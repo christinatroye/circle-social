@@ -3,8 +3,7 @@
 import { randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
 import { database, withinLimit } from "@/lib/db.server";
-import { sendFreshLink } from "@/lib/email.server";
-import { DEVICE_COOKIE, deviceKey, guestForToken, hash, logEvent, newToken, othersInCircle, touch } from "@/lib/guests.server";
+import { DEVICE_COOKIE, deviceKey, guestForToken, hash, holdsLink, logEvent, othersInCircle, touch } from "@/lib/guests.server";
 
 type Result = { ok: true } | { ok: false; reason: "gone" | "elsewhere" | "invalid" };
 
@@ -12,15 +11,12 @@ type Result = { ok: true } | { ok: false; reason: "gone" | "elsewhere" | "invali
 async function owned(token: string) {
   const found = await guestForToken(token);
   if (!found) return null;
-  const key = await deviceKey();
-  if (!key || !found.guest.device_hash || hash(key) !== found.guest.device_hash) return null;
+  if (!found.guest.device_hash || !holdsLink(found.guest, await deviceKey())) return null;
   return found;
 }
 
-/** The first browser to open a link keeps it. */
-export async function claimLink(token: string): Promise<Result> {
-  const found = await guestForToken(token);
-  if (!found) return { ok: false, reason: "gone" };
+/** This browser's device key, set now if it has none yet. */
+async function deviceCookie() {
   const jar = await cookies();
   let key = jar.get(DEVICE_COOKIE)?.value;
   if (!key || key.length > 64) {
@@ -29,10 +25,18 @@ export async function claimLink(token: string): Promise<Result> {
       httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/", maxAge: 60 * 60 * 24 * 365,
     });
   }
+  return key;
+}
+
+/** The first browser to open a link keeps it. */
+export async function claimLink(token: string): Promise<Result> {
+  const found = await guestForToken(token);
+  if (!found) return { ok: false, reason: "gone" };
+  const mine = hash(await deviceCookie());
   const sql = database();
   const [row] = await sql`
-    UPDATE guests SET device_hash = ${hash(key)}, first_opened_at = coalesce(first_opened_at, now()), last_seen_at = now()
-    WHERE id = ${found.guest.id} AND (device_hash IS NULL OR device_hash = ${hash(key)})
+    UPDATE guests SET device_hash = coalesce(device_hash, ${mine}), first_opened_at = coalesce(first_opened_at, now()), last_seen_at = now()
+    WHERE id = ${found.guest.id} AND (device_hash IS NULL OR device_hash = ${mine} OR ${mine} = ANY(other_devices))
     RETURNING id
   `;
   if (!row) return { ok: false, reason: "elsewhere" };
@@ -88,18 +92,21 @@ export async function whoIsHere(token: string): Promise<string[]> {
 }
 
 /**
- * A new device asks for a fresh link. It is sent only if the email matches, and the
- * reply never says whether it did, so this page cannot be used to learn who is invited.
+ * A second device opens the link when the guest types the email their invitation went to.
+ * Nothing is emailed and the first device keeps working, so a forwarded link alone isn't enough.
  */
-export async function requestFreshLink(token: string, email: string): Promise<{ ok: true }> {
+export async function addThisDevice(token: string, email: string): Promise<Result> {
   const found = await guestForToken(token);
+  if (!found) return { ok: false, reason: "gone" };
   const typed = String(email ?? "").trim().toLowerCase();
-  if (!found || !typed || typed.length > 200) return { ok: true };
-  if (!await withinLimit(`fresh:${found.guest.id}`, 3, 60 * 60)) return { ok: true };
-  if (typed !== found.guest.email.trim().toLowerCase()) return { ok: true };
-  const token2 = newToken(found.guest.first_name);
-  await database()`UPDATE guests SET token = ${token2}, device_hash = NULL WHERE id = ${found.guest.id}`;
-  await logEvent(found.guest.id, "link_resent");
-  await sendFreshLink({ to: found.guest.email, firstName: found.guest.first_name, circleTitle: found.circle.title, token: token2 });
+  if (!typed || typed.length > 200) return { ok: false, reason: "invalid" };
+  if (!await withinLimit(`device:${found.guest.id}`, 5, 60 * 60)) return { ok: false, reason: "invalid" };
+  if (typed !== found.guest.email.trim().toLowerCase()) return { ok: false, reason: "invalid" };
+  const mine = hash(await deviceCookie());
+  await database()`
+    UPDATE guests SET other_devices = array_append(other_devices, ${mine}), last_seen_at = now()
+    WHERE id = ${found.guest.id} AND NOT (${mine} = ANY(other_devices))
+  `;
+  await logEvent(found.guest.id, "added_device");
   return { ok: true };
 }

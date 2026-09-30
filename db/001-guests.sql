@@ -57,3 +57,6 @@ CREATE TABLE IF NOT EXISTS rate_limits (
 
 -- The introduction Christina drafted, kept so the host page can show when a guest edited it.
 ALTER TABLE guests ADD COLUMN IF NOT EXISTS introduction_draft varchar(320);
+
+-- Other devices a guest opened their link on, by typing the email their invitation went to.
+ALTER TABLE guests ADD COLUMN IF NOT EXISTS other_devices text[] NOT NULL DEFAULT '{}';

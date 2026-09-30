@@ -17,7 +17,7 @@ export type Circle = {
 export type Guest = {
   id: string; circle_id: string; role: "guest" | "speaker"; name: string; first_name: string; email: string;
   introduction: string; introduction_confirmed_at: string | null; shared: boolean; been_before: boolean;
-  token: string; device_hash: string | null; first_opened_at: string | null; last_seen_at: string | null;
+  token: string; device_hash: string | null; other_devices: string[]; first_opened_at: string | null; last_seen_at: string | null;
   cancelled_at: string | null;
 };
 
@@ -47,10 +47,17 @@ export async function deviceKey() {
   return (await cookies()).get(DEVICE_COOKIE)?.value ?? null;
 }
 
+/** Whether this browser may use the link: the first device to open it, or one the guest added with their email. */
+export function holdsLink(guest: Guest, key: string | null) {
+  if (!key) return false;
+  const mine = hash(key);
+  return mine === guest.device_hash || (guest.other_devices ?? []).includes(mine);
+}
+
 /** "mine" when this browser holds the link, "open" when nobody has claimed it yet, "elsewhere" otherwise. */
 export function deviceState(guest: Guest, key: string | null) {
   if (!guest.device_hash) return "open" as const;
-  return key && hash(key) === guest.device_hash ? "mine" as const : "elsewhere" as const;
+  return holdsLink(guest, key) ? "mine" as const : "elsewhere" as const;
 }
 
 export async function logEvent(guestId: string, kind: string) {
