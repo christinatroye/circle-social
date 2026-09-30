@@ -37,6 +37,18 @@ function deviceZone() {
   try { return Intl.DateTimeFormat().resolvedOptions().timeZone || LONDON; } catch { return LONDON; }
 }
 
+/** A short name for a time zone: "UK time", "ET" or "PT" in the US, else like "CEST" or "GMT+9". */
+function zoneLabel(zone: string, iso: string) {
+  if (zone === LONDON) return "UK time";
+  const name = (locale: string, style: "short" | "shortGeneric") => {
+    try {
+      return new Intl.DateTimeFormat(locale, { timeZone: zone, timeZoneName: style }).formatToParts(new Date(iso)).find(p => p.type === "timeZoneName")?.value ?? "";
+    } catch { return ""; }
+  };
+  const generic = name("en-US", "shortGeneric");
+  return generic.length <= 3 ? generic : name("en-GB", "short");
+}
+
 /** The guest's own time beside UK time, when it differs. */
 function localTime(iso: string, ukWeekday: string, range = false) {
   try {
@@ -71,7 +83,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
   const c = data.circle;
   const start = londonParts(c.startsAt), reveal = londonParts(c.revealAt);
   // The circle shows the start in the guest's own time, so it only says 7pm to someone in the UK.
-  const mine = londonParts(c.startsAt, deviceZone());
+  const zone = deviceZone(), mine = londonParts(c.startsAt, zone), mineTime = `${mine.time} ${zoneLabel(zone, c.startsAt)}`.trim();
   const doorsAt = new Date(Date.parse(c.startsAt) - 10 * 60 * 1000).toISOString(), doors = londonParts(doorsAt);
   const timers: number[] = [], intervals: number[] = [];
   let disposed = false;
@@ -298,7 +310,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       arrive();
       if (me.cancelled) { setMode("gone"); return S.gone(); }
       setMode("early");
-      setCentre(titleCentre(mine.date, mine.time));
+      setCentre(titleCentre(mine.date, mineTime));
       const status = !me.confirmed ? "We still need you to confirm how we&#39;ll introduce you to the others." : me.shared ? "Your introduction is ready for the others." : "You&#39;ll arrive as a quiet guest.";
       if (me.speaker && me.confirmed) return show([
         `<div class="person" id="person"><p class="big">That&#39;s everything, ${esc(me.first)}.</p><p class="small">Your introduction is ready for the guests. On ${esc(reveal.weekday)} the other seats light up, and you can see who&#39;ll be in the room with you.</p></div>`,
@@ -329,7 +341,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
     },
 
     gone() {
-      setCentre(titleCentre(mine.date, mine.time));
+      setCentre(titleCentre(mine.date, mineTime));
       show([
         '<p class="voice">Thank you for telling us.</p>',
         '<p class="small">We&#39;ll offer your seat to someone else, and we hope to see you at the next Circle.</p>',
