@@ -233,7 +233,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
         `<div class="write plain"><label for="bio" class="visually-hidden">Your introduction</label><textarea id="bio" rows="2" maxlength="320">${esc(me.introduction)}</textarea></div>`,
         '<p class="eyebrow">Change any word you like.</p>',
         me.speaker ? "" : '<div class="actions" role="group" aria-label="Your Circles"><button class="pick" type="button" data-c="0">This is my first Circle</button><button class="pick" type="button" data-c="1">I&#39;ve been to a Circle before</button></div>',
-        '<div class="actions"><button class="go" type="button" id="share">Share with the circle</button><button class="quiet" type="button" id="anon">Arrive as a quiet guest</button></div>',
+        `<div class="actions"><button class="go" type="button" id="share">Share with the circle</button>${me.speaker ? "" : '<button class="quiet" type="button" id="anon">Arrive as a quiet guest</button>'}</div>`,
       ].filter(Boolean), el => {
         const t = el.querySelector("#bio") as HTMLTextAreaElement; autosize(t);
         const picks = el.querySelectorAll<HTMLButtonElement>(".pick"), past = el.querySelector("#past")!;
@@ -249,7 +249,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
           });
         };
         el.querySelector("#share")!.addEventListener("click", save(true));
-        el.querySelector("#anon")!.addEventListener("click", save(false));
+        el.querySelector("#anon")?.addEventListener("click", save(false));
       });
     },
 
