@@ -1,0 +1,4 @@
+.quiet-page { min-height: 100vh; display: grid; place-content: center; justify-items: center; gap: 18px; padding: 24px 20px; margin: 0; background: #0f0a07; color: #efe3cf; text-align: center; font-family: var(--font-cormorant), Georgia, serif; font-style: italic; font-size: 1.4rem; }
+.quiet-mark { width: 40px; height: 40px; fill: #efe3cf; }
+.quiet-small { font-family: var(--font-jost), system-ui, sans-serif; font-style: normal; font-size: 14.5px; color: #c6c1e0; max-width: 36ch; line-height: 1.6; }
+body:has(.quiet-page) { margin: 0; background: #0f0a07; }
