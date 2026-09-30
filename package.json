@@ -1,0 +1,28 @@
+{
+  "name": "circle-social",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "node scripts/migrate-db.mjs --if-configured && next build",
+    "start": "next start",
+    "lint": "eslint",
+    "db:setup": "node scripts/migrate-db.mjs",
+    "import": "node scripts/import-guests.mjs"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
+    "jose": "^6.2.9",
+    "next": "^16.3.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.2",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.3.0",
+    "typescript": "^6.0.3"
+  }
+}

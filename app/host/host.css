@@ -1,0 +1,35 @@
+body:has(.host-page) { margin: 0; background: #0f0a07; }
+.host-page { min-height: 100vh; max-width: 760px; margin: 0 auto; padding: 28px 16px 80px; box-sizing: border-box; color: #efe3cf; font-family: var(--font-jost), system-ui, sans-serif; font-weight: 300; font-size: 15px; line-height: 1.55; }
+.host-page h1 { font-family: var(--font-fraunces), Georgia, serif; font-weight: 300; font-size: 2rem; margin: 0 0 4px; }
+.host-page h2 { font-family: var(--font-cormorant), Georgia, serif; font-style: italic; font-weight: 400; font-size: 1.35rem; margin: 40px 0 12px; }
+.host-mark { width: 28px; height: 28px; fill: #efe3cf; }
+.host-top { display: flex; align-items: center; gap: 12px; margin-bottom: 36px; }
+.host-top span { flex: 1; }
+.host-meta, .host-small, .host-empty { color: #c6c1e0; }
+.host-small { font-size: 13px; margin: 2px 0 0; }
+.host-summary { font-family: var(--font-cormorant), Georgia, serif; font-style: italic; font-size: 1.25rem; margin: 16px 0 0; }
+.host-circle + .host-circle { margin-top: 72px; }
+.host-guests, .host-requests, .host-activity { list-style: none; margin: 0; padding: 0; }
+.host-guests li, .host-requests li { padding: 16px 0; }
+.host-guests li + li, .host-requests li + li { box-shadow: 0 -1px 0 rgba(239, 227, 207, .08); }
+.host-guest-top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+.host-guest-top strong, .host-requests strong { font-weight: 400; }
+.host-status { margin-left: auto; font-size: 13px; color: #c6c1e0; }
+[data-status="Introduction confirmed"] .host-status, [data-status="Quiet guest"] .host-status { color: #f3d9a4; text-shadow: 0 0 12px rgba(243, 217, 164, .35); }
+[data-status="Can't come"] { opacity: .6; }
+.host-tag { font-size: 12px; color: #f3d9a4; }
+.host-intro { font-family: var(--font-cormorant), Georgia, serif; font-style: italic; font-size: 1.1rem; margin: 8px 0 0; }
+.host-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; margin-top: 10px; }
+.host-actions form { display: contents; }
+.host-quiet, .host-button { font: inherit; color: #efe3cf; background: none; border: 0; padding: 4px 0; cursor: pointer; transition: text-shadow .4s cubic-bezier(.2,.8,.2,1), color .4s cubic-bezier(.2,.8,.2,1); }
+.host-quiet { font-size: 13px; color: #c6c1e0; }
+.host-quiet:hover, .host-quiet:focus-visible, .host-button:hover, .host-button:focus-visible, .host-quiet[aria-pressed="true"] { color: #f3d9a4; text-shadow: 0 0 14px rgba(243, 217, 164, .5); outline: none; }
+.host-quiet:disabled, .host-button:disabled { cursor: default; opacity: .6; }
+.host-activity li { padding: 5px 0; }
+.host-login-page { display: grid; place-content: center; justify-items: center; gap: 14px; text-align: center; }
+.host-login { display: grid; gap: 16px; width: min(320px, 100%); margin-top: 12px; text-align: left; }
+.host-login label { display: grid; gap: 6px; font-size: 13px; color: #c6c1e0; }
+.host-login input { font: inherit; font-size: 16px; color: #efe3cf; background: none; border: 0; box-shadow: 0 1px 0 rgba(239, 227, 207, .25); padding: 6px 0; outline: none; }
+.host-login input:focus { box-shadow: 0 1px 0 #f3d9a4; }
+.host-button { justify-self: center; font-size: 17px; margin-top: 8px; }
+.host-error { color: #f3d9a4; margin: 0; font-size: 14px; }
