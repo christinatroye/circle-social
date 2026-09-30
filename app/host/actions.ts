@@ -22,3 +22,11 @@ export async function setRequestStatus(requestId: string, status: string) {
   await database()`UPDATE intro_requests SET status = ${status} WHERE id = ${requestId}::uuid`;
   revalidatePath("/host");
 }
+
+/** Christina's own edit becomes the guest's draft, so it doesn't count as the guest having edited it. */
+export async function updateIntroduction(guestId: string, text: string) {
+  await requireHost();
+  const introduction = String(text ?? "").replace(/\s+/g, " ").trim().slice(0, 320);
+  await database()`UPDATE guests SET introduction = ${introduction}, introduction_draft = ${introduction} WHERE id = ${guestId}::uuid`;
+  revalidatePath("/host");
+}

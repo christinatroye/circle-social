@@ -6,6 +6,7 @@ import { signOut } from "../login/actions";
 import { setRequestStatus } from "./actions";
 import { CopyLink } from "./CopyLink";
 import { NewLink } from "./NewLink";
+import { EditIntroduction } from "./EditIntroduction";
 import "./host.css";
 
 export const dynamic = "force-dynamic";
@@ -63,10 +64,11 @@ export default async function HostPage() {
                   <div className="host-guest-top">
                     <strong>{guest.name}</strong>
                     {guest.role === "speaker" && <span className="host-tag">Speaker</span>}
+                    {guest.edited && <span className="host-tag">Edited</span>}
                     <span className="host-status">{guest.status}</span>
                   </div>
                   <p className="host-small">{guest.email}{guest.beenBefore ? " · been to a Circle before" : ""}{guest.lastSeen ? ` · last seen ${when(guest.lastSeen)}` : ""}</p>
-                  {guest.introduction && <p className="host-intro">{guest.introduction}</p>}
+                  <EditIntroduction key={guest.introduction} guestId={guest.id} introduction={guest.introduction} />
                   <div className="host-actions">
                     <CopyLink url={`${SITE_URL}/${guest.token}`} />
                     <NewLink guestId={guest.id} name={guest.name} />
