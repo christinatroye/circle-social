@@ -222,7 +222,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       setCentre(`<p class="c-title">You</p><p class="c-sub">Your seat</p>`);
       let beenBefore = me.beenBefore;
       show([
-        `<p class="eyebrow">Before ${esc(start.weekday)}</p>`,
+        '<p class="eyebrow">Before the Circle</p>',
         '<p class="voice">This is how the others will meet you.</p>',
         `<div class="person"><p class="who">${esc(me.name)}</p><p class="past" id="past">${been(beenBefore)}</p></div>`,
         `<div class="write plain"><label for="bio" class="visually-hidden">Your introduction</label><textarea id="bio" rows="2" maxlength="320">${esc(me.introduction)}</textarea></div>`,
