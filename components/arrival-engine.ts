@@ -259,7 +259,17 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
           });
         };
         el.querySelector("#share")!.addEventListener("click", save(true));
-        el.querySelector("#anon")?.addEventListener("click", save(false));
+        // Choosing quiet first invites them to share once more; staying quiet is still one tap.
+        el.querySelector("#anon")?.addEventListener("click", e => {
+          const actions = (e.currentTarget as HTMLElement).parentElement!;
+          actions.outerHTML = [
+            '<p class="voice say">We&#39;d love the others to know you&#39;re here.</p>',
+            '<p class="small say" style="animation-delay:.15s">Someone in this circle might be the conversation you&#39;ve been waiting for.</p>',
+            '<div class="actions say" style="animation-delay:.3s" id="nudge"><button class="go" type="button" id="share2">Share with the circle</button><button class="quiet" type="button" id="stay">Stay quiet</button></div>',
+          ].join("");
+          el.querySelector("#share2")!.addEventListener("click", save(true));
+          el.querySelector("#stay")!.addEventListener("click", save(false));
+        });
       });
     },
 

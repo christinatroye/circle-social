@@ -121,6 +121,8 @@ body.inside .orb { opacity: 1; }
 .write.plain textarea:focus { color: var(--fg); }
 
 .person { display: grid; gap: 6px; justify-items: center; width: 100%; }
+/* "That's everything" sits in the tappable box, so give it the same breathing room as the other screens. */
+.person .big + .small, .person .small + .small { margin-top: 10px; }
 .person .who { font-family: var(--display); font-weight: 300; font-size: 24px; color: var(--fg); }
 .pick { border: 0; background: none; padding: 8px 4px; color: var(--dim); font-size: 14px; transition: color .4s var(--curve), text-shadow .4s var(--curve); }
 .pick:hover { color: var(--soft); }
