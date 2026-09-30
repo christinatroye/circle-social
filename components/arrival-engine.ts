@@ -201,19 +201,20 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       setMode("door"); centre.innerHTML = "";
       show([
         `<p class="voice">For ${esc(me.first)}</p>`,
-        `<p class="eyebrow">${esc(c.title)}, a Circle with ${esc(c.speaker)}</p>`,
+        me.speaker ? `<p class="eyebrow">${esc(c.title)}. You&#39;re our speaker.</p>` : `<p class="eyebrow">${esc(c.title)}, a Circle with ${esc(c.speaker)}</p>`,
         '<p class="hint" id="hint">Hold the circle to enter</p>',
       ]);
     },
 
     arrival() {
       setCentre(titleCentre(start.dayMonth));
-      const who = me.speaker ? "and the people you&#39;ll be speaking to."
-        : `and ${esc(c.speaker)}${c.speakerLine ? ", " + italics(esc(c.speakerLine)) : ""}${/[.!?]$/.test(c.speakerLine) ? "" : "."}`;
+      const who = `and ${esc(c.speaker)}${c.speakerLine ? ", " + italics(esc(c.speakerLine)) : ""}${/[.!?]$/.test(c.speakerLine) ? "" : "."}`;
       show([
         `<p class="big">${greeting()}, ${esc(me.first)}.</p>`,
-        `<p class="voice">Welcome to the next Circle: ${esc(c.title)}</p>`,
-        `<p class="small">${esc(start.date)} at ${esc(start.time)} UK time${esc(localTime(c.startsAt, start.weekday))}. One hour, a small circle, ${who}${c.question ? ` Our question for ${esc(start.weekday)}:` : ""}</p>`,
+        `<p class="voice">${me.speaker ? "Welcome to your Circle" : "Welcome to the next Circle"}: ${esc(c.title)}</p>`,
+        `<p class="small">${esc(start.date)} at ${esc(start.time)} UK time${esc(localTime(c.startsAt, start.weekday))}. ${me.speaker
+          ? "We&#39;ve invited a group of curious minds, for one hour, to explore your question:"
+          : `One hour, a small circle, ${who}${c.question ? ` Our question for ${esc(start.weekday)}:` : ""}`}</p>`,
         c.question ? `<p class="voice teaser">${esc(c.question)}</p>` : "",
         '<div class="actions"><button class="go" type="button" id="n">Confirm my introduction</button></div>',
       ].filter(Boolean), el => { el.querySelector("#n")!.addEventListener("click", () => S.line(true)); });
@@ -225,13 +226,15 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       let beenBefore = me.beenBefore;
       show([
         '<p class="eyebrow">Before the Circle</p>',
-        '<p class="voice">This is how the others will meet you.</p>',
+        me.speaker
+          ? '<p class="voice">We&#39;ve given people a high level intro to your work already. This is how you&#39;ll show up in the Circle here, together with the other guests.</p>'
+          : '<p class="voice">This is how the others will meet you.</p>',
         `<div class="person"><p class="who">${esc(me.name)}</p><p class="past" id="past">${been(beenBefore)}</p></div>`,
         `<div class="write plain"><label for="bio" class="visually-hidden">Your introduction</label><textarea id="bio" rows="2" maxlength="320">${esc(me.introduction)}</textarea></div>`,
         '<p class="eyebrow">Change any word you like.</p>',
-        '<div class="actions" role="group" aria-label="Your Circles"><button class="pick" type="button" data-c="0">This is my first Circle</button><button class="pick" type="button" data-c="1">I&#39;ve been to a Circle before</button></div>',
+        me.speaker ? "" : '<div class="actions" role="group" aria-label="Your Circles"><button class="pick" type="button" data-c="0">This is my first Circle</button><button class="pick" type="button" data-c="1">I&#39;ve been to a Circle before</button></div>',
         '<div class="actions"><button class="go" type="button" id="share">Share with the circle</button><button class="quiet" type="button" id="anon">Arrive as a quiet guest</button></div>',
-      ], el => {
+      ].filter(Boolean), el => {
         const t = el.querySelector("#bio") as HTMLTextAreaElement; autosize(t);
         const picks = el.querySelectorAll<HTMLButtonElement>(".pick"), past = el.querySelector("#past")!;
         const mark = () => picks.forEach(b => b.setAttribute("aria-pressed", String((b.dataset.c === "1") === beenBefore)));
@@ -269,14 +272,19 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       setMode("kept");
       setCentre(titleCentre(`${start.weekday}, ${start.time}`));
       const status = !me.confirmed ? "We still need you to confirm how we&#39;ll introduce you to the others." : me.shared ? "Your introduction is ready for the others." : "You&#39;ll arrive as a quiet guest.";
+      if (me.speaker && me.confirmed) return show([
+        `<p class="big">That&#39;s everything, ${esc(me.first)}.</p>`,
+        `<p class="small">Your introduction is ready for the guests. On ${esc(reveal.weekday)} the other seats light up, and you can see who&#39;ll be in the room.</p>`,
+        '<div class="actions"><button class="quiet" type="button" id="edit">Change my introduction</button></div>',
+      ], el => { el.querySelector("#edit")!.addEventListener("click", () => S.line(false)); });
       show([
         `<p class="big">That&#39;s everything, ${esc(me.first)}.</p>`,
         `<p class="small">${status} On ${esc(reveal.weekday)} the other seats light up. You can see who else is joining, and ask for introductions for after the Circle.</p>`,
         '<p class="small">Circles are small and kept with care. If your plans change, tell us as soon as you can so we can offer your seat to someone else.</p>',
-        `<div class="actions"><button class="quiet" type="button" id="edit">${me.confirmed ? "Change my introduction" : "Confirm my introduction"}</button><button class="quiet" type="button" id="cant">I can no longer come</button></div>`,
+        `<div class="actions"><button class="quiet" type="button" id="edit">${me.confirmed ? "Change my introduction" : "Confirm my introduction"}</button>${me.speaker ? "" : '<button class="quiet" type="button" id="cant">I can no longer come</button>'}</div>`,
       ], el => {
         el.querySelector("#edit")!.addEventListener("click", () => S.line(false));
-        el.querySelector("#cant")!.addEventListener("click", S.confirmCancel);
+        el.querySelector("#cant")?.addEventListener("click", S.confirmCancel);
       });
     },
 
@@ -313,9 +321,9 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       show([
         '<p class="voice">The others have arrived.</p>',
         '<div class="person" id="person"><p class="small">Touch any seat to meet them. If there&#39;s someone you&#39;d like to know, request an introduction.</p></div>',
-        '<div class="actions"><button class="quiet" type="button" id="cant">I can no longer come</button></div>',
-      ], el => {
-        el.querySelector("#cant")!.addEventListener("click", S.confirmCancel);
+        me.speaker ? "" : '<div class="actions"><button class="quiet" type="button" id="cant">I can no longer come</button></div>',
+      ].filter(Boolean), el => {
+        el.querySelector("#cant")?.addEventListener("click", S.confirmCancel);
       });
     },
 
