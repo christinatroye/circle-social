@@ -5,6 +5,8 @@ export type HostGuest = {
   id: string; name: string; email: string; role: "guest" | "speaker"; introduction: string; token: string;
   status: "Not opened" | "Opened" | "Introduction confirmed" | "Quiet guest" | "Can't come";
   beenBefore: boolean; lastSeen: string | null;
+  /** The guest confirmed an introduction that differs from Christina's draft. */
+  edited: boolean;
 };
 
 export type HostCircle = {
@@ -44,6 +46,7 @@ export async function hostCircles(): Promise<HostCircle[]> {
         id: String(row.id), name: String(row.name), email: String(row.email), role: row.role, introduction: String(row.introduction),
         token: String(row.token), status: statusOf(row), beenBefore: Boolean(row.been_before),
         lastSeen: row.last_seen_at ? new Date(row.last_seen_at).toISOString() : null,
+        edited: Boolean(row.introduction_confirmed_at && row.introduction_draft != null && row.introduction !== row.introduction_draft),
       })),
       requests: requests.map(row => ({
         id: String(row.id), from: String(row.from_name), to: String(row.to_name), note: String(row.note),

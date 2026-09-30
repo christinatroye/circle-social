@@ -54,3 +54,6 @@ CREATE TABLE IF NOT EXISTS rate_limits (
   attempts integer NOT NULL,
   window_started timestamptz NOT NULL
 );
+
+-- The introduction Christina drafted, kept so the host page can show when a guest edited it.
+ALTER TABLE guests ADD COLUMN IF NOT EXISTS introduction_draft varchar(320);

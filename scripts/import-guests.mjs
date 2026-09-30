@@ -85,11 +85,12 @@ const [saved] = await sql`
 
 for (const person of people) {
   const [row] = await sql`
-    INSERT INTO guests (circle_id, role, name, first_name, email, introduction, been_before, token)
-    VALUES (${saved.id}, ${person.role}, ${person.name}, ${person.first}, ${person.email}, ${person.introduction}, ${person.beenBefore}, ${newToken(person.first)})
+    INSERT INTO guests (circle_id, role, name, first_name, email, introduction, introduction_draft, been_before, token)
+    VALUES (${saved.id}, ${person.role}, ${person.name}, ${person.first}, ${person.email}, ${person.introduction}, ${person.introduction}, ${person.beenBefore}, ${newToken(person.first)})
     ON CONFLICT (circle_id, email) DO UPDATE SET
       role = excluded.role, name = excluded.name, first_name = excluded.first_name,
       introduction = CASE WHEN guests.introduction_confirmed_at IS NULL AND excluded.introduction <> '' THEN excluded.introduction ELSE guests.introduction END,
+      introduction_draft = CASE WHEN guests.introduction_confirmed_at IS NULL AND excluded.introduction <> '' THEN excluded.introduction ELSE guests.introduction_draft END,
       been_before = CASE WHEN guests.introduction_confirmed_at IS NULL THEN excluded.been_before ELSE guests.been_before END
     RETURNING name, email, token, introduction
   `;
