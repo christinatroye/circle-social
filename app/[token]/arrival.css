@@ -79,6 +79,10 @@ body.inside .orb { opacity: 1; }
 .big { font-family: var(--display); font-weight: 300; font-size: clamp(1.9rem, 6.4vw, 2.6rem); line-height: 1.12; letter-spacing: -.005em; color: var(--fg); text-wrap: balance; }
 .voice { font-family: var(--voice); font-style: italic; font-weight: 400; font-size: clamp(1.3rem, 4.6vw, 1.6rem); line-height: 1.3; color: var(--fg); text-wrap: balance; }
 .teaser { color: var(--pearl); max-width: 26ch; }
+/* Two short sentences, each on its own line, with room to breathe. */
+.teaser.closing { max-width: 36ch; }
+.teaser.closing span { display: block; }
+.teaser.closing span + span { margin-top: .35em; }
 .lineage { font-family: var(--voice); font-style: italic; font-size: 1.1rem; color: var(--pearl); display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 14px; }
 .lineage span + span::before { content: ""; display: inline-block; width: 4px; height: 4px; border-radius: 50%; background: var(--bone); opacity: .6; margin-right: 14px; vertical-align: middle; }
 .question { font-size: clamp(1.55rem, 5.6vw, 2rem); line-height: 1.25; }
