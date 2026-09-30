@@ -36,9 +36,6 @@ function localTime(iso: string, ukWeekday: string) {
   } catch { return ""; }
 }
 
-const WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve",
-  "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty"];
-const word = (n: number) => WORDS[n] ?? String(n);
 const been = (before: boolean) => before ? "Been to a Circle before" : "First Circle";
 
 function greeting() {
@@ -209,11 +206,12 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
 
     arrival() {
       setCentre(titleCentre(start.dayMonth));
-      const who = me.speaker ? "and the people you'll be speaking to" : `and ${esc(c.speaker)}${c.speakerLine ? ", " + esc(c.speakerLine) : ""}`;
+      const who = me.speaker ? "and the people you&#39;ll be speaking to."
+        : `and ${esc(c.speaker)}${c.speakerLine ? ", " + esc(c.speakerLine) : ""}${/[.!?]$/.test(c.speakerLine) ? "" : "."}`;
       show([
         `<p class="big">${greeting()}, ${esc(me.first)}.</p>`,
         `<p class="voice">Welcome to the next Circle: ${esc(c.title)}</p>`,
-        `<p class="small">${esc(start.date)} at ${esc(start.time)} UK time${esc(localTime(c.startsAt, start.weekday))}. One hour, ${word(N)} seats, ${who}.${c.question && !me.speaker ? ` The question ${esc(c.speaker.split(" ")[0])} is bringing:` : ""}</p>`,
+        `<p class="small">${esc(start.date)} at ${esc(start.time)} UK time${esc(localTime(c.startsAt, start.weekday))}. One hour, a small circle, ${who}</p>`,
         c.question ? `<p class="voice teaser">${esc(c.question)}</p>` : "",
         '<div class="actions"><button class="go" type="button" id="n">Confirm my introduction</button></div>',
       ].filter(Boolean), el => { el.querySelector("#n")!.addEventListener("click", () => S.line(true)); });
@@ -221,10 +219,10 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
 
     line(first: boolean) {
       setMode("kept");
-      setCentre(`<p class="c-title">You</p><p class="c-sub">seat ${YOU + 1} of ${N}</p>`);
+      setCentre(`<p class="c-title">You</p><p class="c-sub">Your seat</p>`);
       let beenBefore = me.beenBefore;
       show([
-        `<p class="eyebrow">Before ${esc(start.weekday)}</p>`,
+        '<p class="eyebrow">Before the Circle</p>',
         '<p class="voice">This is how the others will meet you.</p>',
         `<div class="person"><p class="who">${esc(me.name)}</p><p class="past" id="past">${been(beenBefore)}</p></div>`,
         `<div class="write plain"><label for="bio" class="visually-hidden">Your introduction</label><textarea id="bio" rows="2" maxlength="320">${esc(me.introduction)}</textarea></div>`,
@@ -255,10 +253,10 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       setCentre('<p class="c-title">Circle</p>');
       show([
         '<p class="eyebrow">What a Circle is</p>',
-        '<p class="voice question">We&#39;re bringing you into a new kind of online room.</p>',
+        '<p class="voice question">Welcome to a new kind of online room.</p>',
         '<p class="small">An hour off the Zoom grid, gathered the way humans always have: in a circle, where no one is selling and no one has anything to prove.</p>',
-        '<p class="small">A remarkable speaker, a room full of brilliant minds, one big question, and room to ask your own.</p>',
-        '<p class="voice teaser">Each Circle gathers once, by invitation.</p>',
+        '<p class="small">A remarkable speaker, a circle of curious people, one big question, and space to ask your own.</p>',
+        '<p class="voice teaser">Each Circle gathers once, by invitation. No room is the same.</p>',
         `<div class="actions"><button class="go" type="button" id="n">See you on ${esc(start.weekday)}</button></div>`,
       ], el => { el.querySelector("#n")!.addEventListener("click", S.settled); });
     },
@@ -309,13 +307,12 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
     reveal() {
       arrive();
       setMode("reveal");
-      setCentre(titleCentre(`${others.length + 1} in Circle`));
+      setCentre(`<p class="c-title">${esc(c.title)}</p>`);
       show([
         '<p class="voice">The others have arrived.</p>',
         '<div class="person" id="person"><p class="small">Touch any seat to meet them. If there&#39;s someone you&#39;d like to know, request an introduction.</p></div>',
-        `<div class="actions"><button class="quiet" type="button" id="edit">Change my introduction</button><button class="quiet" type="button" id="cant">I can no longer come</button></div>`,
+        '<div class="actions"><button class="quiet" type="button" id="cant">I can no longer come</button></div>',
       ], el => {
-        el.querySelector("#edit")!.addEventListener("click", () => S.line(false));
         el.querySelector("#cant")!.addEventListener("click", S.confirmCancel);
       });
     },
@@ -411,7 +408,9 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       const box = root.querySelector("#person"); if (!box) return;
       const bio = you ? (me.shared ? me.introduction : "You're arriving as a quiet guest.") : person!.shared ? person!.introduction : "Arriving as a quiet guest.";
       box.innerHTML = `<p class="bio say">${esc(bio)}</p>` +
-        (you || person!.speaker ? "" : '<div class="actions say" style="animation-delay:.15s"><button class="go" type="button" id="ask">Request an introduction</button></div>');
+        (you ? '<button class="quiet say" style="animation-delay:.15s" type="button" id="mine">Change my introduction</button>'
+          : person!.speaker ? "" : '<div class="actions say" style="animation-delay:.15s"><button class="go" type="button" id="ask">Request an introduction</button></div>');
+      box.querySelector("#mine")?.addEventListener("click", () => S.line(false));
       box.querySelector("#ask")?.addEventListener("click", () => {
         box.innerHTML = `<div class="write plain say"><label class="small" for="why" style="display:block">What would you like to talk to ${esc(person!.first)} about?</label><textarea id="why" rows="1" maxlength="600"></textarea></div>` +
           '<div class="actions say" style="animation-delay:.15s"><button class="go" type="button" id="send" disabled>Send to Christina</button></div>';
