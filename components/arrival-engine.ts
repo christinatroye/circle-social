@@ -311,9 +311,8 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       show([
         '<p class="voice">The others have arrived.</p>',
         '<div class="person" id="person"><p class="small">Touch any seat to meet them. If there&#39;s someone you&#39;d like to know, request an introduction.</p></div>',
-        `<div class="actions"><button class="quiet" type="button" id="edit">Change my introduction</button><button class="quiet" type="button" id="cant">I can no longer come</button></div>`,
+        '<div class="actions"><button class="quiet" type="button" id="cant">I can no longer come</button></div>',
       ], el => {
-        el.querySelector("#edit")!.addEventListener("click", () => S.line(false));
         el.querySelector("#cant")!.addEventListener("click", S.confirmCancel);
       });
     },
@@ -409,7 +408,9 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       const box = root.querySelector("#person"); if (!box) return;
       const bio = you ? (me.shared ? me.introduction : "You're arriving as a quiet guest.") : person!.shared ? person!.introduction : "Arriving as a quiet guest.";
       box.innerHTML = `<p class="bio say">${esc(bio)}</p>` +
-        (you || person!.speaker ? "" : '<div class="actions say" style="animation-delay:.15s"><button class="go" type="button" id="ask">Request an introduction</button></div>');
+        (you ? '<button class="quiet say" style="animation-delay:.15s" type="button" id="mine">Change my introduction</button>'
+          : person!.speaker ? "" : '<div class="actions say" style="animation-delay:.15s"><button class="go" type="button" id="ask">Request an introduction</button></div>');
+      box.querySelector("#mine")?.addEventListener("click", () => S.line(false));
       box.querySelector("#ask")?.addEventListener("click", () => {
         box.innerHTML = `<div class="write plain say"><label class="small" for="why" style="display:block">What would you like to talk to ${esc(person!.first)} about?</label><textarea id="why" rows="1" maxlength="600"></textarea></div>` +
           '<div class="actions say" style="animation-delay:.15s"><button class="go" type="button" id="send" disabled>Send to Christina</button></div>';
