@@ -213,9 +213,9 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       setMode("door"); centre.innerHTML = "";
       show([
         `<p class="voice">For ${esc(me.first)}</p>`,
-        me.speaker ? `<p class="eyebrow">${esc(c.title)}. You&#39;re our speaker.</p>` : `<p class="eyebrow">${esc(c.title)}, a Circle with ${esc(c.speaker)}</p>`,
+        me.speaker ? `<p class="eyebrow">${esc(c.title)}. You&#39;re our speaker.</p>` : "",
         '<p class="hint" id="hint">Hold the circle to enter</p>',
-      ]);
+      ].filter(Boolean));
     },
 
     arrival() {
