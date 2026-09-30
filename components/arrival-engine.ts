@@ -12,9 +12,9 @@ function esc(value: unknown) {
   return String(value).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 }
 
-function londonParts(iso: string) {
+function londonParts(iso: string, zone = LONDON) {
   const parts: Record<string, string> = {};
-  new Intl.DateTimeFormat("en-GB", { timeZone: LONDON, weekday: "long", day: "numeric", month: "long", hour: "numeric", minute: "2-digit", hour12: true })
+  new Intl.DateTimeFormat("en-GB", { timeZone: zone, weekday: "long", day: "numeric", month: "long", hour: "numeric", minute: "2-digit", hour12: true })
     .formatToParts(new Date(iso)).forEach(part => { parts[part.type] = part.value; });
   const time = parts.hour + (parts.minute !== "00" ? ":" + parts.minute : "") + (parts.dayPeriod ?? "").toLowerCase().replace(/\s|\./g, "");
   return { weekday: parts.weekday, date: `${parts.weekday} ${parts.day} ${parts.month}`, dayMonth: `${parts.day} ${parts.month}`, time };
@@ -30,6 +30,11 @@ function hourRange(iso: string, zone = LONDON) {
   };
   const from = part(new Date(iso)), to = part(new Date(Date.parse(iso) + 60 * 60 * 1000));
   return from.period === to.period ? `${from.time}-${to.time} ${to.period}` : `${from.time} ${from.period}-${to.time} ${to.period}`;
+}
+
+/** The time zone of the guest's device, or UK time when it can't tell. */
+function deviceZone() {
+  try { return Intl.DateTimeFormat().resolvedOptions().timeZone || LONDON; } catch { return LONDON; }
 }
 
 /** The guest's own time beside UK time, when it differs. */
@@ -65,6 +70,8 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
   const me = { ...data.me };
   const c = data.circle;
   const start = londonParts(c.startsAt), reveal = londonParts(c.revealAt);
+  // The circle shows the start in the guest's own time, so it only says 7pm to someone in the UK.
+  const mine = londonParts(c.startsAt, deviceZone());
   const doorsAt = new Date(Date.parse(c.startsAt) - 10 * 60 * 1000).toISOString(), doors = londonParts(doorsAt);
   const timers: number[] = [], intervals: number[] = [];
   let disposed = false;
@@ -203,7 +210,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
   /** Any later view: the door is already behind you. */
   function arrive() { entered = true; hold.hidden = true; body.classList.add("inside"); }
 
-  const titleCentre = (sub: string) => `<p class="c-title">${esc(c.title)}</p><p class="c-sub">${esc(sub)}</p>`;
+  const titleCentre = (sub: string, time = "") => `<p class="c-title">${esc(c.title)}</p><p class="c-sub">${esc(sub)}${time ? `<br>${esc(time)}` : ""}</p>`;
 
   /* ---------- Scenes ---------- */
   const S = {
@@ -218,7 +225,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
     },
 
     arrival() {
-      setCentre(titleCentre(start.dayMonth));
+      setCentre(titleCentre(mine.dayMonth));
       show([
         `<p class="big">${greeting()}, ${esc(me.first)}.</p>`,
         `<p class="voice">${me.speaker ? `Welcome to your Circle: ${esc(c.title)}` : `Welcome to the next Circle: ${esc(c.title)} with ${esc(c.speaker)}`}</p>`,
@@ -242,7 +249,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
           : '<p class="voice">This is how the others will meet you.</p>',
         `<div class="person"><p class="who">${esc(me.name)}</p><p class="past" id="past">${been(beenBefore)}</p></div>`,
         `<div class="write plain"><label for="bio" class="visually-hidden">Your introduction</label><textarea id="bio" rows="2" maxlength="320">${esc(me.introduction)}</textarea></div>`,
-        `<p class="eyebrow">${me.speaker ? "Edit any way you like." : "Change any word you like."}</p>`,
+        '<p class="eyebrow">Edit any way you like.</p>',
         me.speaker ? "" : '<div class="actions" role="group" aria-label="Your Circles"><button class="pick" type="button" data-c="0">This is my first Circle</button><button class="pick" type="button" data-c="1">I&#39;ve been to a Circle before</button></div>',
         `<div class="actions"><button class="go" type="button" id="share">Share with the circle</button>${me.speaker ? "" : '<button class="quiet" type="button" id="anon">Arrive as a quiet guest</button>'}</div>`,
       ].filter(Boolean), el => {
@@ -291,7 +298,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       arrive();
       if (me.cancelled) { setMode("gone"); return S.gone(); }
       setMode("early");
-      setCentre(titleCentre(`${start.weekday}, ${start.time}`));
+      setCentre(titleCentre(mine.date, mine.time));
       const status = !me.confirmed ? "We still need you to confirm how we&#39;ll introduce you to the others." : me.shared ? "Your introduction is ready for the others." : "You&#39;ll arrive as a quiet guest.";
       if (me.speaker && me.confirmed) return show([
         `<div class="person" id="person"><p class="big">That&#39;s everything, ${esc(me.first)}.</p><p class="small">Your introduction is ready for the guests. On ${esc(reveal.weekday)} the other seats light up, and you can see who&#39;ll be in the room with you.</p></div>`,
@@ -322,7 +329,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
     },
 
     gone() {
-      setCentre(titleCentre(`${start.weekday}, ${start.time}`));
+      setCentre(titleCentre(mine.date, mine.time));
       show([
         '<p class="voice">Thank you for telling us.</p>',
         '<p class="small">We&#39;ll offer your seat to someone else, and we hope to see you at the next Circle.</p>',
@@ -390,7 +397,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
     after() {
       arrive();
       setMode("kept");
-      setCentre(titleCentre(start.dayMonth));
+      setCentre(titleCentre(mine.dayMonth));
       show([
         `<p class="voice">Thank you for being part of ${esc(c.title)}, ${esc(me.first)}.</p>`,
         '<p class="small">We hope to see you at the next Circle.</p>',
