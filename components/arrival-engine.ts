@@ -253,10 +253,10 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       setCentre('<p class="c-title">Circle</p>');
       show([
         '<p class="eyebrow">What a Circle is</p>',
-        '<p class="voice question">We&#39;re bringing you into a new kind of online room.</p>',
+        '<p class="voice question">Welcome to a new kind of online room.</p>',
         '<p class="small">An hour off the Zoom grid, gathered the way humans always have: in a circle, where no one is selling and no one has anything to prove.</p>',
-        '<p class="small">A remarkable speaker, a room full of brilliant minds, one big question, and room to ask your own.</p>',
-        '<p class="voice teaser">Each Circle gathers once, by invitation.</p>',
+        '<p class="small">A remarkable speaker, a circle of curious people, one big question, and space to ask your own.</p>',
+        '<p class="voice teaser">Each Circle gathers once, by invitation. No room is the same.</p>',
         `<div class="actions"><button class="go" type="button" id="n">See you on ${esc(start.weekday)}</button></div>`,
       ], el => { el.querySelector("#n")!.addEventListener("click", S.settled); });
     },
