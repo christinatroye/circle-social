@@ -36,6 +36,8 @@ function localTime(iso: string, ukWeekday: string) {
   } catch { return ""; }
 }
 
+/** Titles written between asterisks, like *We Have No Idea*, show in italics. */
+const italics = (html: string) => html.replace(/\*([^*]+)\*/g, "<em>$1</em>");
 const been = (before: boolean) => before ? "Been to a Circle before" : "First Circle";
 
 function greeting() {
@@ -207,11 +209,11 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
     arrival() {
       setCentre(titleCentre(start.dayMonth));
       const who = me.speaker ? "and the people you&#39;ll be speaking to."
-        : `and ${esc(c.speaker)}${c.speakerLine ? ", " + esc(c.speakerLine) : ""}${/[.!?]$/.test(c.speakerLine) ? "" : "."}`;
+        : `and ${esc(c.speaker)}${c.speakerLine ? ", " + italics(esc(c.speakerLine)) : ""}${/[.!?]$/.test(c.speakerLine) ? "" : "."}`;
       show([
         `<p class="big">${greeting()}, ${esc(me.first)}.</p>`,
         `<p class="voice">Welcome to the next Circle: ${esc(c.title)}</p>`,
-        `<p class="small">${esc(start.date)} at ${esc(start.time)} UK time${esc(localTime(c.startsAt, start.weekday))}. One hour, a small circle, ${who}</p>`,
+        `<p class="small">${esc(start.date)} at ${esc(start.time)} UK time${esc(localTime(c.startsAt, start.weekday))}. One hour, a small circle, ${who}${c.question ? ` Our question for ${esc(start.weekday)}:` : ""}</p>`,
         c.question ? `<p class="voice teaser">${esc(c.question)}</p>` : "",
         '<div class="actions"><button class="go" type="button" id="n">Confirm my introduction</button></div>',
       ].filter(Boolean), el => { el.querySelector("#n")!.addEventListener("click", () => S.line(true)); });
