@@ -20,11 +20,11 @@ function londonParts(iso: string) {
   return { weekday: parts.weekday, date: `${parts.weekday} ${parts.day} ${parts.month}`, dayMonth: `${parts.day} ${parts.month}`, time };
 }
 
-/** The hour of the Circle in UK time, like "7-8 pm". */
-function hourRange(iso: string) {
+/** The hour of the Circle, like "7-8 pm", in UK time unless another zone is given. */
+function hourRange(iso: string, zone = LONDON) {
   const part = (date: Date) => {
     const parts: Record<string, string> = {};
-    new Intl.DateTimeFormat("en-GB", { timeZone: LONDON, hour: "numeric", minute: "2-digit", hour12: true })
+    new Intl.DateTimeFormat("en-GB", { timeZone: zone, hour: "numeric", minute: "2-digit", hour12: true })
       .formatToParts(date).forEach(p => { parts[p.type] = p.value; });
     return { time: parts.hour + (parts.minute !== "00" ? ":" + parts.minute : ""), period: (parts.dayPeriod ?? "").toLowerCase().replace(/\s|\./g, "") };
   };
@@ -33,7 +33,7 @@ function hourRange(iso: string) {
 }
 
 /** The guest's own time beside UK time, when it differs. */
-function localTime(iso: string, ukWeekday: string) {
+function localTime(iso: string, ukWeekday: string, range = false) {
   try {
     const start = new Date(iso);
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -42,7 +42,7 @@ function localTime(iso: string, ukWeekday: string) {
     const parts: Record<string, string> = {};
     new Intl.DateTimeFormat("en-US", { timeZone: tz, weekday: "long", hour: "numeric", minute: "2-digit", hour12: true })
       .formatToParts(start).forEach(part => { parts[part.type] = part.value; });
-    const time = parts.hour + (parts.minute !== "00" ? ":" + parts.minute : "") + parts.dayPeriod.toLowerCase();
+    const time = range ? hourRange(iso, tz) : parts.hour + (parts.minute !== "00" ? ":" + parts.minute : "") + parts.dayPeriod.toLowerCase();
     const day = parts.weekday !== ukWeekday ? " on " + parts.weekday : "";
     return ` (${time}${day} in ${tz.split("/").pop()!.replace(/_/g, " ")})`;
   } catch { return ""; }
@@ -224,7 +224,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
         `<p class="voice">${me.speaker ? `Welcome to your Circle: ${esc(c.title)}` : `Welcome to the next Circle: ${esc(c.title)} with ${esc(c.speaker)}`}</p>`,
         me.speaker
           ? `<p class="small">${esc(start.date)} at ${esc(start.time)} UK time${esc(localTime(c.startsAt, start.weekday))}. We&#39;ve invited a group of curious minds, for one hour, to explore your question:</p>`
-          : `<p class="small">${esc(start.date)} at ${esc(hourRange(c.startsAt))} UK time${esc(localTime(c.startsAt, start.weekday))}.${c.question ? ` Our question for ${esc(start.weekday)}:` : ""}</p>`,
+          : `<p class="small">${esc(start.date)} at ${esc(hourRange(c.startsAt))} UK time${esc(localTime(c.startsAt, start.weekday, true))}.${c.question ? ` Our question for ${esc(start.weekday)}:` : ""}</p>`,
         c.question ? `<p class="voice teaser">${esc(c.question)}</p>` : "",
         '<div class="actions"><button class="go" type="button" id="n">Confirm my introduction</button></div>',
       ].filter(Boolean), el => { el.querySelector("#n")!.addEventListener("click", () => S.line(true)); });
