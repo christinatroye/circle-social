@@ -49,6 +49,11 @@ body.inside .orb { opacity: 1; }
 .ring[data-mode="door"] .seat.extra { opacity: 0; }
 .seat.speaker i { --o: .95; --s: 1.6; --g: 20px; background: var(--pearl); }
 .ring[data-mode="kept"] .seat.you i { --o: 1; --s: 1.45; --g: 18px; }
+/* Before the reveal, on the last screen: your seat and the speaker's can be touched. */
+.ring[data-mode="early"] .seat.you, .ring[data-mode="early"] .seat.speaker { pointer-events: auto; cursor: pointer; }
+.ring[data-mode="early"] .seat.you i { --o: 1; --s: 1.45; --g: 18px; }
+.ring[data-mode="early"] .seat:hover i { --s: 1.7; }
+.ring[data-mode="early"] .seat.sel i { --o: 1; --s: 1.8; --g: 24px; background: var(--pearl); }
 .ring[data-mode="belief"] .seat i { --o: .8; --s: 1.15; --g: 12px; }
 .ring[data-mode="reveal"] .seat { pointer-events: auto; }
 .ring[data-mode="reveal"] .seat i { --o: .62; }

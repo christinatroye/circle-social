@@ -115,7 +115,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
     const wasDoor = ring.dataset.mode === "door";
     ring.dataset.mode = mode;
     place(mode === "door" ? "door" : "ring", stagger && wasDoor);
-    const live = mode === "reveal";
+    const live = mode === "reveal" || mode === "early";
     seats.forEach(({ el, person, you }) => {
       const tappable = live && (Boolean(person) || you);
       el.tabIndex = tappable ? 0 : -1;
@@ -280,18 +280,17 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
     settled() {
       arrive();
       if (me.cancelled) { setMode("gone"); return S.gone(); }
-      setMode("kept");
+      setMode("early");
       setCentre(titleCentre(`${start.weekday}, ${start.time}`));
       const status = !me.confirmed ? "We still need you to confirm how we&#39;ll introduce you to the others." : me.shared ? "Your introduction is ready for the others." : "You&#39;ll arrive as a quiet guest.";
       if (me.speaker && me.confirmed) return show([
-        `<p class="big">That&#39;s everything, ${esc(me.first)}.</p>`,
-        `<p class="small">Your introduction is ready for the guests. On ${esc(reveal.weekday)} the other seats light up, and you can see who&#39;ll be in the room.</p>`,
+        `<div class="person" id="person"><p class="big">That&#39;s everything, ${esc(me.first)}.</p><p class="small">Your introduction is ready for the guests. On ${esc(reveal.weekday)} the other seats light up, and you can see who&#39;ll be in the room.</p></div>`,
         '<div class="actions"><button class="quiet" type="button" id="edit">Change my introduction</button></div>',
       ], el => { el.querySelector("#edit")!.addEventListener("click", () => S.line(false)); });
       show([
-        `<p class="big">That&#39;s everything, ${esc(me.first)}.</p>`,
-        `<p class="small">${status} On ${esc(reveal.weekday)} the other seats light up. You can see who else is joining, and ask for introductions for after the Circle.</p>`,
-        '<p class="small">Circles are small and kept with care. If your plans change, tell us as soon as you can so we can offer your seat to someone else.</p>',
+        `<div class="person" id="person"><p class="big">That&#39;s everything, ${esc(me.first)}.</p><p class="small">${status} On ${esc(reveal.weekday)} the other seats light up. You can see who else is joining, and ask for introductions for after the Circle.</p>` +
+          '<p class="small">Circles are small and kept with care. If your plans change, tell us as soon as you can so we can offer your seat to someone else.</p></div>',
+        '<p class="eyebrow">Touch the glowing seats.</p>',
         `<div class="actions"><button class="quiet" type="button" id="edit">${me.confirmed ? "Change my introduction" : "Confirm my introduction"}</button>${me.speaker ? "" : '<button class="quiet" type="button" id="cant">I can no longer come</button>'}</div>`,
       ], el => {
         el.querySelector("#edit")!.addEventListener("click", () => S.line(false));
@@ -417,17 +416,17 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
     return S.settled();
   }
 
-  // From the reveal: touch a seat and that person takes the centre of the ring.
+  // Touch a seat and that person takes the centre of the ring: before the reveal only you and the speaker, after it everyone.
   seats.forEach(({ el, person, you }) => {
     el.addEventListener("click", () => {
-      if (ring.dataset.mode !== "reveal" || (!person && !you)) return;
+      if ((ring.dataset.mode !== "reveal" && ring.dataset.mode !== "early") || (!person && !you)) return;
       seats.forEach(s => s.el.classList.remove("sel")); el.classList.add("sel");
       const sub = person?.speaker ? "Tonight&#39;s speaker" : been(you ? me.beenBefore : Boolean(person?.beenBefore));
       setCentre(`<p class="c-title">${esc(you ? "You" : person!.name)}</p><p class="c-sub">${sub}</p>`);
       const box = root.querySelector("#person"); if (!box) return;
       const bio = you ? (me.shared ? me.introduction : "You're arriving as a quiet guest.") : person!.shared ? person!.introduction : "Arriving as a quiet guest.";
       box.innerHTML = `<p class="bio say">${esc(bio)}</p>` +
-        (you ? '<button class="quiet say" style="animation-delay:.15s" type="button" id="mine">Change my introduction</button>'
+        (you ? (ring.dataset.mode === "reveal" ? '<button class="quiet say" style="animation-delay:.15s" type="button" id="mine">Change my introduction</button>' : "")
           : person!.speaker ? "" : '<div class="actions say" style="animation-delay:.15s"><button class="go" type="button" id="ask">Request an introduction</button></div>');
       box.querySelector("#mine")?.addEventListener("click", () => S.line(false));
       box.querySelector("#ask")?.addEventListener("click", () => {
