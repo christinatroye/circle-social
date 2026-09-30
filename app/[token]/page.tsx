@@ -8,6 +8,9 @@ import "./arrival.css";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Circle", robots: { index: false, follow: false } };
 
+/** The public invitation for each Circle, shown to the speaker. */
+const INVITATIONS: Record<string, string> = { alien: "https://luma.com/d1bodo24" };
+
 export default async function GuestPage({ params }: PageProps<"/[token]">) {
   const { token } = await params;
   const found = await guestForToken(token);
@@ -37,6 +40,7 @@ export default async function GuestPage({ params }: PageProps<"/[token]">) {
     circle: {
       title: circle.title, speaker: circle.speaker, speakerLine: circle.speaker_line, question: circle.question,
       startsAt: circle.starts_at, revealAt: circle.reveal_at, roomUrl: trusted && phase === "day" ? circle.room_url : null,
+      inviteUrl: INVITATIONS[circle.slug] ?? null,
       seats: trusted ? await seatCount(circle.id) : 0,
     },
     // Before the reveal, the speaker is the only other seat that shows.

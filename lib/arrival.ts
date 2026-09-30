@@ -26,7 +26,7 @@ export type ArrivalData = {
   };
   circle: {
     title: string; speaker: string; speakerLine: string; question: string;
-    startsAt: string; revealAt: string; roomUrl: string | null; seats: number;
+    startsAt: string; revealAt: string; roomUrl: string | null; inviteUrl: string | null; seats: number;
   };
   others: Person[];
 };

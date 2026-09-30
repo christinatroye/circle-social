@@ -237,7 +237,8 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       show([
         '<p class="eyebrow">Before the Circle</p>',
         me.speaker
-          ? '<p class="voice">We&#39;ve given people a high level intro to your work already. This is how you&#39;ll show up in the Circle here, together with the other guests.</p>'
+          ? '<p class="voice">This is how you&#39;ll appear in the Circle, alongside the guests.</p>' +
+            (c.inviteUrl ? `<p class="small">You can see <a href="${esc(c.inviteUrl)}" target="_blank" rel="noopener">the invitation</a> we shared with guests.</p>` : "")
           : '<p class="voice">This is how the others will meet you.</p>',
         `<div class="person"><p class="who">${esc(me.name)}</p><p class="past" id="past">${been(beenBefore)}</p></div>`,
         `<div class="write plain"><label for="bio" class="visually-hidden">Your introduction</label><textarea id="bio" rows="2" maxlength="320">${esc(me.introduction)}</textarea></div>`,
@@ -293,7 +294,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       setCentre(titleCentre(`${start.weekday}, ${start.time}`));
       const status = !me.confirmed ? "We still need you to confirm how we&#39;ll introduce you to the others." : me.shared ? "Your introduction is ready for the others." : "You&#39;ll arrive as a quiet guest.";
       if (me.speaker && me.confirmed) return show([
-        `<div class="person" id="person"><p class="big">That&#39;s everything, ${esc(me.first)}.</p><p class="small">Your introduction is ready for the guests. On ${esc(reveal.weekday)} the other seats light up, and you can see who&#39;ll be in the room.</p></div>`,
+        `<div class="person" id="person"><p class="big">That&#39;s everything, ${esc(me.first)}.</p><p class="small">Your introduction is ready for the guests. On ${esc(reveal.weekday)} the other seats light up, and you can see who&#39;ll be in the room with you.</p></div>`,
         '<div class="actions"><button class="quiet" type="button" id="edit">Change my introduction</button></div>',
       ], el => { el.querySelector("#edit")!.addEventListener("click", () => S.line(false)); });
       show([
