@@ -6,6 +6,8 @@ import { signOut } from "../login/actions";
 import { setRequestStatus } from "./actions";
 import { CopyLink } from "./CopyLink";
 import { NewLink } from "./NewLink";
+import { AddGuest } from "./AddGuest";
+import { RemoveGuest } from "./RemoveGuest";
 import { EditIntroduction } from "./EditIntroduction";
 import "./host.css";
 
@@ -71,10 +73,12 @@ export default async function HostPage() {
                   <div className="host-actions">
                     <CopyLink url={`${SITE_URL}/${guest.token}`} />
                     <NewLink guestId={guest.id} name={guest.name} />
+                    <RemoveGuest guestId={guest.id} name={guest.name} />
                   </div>
                 </li>
               ))}
             </ul>
+            <AddGuest circleId={circle.id} />
 
             <h2>Introduction requests</h2>
             {circle.requests.length === 0 ? <p className="host-empty">None yet. Guests can ask after the reveal.</p> : (
