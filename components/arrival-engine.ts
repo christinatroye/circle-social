@@ -36,9 +36,6 @@ function localTime(iso: string, ukWeekday: string) {
   } catch { return ""; }
 }
 
-const WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve",
-  "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty"];
-const word = (n: number) => WORDS[n] ?? String(n);
 const been = (before: boolean) => before ? "Been to a Circle before" : "First Circle";
 
 function greeting() {
@@ -209,11 +206,12 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
 
     arrival() {
       setCentre(titleCentre(start.dayMonth));
-      const who = me.speaker ? "and the people you'll be speaking to" : `and ${esc(c.speaker)}${c.speakerLine ? ", " + esc(c.speakerLine) : ""}`;
+      const who = me.speaker ? "and the people you&#39;ll be speaking to."
+        : `and ${esc(c.speaker)}${c.speakerLine ? ", " + esc(c.speakerLine) : ""}${/[.!?]$/.test(c.speakerLine) ? "" : "."}`;
       show([
         `<p class="big">${greeting()}, ${esc(me.first)}.</p>`,
         `<p class="voice">Welcome to the next Circle: ${esc(c.title)}</p>`,
-        `<p class="small">${esc(start.date)} at ${esc(start.time)} UK time${esc(localTime(c.startsAt, start.weekday))}. One hour, ${word(N)} seats, ${who}.${c.question && !me.speaker ? ` The question ${esc(c.speaker.split(" ")[0])} is bringing:` : ""}</p>`,
+        `<p class="small">${esc(start.date)} at ${esc(start.time)} UK time${esc(localTime(c.startsAt, start.weekday))}. One hour, a small circle, ${who}</p>`,
         c.question ? `<p class="voice teaser">${esc(c.question)}</p>` : "",
         '<div class="actions"><button class="go" type="button" id="n">Confirm my introduction</button></div>',
       ].filter(Boolean), el => { el.querySelector("#n")!.addEventListener("click", () => S.line(true)); });
@@ -221,7 +219,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
 
     line(first: boolean) {
       setMode("kept");
-      setCentre(`<p class="c-title">You</p><p class="c-sub">seat ${YOU + 1} of ${N}</p>`);
+      setCentre(`<p class="c-title">You</p><p class="c-sub">Your seat</p>`);
       let beenBefore = me.beenBefore;
       show([
         `<p class="eyebrow">Before ${esc(start.weekday)}</p>`,
@@ -309,7 +307,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
     reveal() {
       arrive();
       setMode("reveal");
-      setCentre(titleCentre(`${others.length + 1} in Circle`));
+      setCentre(`<p class="c-title">${esc(c.title)}</p>`);
       show([
         '<p class="voice">The others have arrived.</p>',
         '<div class="person" id="person"><p class="small">Touch any seat to meet them. If there&#39;s someone you&#39;d like to know, request an introduction.</p></div>',
