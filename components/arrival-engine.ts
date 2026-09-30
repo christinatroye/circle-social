@@ -44,7 +44,7 @@ function localTime(iso: string, ukWeekday: string, range = false) {
       .formatToParts(start).forEach(part => { parts[part.type] = part.value; });
     const time = range ? hourRange(iso, tz) : parts.hour + (parts.minute !== "00" ? ":" + parts.minute : "") + parts.dayPeriod.toLowerCase();
     const day = parts.weekday !== ukWeekday ? " on " + parts.weekday : "";
-    return ` (${time}${day} in ${tz.split("/").pop()!.replace(/_/g, " ")})`;
+    return ` (${time} your time${day})`;
   } catch { return ""; }
 }
 
