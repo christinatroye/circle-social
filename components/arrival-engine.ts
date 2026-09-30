@@ -211,8 +211,17 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
   hold.addEventListener("keyup", onKeyUp);
   hold.addEventListener("contextmenu", noMenu);
 
+  /** Keep this link on this device. Only a person gets here, so email scanners that open links don't claim them. */
+  let claimed = data.device !== "open";
+  function claim() {
+    if (claimed) return;
+    claimed = true;
+    actions.claim().then(result => { if (!disposed && !result.ok && result.reason === "elsewhere") S.elsewhere(); }).catch(() => {});
+  }
+
   function enter() {
     entered = true; hold.classList.remove("pressing"); hold.hidden = true;
+    claim();
     drawLit(0);
     body.classList.add("inside");
     show([]); copy.classList.add("leaving");
@@ -477,9 +486,8 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
   else if (!me.confirmed && !me.cancelled && data.phase !== "after") { arrive(); setMode("kept"); S.arrival(); }
   else home();
 
-  if (data.device === "open") {
-    actions.claim().then(result => { if (!disposed && !result.ok && result.reason === "elsewhere") S.elsewhere(); }).catch(() => {});
-  }
+  // Without the door (a cancelled guest, or after the Circle) there is no hold, so keep the link right away.
+  if (data.device === "open" && !(data.firstVisit && !me.cancelled && data.phase !== "after")) claim();
 
   return () => {
     disposed = true;
