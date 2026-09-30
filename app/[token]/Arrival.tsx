@@ -10,8 +10,12 @@ export default function Arrival({ data }: { data: ArrivalData }) {
   const root = useRef<HTMLDivElement>(null);
   const orb = useRef<HTMLDivElement>(null);
 
+  // Claiming the link sets a cookie, and Next.js then re-renders this page with fresh data.
+  // Start the arrival once, from the data it opened with, so that refresh can't skip the door.
+  const opened = useRef(data);
+
   useEffect(() => {
-    const { token } = data;
+    const data = opened.current, { token } = data;
     return startArrival(root.current!, data, {
       claim: () => claimLink(token),
       saveIntroduction: input => saveIntroduction(token, input),
@@ -20,7 +24,7 @@ export default function Arrival({ data }: { data: ArrivalData }) {
       whoIsHere: () => whoIsHere(token),
       requestFreshLink: email => requestFreshLink(token, email),
     });
-  }, [data]);
+  }, []);
 
   // The drifting light from entercircle.co, in the room's hue.
   useEffect(() => {
