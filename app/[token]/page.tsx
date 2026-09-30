@@ -39,7 +39,8 @@ export default async function GuestPage({ params }: PageProps<"/[token]">) {
       startsAt: circle.starts_at, revealAt: circle.reveal_at, roomUrl: trusted && phase === "day" ? circle.room_url : null,
       seats: trusted ? await seatCount(circle.id) : 0,
     },
-    others: trusted && phase !== "before" ? await othersInCircle(circle.id, guest.id) : [],
+    // Before the reveal, the speaker is the only other seat that shows.
+    others: !trusted ? [] : (await othersInCircle(circle.id, guest.id)).filter(person => phase !== "before" || person.speaker),
   };
   return <Arrival data={data} />;
 }

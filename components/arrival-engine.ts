@@ -20,6 +20,18 @@ function londonParts(iso: string) {
   return { weekday: parts.weekday, date: `${parts.weekday} ${parts.day} ${parts.month}`, dayMonth: `${parts.day} ${parts.month}`, time };
 }
 
+/** The hour of the Circle in UK time, like "7-8 pm". */
+function hourRange(iso: string) {
+  const part = (date: Date) => {
+    const parts: Record<string, string> = {};
+    new Intl.DateTimeFormat("en-GB", { timeZone: LONDON, hour: "numeric", minute: "2-digit", hour12: true })
+      .formatToParts(date).forEach(p => { parts[p.type] = p.value; });
+    return { time: parts.hour + (parts.minute !== "00" ? ":" + parts.minute : ""), period: (parts.dayPeriod ?? "").toLowerCase().replace(/\s|\./g, "") };
+  };
+  const from = part(new Date(iso)), to = part(new Date(Date.parse(iso) + 60 * 60 * 1000));
+  return from.period === to.period ? `${from.time}-${to.time} ${to.period}` : `${from.time} ${from.period}-${to.time} ${to.period}`;
+}
+
 /** The guest's own time beside UK time, when it differs. */
 function localTime(iso: string, ukWeekday: string) {
   try {
@@ -36,8 +48,6 @@ function localTime(iso: string, ukWeekday: string) {
   } catch { return ""; }
 }
 
-/** Titles written between asterisks, like *We Have No Idea*, show in italics. */
-const italics = (html: string) => html.replace(/\*([^*]+)\*/g, "<em>$1</em>");
 const been = (before: boolean) => before ? "Been to a Circle before" : "First Circle";
 
 function greeting() {
@@ -210,13 +220,12 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
 
     arrival() {
       setCentre(titleCentre(start.dayMonth));
-      const who = `and ${esc(c.speaker)}${c.speakerLine ? ", " + italics(esc(c.speakerLine)) : ""}${/[.!?]$/.test(c.speakerLine) ? "" : "."}`;
       show([
         `<p class="big">${greeting()}, ${esc(me.first)}.</p>`,
-        `<p class="voice">${me.speaker ? "Welcome to your Circle" : "Welcome to the next Circle"}: ${esc(c.title)}</p>`,
-        `<p class="small">${esc(start.date)} at ${esc(start.time)} UK time${esc(localTime(c.startsAt, start.weekday))}. ${me.speaker
-          ? "We&#39;ve invited a group of curious minds, for one hour, to explore your question:"
-          : `One hour, a small circle, ${who}${c.question ? ` Our question for ${esc(start.weekday)}:` : ""}`}</p>`,
+        `<p class="voice">${me.speaker ? `Welcome to your Circle: ${esc(c.title)}` : `Welcome to the next Circle: ${esc(c.title)} with ${esc(c.speaker)}`}</p>`,
+        me.speaker
+          ? `<p class="small">${esc(start.date)} at ${esc(start.time)} UK time${esc(localTime(c.startsAt, start.weekday))}. We&#39;ve invited a group of curious minds, for one hour, to explore your question:</p>`
+          : `<p class="small">${esc(start.date)} at ${esc(hourRange(c.startsAt))} UK time${esc(localTime(c.startsAt, start.weekday))}.${c.question ? ` Our question for ${esc(start.weekday)}:` : ""}</p>`,
         c.question ? `<p class="voice teaser">${esc(c.question)}</p>` : "",
         '<div class="actions"><button class="go" type="button" id="n">Confirm my introduction</button></div>',
       ].filter(Boolean), el => { el.querySelector("#n")!.addEventListener("click", () => S.line(true)); });
@@ -260,10 +269,10 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       setCentre('<p class="c-title">Circle</p>');
       show([
         '<p class="eyebrow">What a Circle is</p>',
-        '<p class="voice question">Welcome to a new kind of online room.</p>',
-        '<p class="small">An hour off the Zoom grid, in a space designed for this gathering.</p>',
-        '<p class="small">A fascinating speaker, a circle of curious people, and one big question. With time to ask your own.</p>',
-        '<p class="voice teaser">Each Circle gathers once, by invitation. Every room is different.</p>',
+        '<p class="voice question">A new kind of online room.</p>',
+        '<p class="small">Step out of the Zoom grid and into a space designed for this gathering.</p>',
+        '<p class="small">A fascinating speaker, a circle of curious people, and questions that open up new perspectives.</p>',
+        '<p class="voice teaser closing"><span>Each Circle gathers once, by invitation.</span><span>Every room is different.</span></p>',
         `<div class="actions"><button class="go" type="button" id="n">See you on ${esc(start.weekday)}</button></div>`,
       ], el => { el.querySelector("#n")!.addEventListener("click", S.settled); });
     },
