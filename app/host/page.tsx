@@ -29,8 +29,6 @@ const EVENTS: Record<string, string> = {
   added_device: "opened their link on another device",
 };
 
-const ORDER: HostGuest["status"][] = ["Not opened", "Opened", "Introduction confirmed", "Quiet guest", "Can't come"];
-
 function summary(circle: HostCircle) {
   const count = (status: HostGuest["status"]) => circle.guests.filter(guest => guest.status === status).length;
   const confirmed = count("Introduction confirmed") + count("Quiet guest");
@@ -51,7 +49,7 @@ export default async function HostPage() {
       </header>
       {circles.length === 0 && <p className="host-empty">No Circles yet. Import a guest list from Luma to begin.</p>}
       {circles.map(circle => {
-        const guests = [...circle.guests].sort((a, b) => ORDER.indexOf(a.status) - ORDER.indexOf(b.status));
+        const guests = [...circle.guests].sort((a, b) => a.name.localeCompare(b.name, "en", { sensitivity: "base" }));
         return (
           <section key={circle.id} className="host-circle">
             <h1>{circle.title}</h1>
