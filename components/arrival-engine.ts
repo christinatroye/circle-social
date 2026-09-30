@@ -136,17 +136,19 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
     t.addEventListener("input", fit); fit();
   }
   /** Runs a save; on failure the button comes back with a gentle note instead of moving on. */
-  async function attempt(button: HTMLButtonElement, run: () => Promise<{ ok: boolean }>, next: () => void) {
+  async function attempt(button: HTMLButtonElement, run: () => Promise<{ ok: boolean }>, next: () => void, refused?: string) {
     button.disabled = true;
+    let trouble = "That didn't save. Please try again in a moment.";
     try {
       const result = await run();
       if (disposed) return;
       if (result.ok) return next();
+      if (refused) trouble = refused;
     } catch { /* shown below */ }
     button.disabled = false;
     let note = copy.querySelector(".trouble");
     if (!note) { note = document.createElement("p"); note.className = "eyebrow trouble"; copy.appendChild(note); }
-    note.textContent = "That didn't save. Please try again in a moment.";
+    note.textContent = trouble;
   }
 
   /* ---------- The door ---------- */
@@ -382,18 +384,16 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       setMode("door"); centre.innerHTML = "";
       show([
         `<p class="voice">For ${esc(me.first)}</p>`,
-        '<p class="small">This link is already open on another device. We&#39;ll email you a fresh one for this device.</p>',
+        '<p class="small">This link is already open on another device. To open it here too, type the email your invitation went to.</p>',
         '<form class="write plain" id="fresh"><label for="email" class="visually-hidden">Your email</label><input id="email" type="email" required autocomplete="email" placeholder="Your email"></form>',
-        '<div class="actions"><button class="go" type="submit" form="fresh" id="send">Send me a fresh link</button></div>',
+        '<div class="actions"><button class="go" type="submit" form="fresh" id="send">Open it here</button></div>',
       ], el => {
         const form = el.querySelector("#fresh") as HTMLFormElement;
         form.addEventListener("submit", e => {
           e.preventDefault();
           const email = (el.querySelector("#email") as HTMLInputElement).value;
-          void attempt(el.querySelector("#send") as HTMLButtonElement, () => actions.requestFreshLink(email), () => show([
-            '<p class="voice">If that&#39;s you, it&#39;s on its way.</p>',
-            '<p class="small">Open the new link on this device. It replaces the old one.</p>',
-          ]));
+          void attempt(el.querySelector("#send") as HTMLButtonElement, () => actions.addThisDevice(email), () => window.location.reload(),
+            "That email doesn't match this invitation. Please check it, or write to Christina.");
         });
       });
     },

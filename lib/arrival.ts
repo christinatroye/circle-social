@@ -37,5 +37,5 @@ export type ArrivalActions = {
   setCancelled: (cancelled: boolean) => Promise<{ ok: boolean }>;
   requestIntroduction: (to: string, note: string) => Promise<{ ok: boolean }>;
   whoIsHere: () => Promise<string[]>;
-  requestFreshLink: (email: string) => Promise<{ ok: boolean }>;
+  addThisDevice: (email: string) => Promise<{ ok: boolean }>;
 };

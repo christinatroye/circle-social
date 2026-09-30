@@ -26,6 +26,7 @@ const EVENTS: Record<string, string> = {
   intro_requested: "requested an introduction",
   link_resent: "was emailed a fresh link",
   new_link: "was given a new link",
+  added_device: "opened their link on another device",
 };
 
 const ORDER: HostGuest["status"][] = ["Not opened", "Opened", "Introduction confirmed", "Quiet guest", "Can't come"];
