@@ -90,7 +90,7 @@ body.inside .orb { opacity: 1; }
 .teaser.closing span + span { margin-top: .35em; }
 .lineage { font-family: var(--voice); font-style: italic; font-weight: 300; font-size: 1.1rem; color: var(--pearl); display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 14px; }
 .lineage span + span::before { content: ""; display: inline-block; width: 4px; height: 4px; border-radius: 50%; background: var(--bone); opacity: .6; margin-right: 14px; vertical-align: middle; }
-.question { font-size: clamp(1.55rem, 5.6vw, 2rem); line-height: 1.25; }
+.question { font-style: normal; font-size: clamp(1.55rem, 5.6vw, 2rem); line-height: 1.25; }
 .small { font-size: 14.5px; line-height: 1.65; color: var(--soft); max-width: 42ch; text-wrap: pretty; }
 .eyebrow { font-size: 12.5px; letter-spacing: .06em; color: var(--dim); }
 .hint { font-size: 13px; letter-spacing: .04em; color: var(--bone); transition: opacity .6s var(--curve); }
