@@ -254,7 +254,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
           ? `<p class="small">${esc(start.date)} at ${esc(start.time)} UK time${esc(localTime(c.startsAt, start.weekday))}. We&#39;ve invited a group of curious minds, for one hour, to explore your question:</p>`
           : `<p class="small">${esc(start.date)} at ${esc(hourRange(c.startsAt))} UK time${esc(localTime(c.startsAt, start.weekday, true))}.${c.question ? ` Our question for ${esc(start.weekday)}:` : ""}</p>`,
         c.question ? `<p class="voice teaser">${esc(c.question)}</p>` : "",
-        '<div class="actions"><button class="go" type="button" id="n">Confirm my introduction</button></div>',
+        '<div class="actions"><button class="go" type="button" id="n">See my introduction</button></div>',
       ].filter(Boolean), el => { el.querySelector("#n")!.addEventListener("click", () => S.line(true)); });
     },
 
