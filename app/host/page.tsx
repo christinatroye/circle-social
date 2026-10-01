@@ -19,6 +19,7 @@ const when = (iso: string) => new Intl.DateTimeFormat("en-GB", {
 
 const EVENTS: Record<string, string> = {
   opened: "opened their link",
+  saw_introduction: "saw their introduction",
   introduction_confirmed: "confirmed their introduction",
   introduction_changed: "changed their introduction",
   quiet_guest: "chose to be a quiet guest",

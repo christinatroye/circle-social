@@ -44,6 +44,15 @@ export async function claimLink(token: string): Promise<Result> {
   return { ok: true };
 }
 
+/** The first time a guest reaches their introduction, so the host can see where someone stopped. */
+export async function sawIntroduction(token: string) {
+  const found = await owned(token);
+  if (!found || found.guest.introduction_confirmed_at) return;
+  const [seen] = await database()`SELECT 1 FROM guest_events WHERE guest_id = ${found.guest.id} AND kind = 'saw_introduction' LIMIT 1`;
+  if (!seen) await logEvent(found.guest.id, "saw_introduction");
+  await touch(found.guest.id);
+}
+
 export async function saveIntroduction(token: string, input: { introduction: string; shared: boolean; beenBefore: boolean }): Promise<Result> {
   const found = await owned(token);
   if (!found) return { ok: false, reason: "elsewhere" };

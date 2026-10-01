@@ -33,6 +33,7 @@ export type ArrivalData = {
 
 export type ArrivalActions = {
   claim: () => Promise<{ ok: boolean; reason?: string }>;
+  sawIntroduction: () => Promise<unknown>;
   saveIntroduction: (input: { introduction: string; shared: boolean; beenBefore: boolean }) => Promise<{ ok: boolean }>;
   setCancelled: (cancelled: boolean) => Promise<{ ok: boolean }>;
   requestIntroduction: (to: string, note: string) => Promise<{ ok: boolean }>;

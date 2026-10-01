@@ -262,6 +262,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       setMode("kept");
       setCentre(`<p class="c-title">You</p><p class="c-sub">Your seat</p>`);
       let beenBefore = me.beenBefore;
+      if (!me.confirmed) actions.sawIntroduction().catch(() => {});
       show([
         '<p class="eyebrow">Before the Circle</p>',
         me.speaker

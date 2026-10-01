@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import type { ArrivalData } from "@/lib/arrival";
 import { startArrival } from "@/components/arrival-engine";
 import { CircleMark } from "@/components/CircleMark";
-import { addThisDevice, claimLink, requestIntroduction, saveIntroduction, setCancelled, whoIsHere } from "./actions";
+import { addThisDevice, claimLink, requestIntroduction, saveIntroduction, sawIntroduction, setCancelled, whoIsHere } from "./actions";
 
 export default function Arrival({ data }: { data: ArrivalData }) {
   const root = useRef<HTMLDivElement>(null);
@@ -18,6 +18,7 @@ export default function Arrival({ data }: { data: ArrivalData }) {
     const data = opened.current, { token } = data;
     return startArrival(root.current!, data, {
       claim: () => claimLink(token),
+      sawIntroduction: () => sawIntroduction(token),
       saveIntroduction: input => saveIntroduction(token, input),
       setCancelled: cancelled => setCancelled(token, cancelled),
       requestIntroduction: (to, note) => requestIntroduction(token, to, note),
