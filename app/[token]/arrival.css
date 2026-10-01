@@ -129,6 +129,12 @@ body.inside .orb { opacity: 1; }
 .pick { border: 0; background: none; padding: 8px 4px; color: var(--dim); font-size: 14px; transition: color .4s var(--curve), text-shadow .4s var(--curve); }
 .pick:hover { color: var(--soft); }
 .pick[aria-pressed="true"] { color: var(--bone); text-shadow: 0 0 14px rgba(239,227,207,.45); }
+/* A quiet choice, so "Share with the circle" is the one clear step. */
+.picks { gap: 2px 18px; margin-top: -4px; }
+.picks .pick { font-size: 13px; padding: 4px 2px; opacity: .75; }
+.picks .pick[aria-pressed="true"] { color: var(--soft); text-shadow: none; opacity: 1; }
+.picks .pick[aria-pressed="true"]::before { content: ""; display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--bone); margin-right: 8px; vertical-align: middle; }
+.picks + .actions { margin-top: 22px; }
 .person .past { font-size: 12.5px; letter-spacing: .06em; color: var(--pearl); }
 .person .bio { font-size: 14.5px; line-height: 1.65; color: var(--soft); max-width: 44ch; }
 
