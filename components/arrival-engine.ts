@@ -459,7 +459,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
     el.addEventListener("click", () => {
       if ((ring.dataset.mode !== "reveal" && ring.dataset.mode !== "early") || (!person && !you)) return;
       seats.forEach(s => s.el.classList.remove("sel")); el.classList.add("sel");
-      const sub = person?.speaker ? "Tonight&#39;s speaker" : been(you ? me.beenBefore : Boolean(person?.beenBefore));
+      const sub = person?.speaker ? "Speaker" : been(you ? me.beenBefore : Boolean(person?.beenBefore));
       setCentre(`<p class="c-title">${esc(you ? "You" : person!.name)}</p><p class="c-sub">${sub}</p>`);
       const box = root.querySelector("#person"); if (!box) return;
       const bio = you ? (me.shared ? me.introduction : "You're arriving as a quiet guest.") : person!.shared ? person!.introduction : "Arriving as a quiet guest.";
