@@ -273,7 +273,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
         `<div class="write plain"><label for="bio" class="visually-hidden">Your introduction</label><textarea id="bio" rows="2" maxlength="320">${esc(me.introduction)}</textarea></div>`,
         '<p class="eyebrow">Edit any way you like.</p>',
         me.speaker ? "" : '<div class="actions picks" role="group" aria-label="Your Circles"><button class="pick" type="button" data-c="0">This is my first Circle</button><button class="pick" type="button" data-c="1">I&#39;ve been to a Circle before</button></div>',
-        `<div class="actions"><button class="go" type="button" id="share">Share with the circle</button>${me.speaker ? "" : '<button class="quiet" type="button" id="anon">Arrive as a quiet guest</button>'}</div>`,
+        `<div class="actions"><button class="go" type="button" id="share">Share with the circle</button>${me.speaker ? "" : '<button class="quiet" type="button" id="anon">Skip the introduction</button>'}</div>`,
       ].filter(Boolean), el => {
         const t = el.querySelector("#bio") as HTMLTextAreaElement; autosize(t);
         const picks = el.querySelectorAll<HTMLButtonElement>(".pick"), past = el.querySelector("#past")!;
@@ -289,13 +289,13 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
           });
         };
         el.querySelector("#share")!.addEventListener("click", save(true));
-        // Choosing quiet first invites them to share once more; staying quiet is still one tap.
+        // Skipping first invites them to share once more; skipping again is still one tap.
         el.querySelector("#anon")?.addEventListener("click", e => {
           const actions = (e.currentTarget as HTMLElement).parentElement!;
           actions.outerHTML = [
             '<p class="voice say">We&#39;d love the others to know you&#39;re here.</p>',
             '<p class="small say" style="animation-delay:.15s">Someone in this circle might be the conversation you&#39;ve been waiting for.</p>',
-            '<div class="actions say" style="animation-delay:.3s" id="nudge"><button class="go" type="button" id="share2">Share with the circle</button><button class="quiet" type="button" id="stay">Stay quiet</button></div>',
+            '<div class="actions say" style="animation-delay:.3s" id="nudge"><button class="go" type="button" id="share2">Share with the circle</button><button class="quiet" type="button" id="stay">Skip the introduction</button></div>',
           ].join("");
           el.querySelector("#share2")!.addEventListener("click", save(true));
           el.querySelector("#stay")!.addEventListener("click", save(false));
@@ -321,7 +321,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       if (me.cancelled) { setMode("gone"); return S.gone(); }
       setMode("early");
       setCentre(titleCentre(mine.date, mineTime));
-      const status = !me.confirmed ? "We still need you to confirm how we&#39;ll introduce you to the others." : me.shared ? "Your introduction is ready for the others." : "You&#39;ll arrive as a quiet guest.";
+      const status = !me.confirmed ? "We still need you to confirm how we&#39;ll introduce you to the others." : me.shared ? "Your introduction is ready for the others." : "The others will see just your name.";
       if (me.speaker && me.confirmed) return show([
         `<div class="person" id="person"><p class="big">That&#39;s everything, ${esc(me.first)}.</p><p class="small">Your introduction is ready for the guests. On ${esc(reveal.weekday)} the other seats light up, and you can see who&#39;ll be in the room with you.</p></div>`,
         '<div class="actions"><button class="quiet" type="button" id="edit">Change my introduction</button></div>',
@@ -463,8 +463,8 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       const sub = person?.speaker ? "Speaker" : been(you ? me.beenBefore : Boolean(person?.beenBefore));
       setCentre(`<p class="c-title">${esc(you ? "You" : person!.name)}</p><p class="c-sub">${sub}</p>`);
       const box = root.querySelector("#person"); if (!box) return;
-      const bio = you ? (me.shared ? me.introduction : "You're arriving as a quiet guest.") : person!.shared ? person!.introduction : "Arriving as a quiet guest.";
-      box.innerHTML = `<p class="bio say">${esc(bio)}</p>` +
+      const bio = you ? (me.shared ? me.introduction : "The others will see just your name.") : person!.shared ? person!.introduction : "";
+      box.innerHTML = (bio ? `<p class="bio say">${esc(bio)}</p>` : "") +
         (you ? (ring.dataset.mode === "reveal" ? '<button class="quiet say" style="animation-delay:.15s" type="button" id="mine">Change my introduction</button>' : "")
           : person!.speaker ? "" : '<div class="actions say" style="animation-delay:.15s"><button class="go" type="button" id="ask">Request an introduction</button></div>');
       box.querySelector("#mine")?.addEventListener("click", () => S.line(false));
