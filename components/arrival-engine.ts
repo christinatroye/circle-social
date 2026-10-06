@@ -65,6 +65,11 @@ function localTime(iso: string, ukWeekday: string, range = false) {
   } catch { return ""; }
 }
 
+/** What to expect from each Circle's speaker, in Christina's words. Circles without one get a plain line. */
+const SPEAKER_NOTES: Record<string, string> = {
+  Alien: "You don't need to know any physics. Daniel's gift is making the biggest questions in science feel human and accessible. He'll take us through a few slides, with plenty of space for questions.",
+};
+
 const been = (before: boolean) => before ? "Been to a Circle before" : "First Circle";
 
 function greeting() {
@@ -386,8 +391,9 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
         '<p class="eyebrow">What to expect</p>',
         `<p class="voice">${esc(start.weekday)} at ${esc(start.time)} UK time${esc(localTime(c.startsAt, start.weekday))}.</p>`,
         `<div class="person"><p class="small">The doors open at ${esc(doors.time)}. Come a few minutes early, so we can begin together at ${esc(start.time.replace(/(am|pm)$/, ""))}.</p>` +
-          `<p class="small">${esc(c.speaker.split(" ")[0])} will take us through a few slides, with plenty of space for questions. Everyone has already been introduced here, so in the room we can go straight in.</p>` +
-          '<p class="small">The room isn&#39;t recorded, so you can be yourself.</p>' +
+          '<p class="small">This is a space where you don&#39;t need to sell, buy, or prove anything. Just be in the room.</p>' +
+          `<p class="small">${esc(SPEAKER_NOTES[c.title] ?? `${c.speaker.split(" ")[0]} will take us through a few slides, with plenty of space for questions.`)} Everyone has already been introduced here, so no need to reference your work.</p>` +
+          '<p class="small">Nothing is recorded. Be yourself.</p>' +
           '<p class="small">Questions are always best when more people can enjoy them.</p></div>',
         '<p class="voice teaser closing"><span>We&#39;re glad you&#39;re here.</span></p>',
         '<div class="actions"><button class="quiet" type="button" id="back">Back</button></div>',
