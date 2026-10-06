@@ -81,6 +81,11 @@ body.inside .orb { opacity: 1; }
 .say { animation: say 1s var(--curve) both; }
 .copy > .stepping-aside { opacity: 0; height: 0 !important; margin-bottom: -16px; overflow: hidden; transition: opacity .4s var(--curve), height .7s var(--curve), margin .7s var(--curve); }
 @keyframes say { from { opacity: 0; transform: translateY(10px); } }
+.room-link { display: grid; justify-items: center; gap: 12px; max-width: 34ch; }
+/* An empty line of light where the way into the room will appear: a slow glint, never a flicker. */
+.shine { display: block; width: min(220px, 60vw); height: 1px; background: linear-gradient(90deg, rgba(217,212,238,0) 0%, rgba(217,212,238,.18) 30%, rgba(239,227,207,.85) 50%, rgba(217,212,238,.18) 70%, rgba(217,212,238,0) 100%) 0 0 / 250% 100%;
+  box-shadow: 0 0 14px rgba(239,227,207,.18); animation: glint 4.5s var(--curve) infinite; }
+@keyframes glint { from { background-position: 100% 0; } to { background-position: -150% 0; } }
 
 .big { font-family: var(--display); font-weight: 300; font-size: clamp(1.9rem, 6.4vw, 2.6rem); line-height: 1.12; letter-spacing: -.005em; color: var(--fg); text-wrap: balance; }
 .voice { font-family: var(--voice); font-style: italic; font-weight: 300; font-size: clamp(1.15rem, 4.2vw, 1.42rem); line-height: 1.38; color: var(--fg); text-wrap: balance; }
@@ -148,3 +153,4 @@ body.inside .orb { opacity: 1; }
 .write input::placeholder { color: var(--dim); }
 .write input:focus { outline: none; }
 .stage { padding-block: 76px 64px; }
+@media (prefers-reduced-motion: reduce) { .shine { animation: none; background-position: 50% 0; } }
