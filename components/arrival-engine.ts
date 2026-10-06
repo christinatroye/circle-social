@@ -84,7 +84,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
   const start = londonParts(c.startsAt), reveal = londonParts(c.revealAt);
   // The circle shows the start in the guest's own time, so it only says 7pm to someone in the UK.
   const zone = deviceZone(), mine = londonParts(c.startsAt, zone), mineTime = `${mine.time} ${zoneLabel(zone, c.startsAt)}`.trim();
-  const doorsAt = new Date(Date.parse(c.startsAt) - 10 * 60 * 1000).toISOString(), doors = londonParts(doorsAt);
+  const doorsAt = new Date(Date.parse(c.startsAt) - 5 * 60 * 1000).toISOString(), doors = londonParts(doorsAt);
   const timers: number[] = [], intervals: number[] = [];
   let disposed = false;
   const later = (fn: () => void, ms: number) => { timers.push(window.setTimeout(() => { if (!disposed) fn(); }, ms)); };
@@ -384,12 +384,11 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       show([
         '<p class="eyebrow">What to expect</p>',
         `<p class="voice">${esc(start.weekday)} at ${esc(start.time)} UK time${esc(localTime(c.startsAt, start.weekday))}.</p>`,
-        `<div class="person"><p class="small">The doors open at ${esc(doors.time)}. Come a few minutes early, so we can begin at ${esc(start.time)}.</p>` +
-          `<p class="small">${esc(c.speaker.split(" ")[0])} will talk through a few slides, and leave plenty of space for questions.</p>` +
-          '<p class="small">Everyone has already been introduced here, so in the room we can go straight to the questions.</p>' +
+        `<div class="person"><p class="small">The doors open at ${esc(doors.time)}. Come a few minutes early, so we can begin together at ${esc(start.time.replace(/(am|pm)$/, ""))}.</p>` +
+          `<p class="small">${esc(c.speaker.split(" ")[0])} will take us through a few slides, with plenty of space for questions. Everyone has already been introduced here, so in the room we can go straight in.</p>` +
           '<p class="small">The room isn&#39;t recorded, so you can be yourself.</p>' +
-          '<p class="small">When you ask a question, give a little context and keep technical terms simple, so the whole room can enjoy the answer.</p></div>',
-        '<p class="voice teaser closing"><span>A Circle is a new kind of meeting space.</span><span>We hope you&#39;ll enjoy it.</span></p>',
+          '<p class="small">Questions are always best when more people can enjoy them.</p></div>',
+        '<p class="voice teaser closing"><span>We&#39;re glad you&#39;re here.</span></p>',
         '<div class="actions"><button class="quiet" type="button" id="back">Back</button></div>',
       ], el => { el.querySelector("#back")!.addEventListener("click", home); });
     },
