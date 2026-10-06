@@ -65,6 +65,11 @@ function localTime(iso: string, ukWeekday: string, range = false) {
   } catch { return ""; }
 }
 
+/** What to expect from each Circle's speaker, in Christina's words. Circles without one get a plain line. */
+const SPEAKER_NOTES: Record<string, string> = {
+  Alien: "You don't need to know any physics. Daniel's gift is making the biggest questions in science feel human and accessible. He'll take us through a few slides, with plenty of space for questions.",
+};
+
 const been = (before: boolean) => before ? "Been to a Circle before" : "First Circle";
 
 function greeting() {
@@ -84,7 +89,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
   const start = londonParts(c.startsAt), reveal = londonParts(c.revealAt);
   // The circle shows the start in the guest's own time, so it only says 7pm to someone in the UK.
   const zone = deviceZone(), mine = londonParts(c.startsAt, zone), mineTime = `${mine.time} ${zoneLabel(zone, c.startsAt)}`.trim();
-  const doorsAt = new Date(Date.parse(c.startsAt) - 10 * 60 * 1000).toISOString(), doors = londonParts(doorsAt);
+  const doorsAt = new Date(Date.parse(c.startsAt) - 5 * 60 * 1000).toISOString(), doors = londonParts(doorsAt);
   const timers: number[] = [], intervals: number[] = [];
   let disposed = false;
   const later = (fn: () => void, ms: number) => { timers.push(window.setTimeout(() => { if (!disposed) fn(); }, ms)); };
@@ -153,7 +158,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
   /* ---------- Words, one moment at a time ---------- */
   function show(parts: string[], after?: (el: HTMLElement) => void) {
     const render = () => {
-      copy.classList.remove("leaving");
+      copy.classList.remove("leaving"); copy.style.minHeight = "";
       copy.innerHTML = parts.map((p, i) => p.replace(/^<(\w+)/, `<$1 style="animation-delay:${(0.1 + i * 0.16).toFixed(2)}s"`)).join("");
       copy.querySelectorAll(":scope > *").forEach(el => el.classList.add("say"));
       if (after) after(copy);
@@ -313,7 +318,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
         '<p class="small">A fascinating speaker, a circle of curious people, and questions that open up new perspectives.</p>',
         '<p class="voice teaser closing"><span>Each Circle gathers once, by invitation.</span><span>Every room is different.</span></p>',
         `<div class="actions"><button class="go" type="button" id="n">See you on ${esc(start.weekday)}</button></div>`,
-      ], el => { el.querySelector("#n")!.addEventListener("click", S.settled); });
+      ], el => { el.querySelector("#n")!.addEventListener("click", home); });
     },
 
     settled() {
@@ -368,16 +373,36 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       setMode("reveal");
       setCentre(`<p class="c-title">${esc(c.title)}</p>`);
       show([
-        '<p class="voice">The others have arrived.</p>',
+        '<p class="voice" id="arrived">The others have arrived.</p>',
         '<div class="person" id="person"><p class="small">Touch any seat to meet them. If there&#39;s someone you&#39;d like to know, request an introduction.</p></div>',
-        me.speaker ? "" : '<div class="actions"><button class="quiet" type="button" id="cant">I can no longer come</button></div>',
+        `<div class="room-link"><p class="eyebrow ceremony">The link to the room will appear here on ${esc(start.weekday)}. It will also be in your Luma invitation and calendar.</p></div>`,
+        me.speaker ? "" : '<div class="actions"><button class="quiet" type="button" id="expect">What to expect</button><button class="quiet" type="button" id="cant">I can no longer come</button></div>',
       ].filter(Boolean), el => {
+        el.querySelector("#expect")?.addEventListener("click", S.expect);
         el.querySelector("#cant")?.addEventListener("click", S.confirmCancel);
       });
     },
 
+    /** How the hour itself will go, for guests. */
+    expect() {
+      setMode("kept");
+      setCentre(titleCentre(mine.date, mineTime));
+      show([
+        '<p class="eyebrow">What to expect</p>',
+        `<p class="voice">${esc(start.weekday)} at ${esc(start.time)} UK time${esc(localTime(c.startsAt, start.weekday))}.</p>`,
+        `<div class="person"><p class="small">The doors open at ${esc(doors.time)}. Come a few minutes early, so we can begin together at ${esc(start.time.replace(/(am|pm)$/, ""))}.</p>` +
+          '<p class="small">This is a space where you don&#39;t need to sell, buy, or prove anything. Just be in the room.</p>' +
+          `<p class="small">${esc(SPEAKER_NOTES[c.title] ?? `${c.speaker.split(" ")[0]} will take us through a few slides, with plenty of space for questions.`)} Everyone has already been introduced here, so no need to reference your work.</p>` +
+          '<p class="small">Nothing is recorded. Be yourself.</p>' +
+          '<p class="small">Questions are always best when more people can enjoy them.</p></div>',
+        '<p class="voice teaser closing"><span>We&#39;re glad you&#39;re here.</span></p>',
+        '<div class="actions"><button class="quiet" type="button" id="back">Back</button></div>',
+      ], el => { el.querySelector("#back")!.addEventListener("click", home); });
+    },
+
     day() {
       arrive();
+      intervals.splice(0).forEach(clearInterval);
       setMode("day");
       const lightHere = (ids: string[]) => {
         const set = new Set(ids);
@@ -391,7 +416,9 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
         '<p class="big">Tonight.</p>',
         `<p class="small" id="status">We open the doors at ${esc(doors.time)}.</p>`,
         '<div class="actions later" id="act"><button class="go" type="button" id="enter">Enter the room</button></div>',
-      ], el => {
+        me.speaker ? "" : '<div class="actions"><button class="quiet" type="button" id="expect">What to expect</button></div>',
+      ].filter(Boolean), el => {
+        el.querySelector("#expect")?.addEventListener("click", S.expect);
         later(() => lightHere(others.filter(p => p.here).map(p => p.id)), 400);
         el.querySelector("#enter")!.addEventListener("click", S.enterRoom);
         const open = () => {
@@ -460,6 +487,14 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
     el.addEventListener("click", () => {
       if ((ring.dataset.mode !== "reveal" && ring.dataset.mode !== "early") || (!person && !you)) return;
       seats.forEach(s => s.el.classList.remove("sel")); el.classList.add("sel");
+      // After the first touch the welcome line steps aside, so the introduction sits closer to the ring.
+      const arrived = root.querySelector<HTMLElement>("#arrived");
+      if (arrived) {
+        copy.style.minHeight = `${copy.offsetHeight}px`; // the ring stays where it is; only the words below it move up
+        arrived.removeAttribute("id"); arrived.style.height = `${arrived.offsetHeight}px`; arrived.classList.remove("say");
+        void arrived.offsetHeight; arrived.classList.add("stepping-aside");
+        later(() => arrived.remove(), 700);
+      }
       const sub = person?.speaker ? "Speaker" : been(you ? me.beenBefore : Boolean(person?.beenBefore));
       setCentre(`<p class="c-title">${esc(you ? "You" : person!.name)}</p><p class="c-sub">${sub}</p>`);
       const box = root.querySelector("#person"); if (!box) return;

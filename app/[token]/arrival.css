@@ -79,7 +79,13 @@ body.inside .orb { opacity: 1; }
 .copy { width: min(100%, 500px); display: grid; gap: 16px; justify-items: center; text-align: center; min-height: 12rem; align-content: start; }
 .copy.leaving > * { opacity: 0; transform: translateY(-6px); transition: opacity .45s var(--curve), transform .45s var(--curve); }
 .say { animation: say 1s var(--curve) both; }
+.copy > .stepping-aside { opacity: 0; height: 0 !important; margin-bottom: -16px; overflow: hidden; transition: opacity .4s var(--curve), height .7s var(--curve), margin .7s var(--curve); }
 @keyframes say { from { opacity: 0; transform: translateY(10px); } }
+.room-link { display: grid; justify-items: center; gap: 12px; max-width: 34ch; }
+/* A slow light passes through the words once, like a candle carried past, and leaves them lit. */
+.ceremony { color: var(--bone); background: linear-gradient(100deg, var(--bone) 0%, var(--bone) 40%, #fff8ec 50%, var(--dim) 62%, var(--dim) 100%) 100% 0 / 300% 100%;
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: pass 7s cubic-bezier(.45,.05,.55,.95) 1.2s forwards; }
+@keyframes pass { to { background-position: 0% 0; } }
 
 .big { font-family: var(--display); font-weight: 300; font-size: clamp(1.9rem, 6.4vw, 2.6rem); line-height: 1.12; letter-spacing: -.005em; color: var(--fg); text-wrap: balance; }
 .voice { font-family: var(--voice); font-style: italic; font-weight: 300; font-size: clamp(1.15rem, 4.2vw, 1.42rem); line-height: 1.38; color: var(--fg); text-wrap: balance; }
@@ -147,3 +153,4 @@ body.inside .orb { opacity: 1; }
 .write input::placeholder { color: var(--dim); }
 .write input:focus { outline: none; }
 .stage { padding-block: 76px 64px; }
+@media (prefers-reduced-motion: reduce) { .ceremony { animation: none; -webkit-text-fill-color: currentColor; background: none; } }

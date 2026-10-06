@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { phaseFor, type ArrivalData } from "@/lib/arrival";
+import { phaseFor, type ArrivalData, type Phase } from "@/lib/arrival";
+import { isHostAuthenticated } from "@/lib/host-auth.server";
 import { deviceKey, deviceState, guestForToken, othersInCircle, seatCount, touch } from "@/lib/guests.server";
 import Arrival from "./Arrival";
 import "./arrival.css";
@@ -11,15 +12,20 @@ export const metadata: Metadata = { title: "Circle", robots: { index: false, fol
 /** The public invitation for each Circle, shown to the speaker. */
 const INVITATIONS: Record<string, string> = { alien: "https://luma.com/d1bodo24" };
 
-export default async function GuestPage({ params }: PageProps<"/[token]">) {
+const PHASES: Phase[] = ["before", "reveal", "day", "after"];
+
+export default async function GuestPage({ params, searchParams }: PageProps<"/[token]">) {
   const { token } = await params;
+  // Only for Christina signed in to /host (or on a preview deployment), ?phase=reveal (or before, day, after) shows that moment early.
+  // Guests always see the moment the clock gives them.
+  const asked = process.env.VERCEL_ENV === "preview" || await isHostAuthenticated() ? (await searchParams).phase : undefined;
   const found = await guestForToken(token);
   if (!found) notFound();
   const { guest, circle } = found;
   const device = deviceState(guest, await deviceKey());
   if (device === "mine") await touch(guest.id);
 
-  const phase = phaseFor(circle.starts_at, circle.reveal_at);
+  const phase = PHASES.find(p => p === asked) ?? phaseFor(circle.starts_at, circle.reveal_at);
   const trusted = device !== "elsewhere";
 
   const data: ArrivalData = {
