@@ -370,14 +370,33 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       show([
         '<p class="voice">The others have arrived.</p>',
         '<div class="person" id="person"><p class="small">Touch any seat to meet them. If there&#39;s someone you&#39;d like to know, request an introduction.</p></div>',
-        me.speaker ? "" : '<div class="actions"><button class="quiet" type="button" id="cant">I can no longer come</button></div>',
+        me.speaker ? "" : '<div class="actions"><button class="quiet" type="button" id="expect">What to expect</button><button class="quiet" type="button" id="cant">I can no longer come</button></div>',
       ].filter(Boolean), el => {
+        el.querySelector("#expect")?.addEventListener("click", S.expect);
         el.querySelector("#cant")?.addEventListener("click", S.confirmCancel);
       });
     },
 
+    /** How the hour itself will go, for guests. */
+    expect() {
+      setMode("kept");
+      setCentre(titleCentre(mine.date, mineTime));
+      show([
+        '<p class="eyebrow">What to expect</p>',
+        `<p class="voice">${esc(start.weekday)} at ${esc(start.time)} UK time${esc(localTime(c.startsAt, start.weekday))}.</p>`,
+        `<div class="person"><p class="small">The doors open at ${esc(doors.time)}. Come a few minutes early, so we can begin at ${esc(start.time)}.</p>` +
+          `<p class="small">${esc(c.speaker.split(" ")[0])} will talk through a few slides, and leave plenty of space for questions.</p>` +
+          '<p class="small">Everyone has already been introduced here, so in the room we can go straight to the questions.</p>' +
+          '<p class="small">The room isn&#39;t recorded, so you can be yourself.</p>' +
+          '<p class="small">When you ask a question, give a little context and keep technical terms simple, so the whole room can enjoy the answer.</p></div>',
+        '<p class="voice teaser closing"><span>A Circle is a new kind of meeting space.</span><span>We hope you&#39;ll enjoy it.</span></p>',
+        '<div class="actions"><button class="quiet" type="button" id="back">Back</button></div>',
+      ], el => { el.querySelector("#back")!.addEventListener("click", home); });
+    },
+
     day() {
       arrive();
+      intervals.splice(0).forEach(clearInterval);
       setMode("day");
       const lightHere = (ids: string[]) => {
         const set = new Set(ids);
@@ -391,7 +410,9 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
         '<p class="big">Tonight.</p>',
         `<p class="small" id="status">We open the doors at ${esc(doors.time)}.</p>`,
         '<div class="actions later" id="act"><button class="go" type="button" id="enter">Enter the room</button></div>',
-      ], el => {
+        me.speaker ? "" : '<div class="actions"><button class="quiet" type="button" id="expect">What to expect</button></div>',
+      ].filter(Boolean), el => {
+        el.querySelector("#expect")?.addEventListener("click", S.expect);
         later(() => lightHere(others.filter(p => p.here).map(p => p.id)), 400);
         el.querySelector("#enter")!.addEventListener("click", S.enterRoom);
         const open = () => {
