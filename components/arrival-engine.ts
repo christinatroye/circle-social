@@ -385,12 +385,13 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
 
     /** How the hour itself will go, for guests. */
     expect() {
+      const doorsLocal = localTime(doorsAt, doors.weekday);
       setMode("kept");
       setCentre(titleCentre(mine.date, mineTime));
       show([
         '<p class="eyebrow">What to expect</p>',
         `<p class="voice">${esc(start.weekday)} at ${esc(start.time)} UK time${esc(localTime(c.startsAt, start.weekday))}.</p>`,
-        `<div class="person"><p class="small">The doors open at ${esc(doors.time)}. Come a few minutes early, so we can begin together at ${esc(start.time.replace(/(am|pm)$/, ""))}.</p>` +
+        `<div class="person"><p class="small">The doors open at ${esc(doors.time)}${esc(doorsLocal && " UK time" + doorsLocal)}. Come a few minutes early, so we can begin together at ${esc(start.time.replace(/(am|pm)$/, ""))}.</p>` +
           '<p class="small">This is a space where you don&#39;t need to sell, buy, or prove anything. Just be in the room.</p>' +
           `<p class="small">${esc(SPEAKER_NOTES[c.title] ?? `${c.speaker.split(" ")[0]} will take us through a few slides, with plenty of space for questions.`)} Everyone has already been introduced here, so no need to reference your work.</p>` +
           '<p class="small">Nothing is recorded. Be yourself.</p>' +
