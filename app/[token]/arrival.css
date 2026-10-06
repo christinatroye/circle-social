@@ -79,6 +79,7 @@ body.inside .orb { opacity: 1; }
 .copy { width: min(100%, 500px); display: grid; gap: 16px; justify-items: center; text-align: center; min-height: 12rem; align-content: start; }
 .copy.leaving > * { opacity: 0; transform: translateY(-6px); transition: opacity .45s var(--curve), transform .45s var(--curve); }
 .say { animation: say 1s var(--curve) both; }
+.copy > .stepping-aside { opacity: 0; height: 0 !important; margin-bottom: -16px; overflow: hidden; transition: opacity .4s var(--curve), height .7s var(--curve), margin .7s var(--curve); }
 @keyframes say { from { opacity: 0; transform: translateY(10px); } }
 
 .big { font-family: var(--display); font-weight: 300; font-size: clamp(1.9rem, 6.4vw, 2.6rem); line-height: 1.12; letter-spacing: -.005em; color: var(--fg); text-wrap: balance; }

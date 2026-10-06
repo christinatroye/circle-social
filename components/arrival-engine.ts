@@ -153,7 +153,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
   /* ---------- Words, one moment at a time ---------- */
   function show(parts: string[], after?: (el: HTMLElement) => void) {
     const render = () => {
-      copy.classList.remove("leaving");
+      copy.classList.remove("leaving"); copy.style.minHeight = "";
       copy.innerHTML = parts.map((p, i) => p.replace(/^<(\w+)/, `<$1 style="animation-delay:${(0.1 + i * 0.16).toFixed(2)}s"`)).join("");
       copy.querySelectorAll(":scope > *").forEach(el => el.classList.add("say"));
       if (after) after(copy);
@@ -368,7 +368,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       setMode("reveal");
       setCentre(`<p class="c-title">${esc(c.title)}</p>`);
       show([
-        '<p class="voice">The others have arrived.</p>',
+        '<p class="voice" id="arrived">The others have arrived.</p>',
         '<div class="person" id="person"><p class="small">Touch any seat to meet them. If there&#39;s someone you&#39;d like to know, request an introduction.</p></div>',
         me.speaker ? "" : '<div class="actions"><button class="quiet" type="button" id="expect">What to expect</button><button class="quiet" type="button" id="cant">I can no longer come</button></div>',
       ].filter(Boolean), el => {
@@ -481,6 +481,14 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
     el.addEventListener("click", () => {
       if ((ring.dataset.mode !== "reveal" && ring.dataset.mode !== "early") || (!person && !you)) return;
       seats.forEach(s => s.el.classList.remove("sel")); el.classList.add("sel");
+      // After the first touch the welcome line steps aside, so the introduction sits closer to the ring.
+      const arrived = root.querySelector<HTMLElement>("#arrived");
+      if (arrived) {
+        copy.style.minHeight = `${copy.offsetHeight}px`; // the ring stays where it is; only the words below it move up
+        arrived.removeAttribute("id"); arrived.style.height = `${arrived.offsetHeight}px`; arrived.classList.remove("say");
+        void arrived.offsetHeight; arrived.classList.add("stepping-aside");
+        later(() => arrived.remove(), 700);
+      }
       const sub = person?.speaker ? "Speaker" : been(you ? me.beenBefore : Boolean(person?.beenBefore));
       setCentre(`<p class="c-title">${esc(you ? "You" : person!.name)}</p><p class="c-sub">${sub}</p>`);
       const box = root.querySelector("#person"); if (!box) return;
