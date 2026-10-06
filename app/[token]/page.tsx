@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { phaseFor, type ArrivalData, type Phase } from "@/lib/arrival";
+import { isHostAuthenticated } from "@/lib/host-auth.server";
 import { deviceKey, deviceState, guestForToken, othersInCircle, seatCount, touch } from "@/lib/guests.server";
 import Arrival from "./Arrival";
 import "./arrival.css";
@@ -15,8 +16,9 @@ const PHASES: Phase[] = ["before", "reveal", "day", "after"];
 
 export default async function GuestPage({ params, searchParams }: PageProps<"/[token]">) {
   const { token } = await params;
-  // On preview deployments only, ?phase=reveal (or before, day, after) shows that moment, so changes can be checked before guests see them.
-  const asked = process.env.VERCEL_ENV === "preview" ? (await searchParams).phase : undefined;
+  // Only for Christina signed in to /host (or on a preview deployment), ?phase=reveal (or before, day, after) shows that moment early.
+  // Guests always see the moment the clock gives them.
+  const asked = process.env.VERCEL_ENV === "preview" || await isHostAuthenticated() ? (await searchParams).phase : undefined;
   const found = await guestForToken(token);
   if (!found) notFound();
   const { guest, circle } = found;
