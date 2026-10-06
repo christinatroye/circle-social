@@ -503,7 +503,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       const bio = you ? (me.shared ? me.introduction : "The others will see just your name.") : person!.shared ? person!.introduction : "";
       box.innerHTML = (bio ? `<p class="bio say">${esc(bio)}</p>` : "") +
         (you ? (ring.dataset.mode === "reveal" ? '<button class="quiet say" style="animation-delay:.15s" type="button" id="mine">Change my introduction</button>' : "")
-          : person!.speaker ? "" : '<div class="actions say" style="animation-delay:.15s"><button class="go" type="button" id="ask">Request an introduction</button></div>');
+          : person!.speaker && ring.dataset.mode !== "reveal" ? "" : '<div class="actions say" style="animation-delay:.15s"><button class="go" type="button" id="ask">Request an introduction</button></div>');
       box.querySelector("#mine")?.addEventListener("click", () => S.line(false));
       box.querySelector("#ask")?.addEventListener("click", () => {
         box.innerHTML = `<div class="write plain say"><label class="small" for="why" style="display:block">What would you like to talk to ${esc(person!.first)} about?</label><textarea id="why" rows="1" maxlength="600"></textarea></div>` +
