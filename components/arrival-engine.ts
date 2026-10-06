@@ -313,7 +313,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
         '<p class="small">A fascinating speaker, a circle of curious people, and questions that open up new perspectives.</p>',
         '<p class="voice teaser closing"><span>Each Circle gathers once, by invitation.</span><span>Every room is different.</span></p>',
         `<div class="actions"><button class="go" type="button" id="n">See you on ${esc(start.weekday)}</button></div>`,
-      ], el => { el.querySelector("#n")!.addEventListener("click", S.settled); });
+      ], el => { el.querySelector("#n")!.addEventListener("click", home); });
     },
 
     settled() {
