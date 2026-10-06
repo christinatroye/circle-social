@@ -395,7 +395,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
           '<p class="small">This is a space where you don&#39;t need to sell, buy, or prove anything. Just be in the room.</p>' +
           `<p class="small">${esc(SPEAKER_NOTES[c.title] ?? `${c.speaker.split(" ")[0]} will take us through a few slides, with plenty of space for questions.`)} Everyone has already been introduced here, so no need to reference your work.</p>` +
           '<p class="small">Nothing is recorded. Be yourself.</p>' +
-          '<p class="small">Questions are always best when more people can enjoy them.</p>' +
+          '<p class="small">Questions are always best when the whole room wants to hear the answer.</p>' +
           '<p class="small">A few things that make a Circle more enjoyable: a quiet, comfortable space, not too bright. Camera on. Laptop over mobile if you can. Good wifi. And maybe a cup of tea.</p></div>',
         '<p class="voice teaser closing"><span>We&#39;re glad you&#39;re here.</span></p>',
         '<div class="actions"><button class="quiet" type="button" id="back">Back</button></div>',
