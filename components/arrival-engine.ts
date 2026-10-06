@@ -65,6 +65,13 @@ function localTime(iso: string, ukWeekday: string, range = false) {
   } catch { return ""; }
 }
 
+/** "tomorrow" the day before the Circle and "today" on the day, in UK time, so the words stay true whenever they're read. */
+function whenFromNow(iso: string, weekday: string) {
+  const day = (d: Date) => new Intl.DateTimeFormat("en-GB", { timeZone: LONDON, year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
+  const now = new Date(), tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000), start = new Date(iso);
+  return day(start) === day(now) ? "today" : day(start) === day(tomorrow) ? "tomorrow" : `on ${weekday}`;
+}
+
 /** What to expect from each Circle's speaker, in Christina's words. Circles without one get a plain line. */
 const SPEAKER_NOTES: Record<string, string> = {
   Alien: "You don't need to know any physics. Daniel's gift is making the biggest questions in science feel human and accessible. He'll take us through a few slides, with plenty of space for questions.",
@@ -375,7 +382,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       show([
         '<p class="voice" id="arrived">The others have arrived.</p>',
         '<div class="person" id="person"><p class="small">Touch any seat to meet them. If there&#39;s someone you&#39;d like to know, request an introduction.</p></div>',
-        `<div class="room-link"><p class="eyebrow">The link to the room will appear here on ${esc(start.weekday)} at ${esc(doors.time)}. It&#39;s also in your Luma invitation and calendar.</p><span class="shine" aria-hidden="true"></span></div>`,
+        `<div class="room-link"><p class="eyebrow ceremony">The link to the room will appear here on ${esc(start.weekday)} at ${esc(doors.time)}. It will also be in your Luma invitation and calendar ${esc(whenFromNow(c.startsAt, start.weekday))}.</p></div>`,
         me.speaker ? "" : '<div class="actions"><button class="quiet" type="button" id="expect">What to expect</button><button class="quiet" type="button" id="cant">I can no longer come</button></div>',
       ].filter(Boolean), el => {
         el.querySelector("#expect")?.addEventListener("click", S.expect);
