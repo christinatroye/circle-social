@@ -82,10 +82,10 @@ body.inside .orb { opacity: 1; }
 .copy > .stepping-aside { opacity: 0; height: 0 !important; margin-bottom: -16px; overflow: hidden; transition: opacity .4s var(--curve), height .7s var(--curve), margin .7s var(--curve); }
 @keyframes say { from { opacity: 0; transform: translateY(10px); } }
 .room-link { display: grid; justify-items: center; gap: 12px; max-width: 34ch; }
-/* A slow light passes through the words, like a candle carried past: once every few seconds, never a flicker. */
-.ceremony { color: var(--soft); background: linear-gradient(100deg, var(--dim) 0%, var(--dim) 36%, #fff6e6 50%, var(--dim) 64%, var(--dim) 100%) 0 0 / 300% 100%;
-  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: pass 11s cubic-bezier(.45,.05,.55,.95) infinite; }
-@keyframes pass { 0% { background-position: 100% 0; } 60%, 100% { background-position: 0% 0; } }
+/* A slow light passes through the words once, like a candle carried past, and leaves them lit. */
+.ceremony { color: var(--bone); background: linear-gradient(100deg, var(--bone) 0%, var(--bone) 40%, #fff8ec 50%, var(--dim) 62%, var(--dim) 100%) 100% 0 / 300% 100%;
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: pass 7s cubic-bezier(.45,.05,.55,.95) 1.2s forwards; }
+@keyframes pass { to { background-position: 0% 0; } }
 
 .big { font-family: var(--display); font-weight: 300; font-size: clamp(1.9rem, 6.4vw, 2.6rem); line-height: 1.12; letter-spacing: -.005em; color: var(--fg); text-wrap: balance; }
 .voice { font-family: var(--voice); font-style: italic; font-weight: 300; font-size: clamp(1.15rem, 4.2vw, 1.42rem); line-height: 1.38; color: var(--fg); text-wrap: balance; }
