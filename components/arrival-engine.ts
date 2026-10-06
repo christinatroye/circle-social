@@ -382,7 +382,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       show([
         '<p class="voice" id="arrived">The others have arrived.</p>',
         '<div class="person" id="person"><p class="small">Touch any seat to meet them. If there&#39;s someone you&#39;d like to know, request an introduction.</p></div>',
-        `<div class="room-link"><p class="eyebrow ceremony">The link to the room will appear here on ${esc(start.weekday)} at ${esc(doors.time)}. It will also be in your Luma invitation and calendar ${esc(whenFromNow(c.startsAt, start.weekday))}.</p></div>`,
+        `<div class="room-link"><p class="eyebrow ceremony">The link to the room will appear here ${esc(whenFromNow(c.startsAt, start.weekday))} at ${esc(doors.time)}. It will also be in your Luma invitation and calendar.</p></div>`,
         me.speaker ? "" : '<div class="actions"><button class="quiet" type="button" id="expect">What to expect</button><button class="quiet" type="button" id="cant">I can no longer come</button></div>',
       ].filter(Boolean), el => {
         el.querySelector("#expect")?.addEventListener("click", S.expect);
