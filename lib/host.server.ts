@@ -13,6 +13,8 @@ export type HostCircle = {
   id: string; title: string; speaker: string; startsAt: string; revealAt: string;
   guests: HostGuest[];
   requests: { id: string; from: string; to: string; note: string; status: string; at: string }[];
+  recommendations: { from: string; recommended: string; at: string }[];
+  wantsNext: string[];
   activity: { name: string; kind: string; at: string }[];
 };
 
@@ -27,12 +29,21 @@ export async function hostCircles(): Promise<HostCircle[]> {
   const sql = database();
   const circles = await sql`SELECT id, title, speaker, starts_at, reveal_at FROM circles ORDER BY starts_at DESC`;
   return Promise.all(circles.map(async circle => {
-    const [guests, requests, activity] = await Promise.all([
+    const [guests, requests, recommendations, wantsNext, activity] = await Promise.all([
       sql`SELECT * FROM guests WHERE circle_id = ${circle.id} ORDER BY role DESC, name`,
       sql`
         SELECT r.id, f.name AS from_name, t.name AS to_name, r.note, r.status, r.created_at
         FROM intro_requests r JOIN guests f ON f.id = r.from_guest JOIN guests t ON t.id = r.to_guest
         WHERE r.circle_id = ${circle.id} ORDER BY r.created_at DESC
+      `,
+      sql`
+        SELECT g.name AS from_name, r.recommended, r.created_at
+        FROM recommendations r JOIN guests g ON g.id = r.from_guest
+        WHERE r.circle_id = ${circle.id} ORDER BY r.created_at DESC
+      `,
+      sql`
+        SELECT DISTINCT g.name FROM guest_events e JOIN guests g ON g.id = e.guest_id
+        WHERE g.circle_id = ${circle.id} AND e.kind = 'wants_next' ORDER BY g.name
       `,
       sql`
         SELECT g.name, e.kind, e.at FROM guest_events e JOIN guests g ON g.id = e.guest_id
@@ -52,6 +63,10 @@ export async function hostCircles(): Promise<HostCircle[]> {
         id: String(row.id), from: String(row.from_name), to: String(row.to_name), note: String(row.note),
         status: String(row.status), at: new Date(row.created_at).toISOString(),
       })),
+      recommendations: recommendations.map(row => ({
+        from: String(row.from_name), recommended: String(row.recommended), at: new Date(row.created_at).toISOString(),
+      })),
+      wantsNext: wantsNext.map(row => String(row.name)),
       activity: activity.map(row => ({ name: String(row.name), kind: String(row.kind), at: new Date(row.at).toISOString() })),
     };
   }));

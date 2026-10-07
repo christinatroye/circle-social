@@ -55,6 +55,15 @@ CREATE TABLE IF NOT EXISTS rate_limits (
   window_started timestamptz NOT NULL
 );
 
+-- Friends a guest recommends for a future Circle, from their page after the evening.
+CREATE TABLE IF NOT EXISTS recommendations (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  circle_id uuid NOT NULL REFERENCES circles (id) ON DELETE CASCADE,
+  from_guest uuid NOT NULL REFERENCES guests (id) ON DELETE CASCADE,
+  recommended varchar(300) NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
 -- The introduction Christina drafted, kept so the host page can show when a guest edited it.
 ALTER TABLE guests ADD COLUMN IF NOT EXISTS introduction_draft varchar(320);
 

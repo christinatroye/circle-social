@@ -30,6 +30,8 @@ const EVENTS: Record<string, string> = {
   link_resent: "was emailed a fresh link",
   new_link: "was given a new link",
   added_device: "opened their link on another device",
+  recommended: "recommended a friend",
+  wants_next: "would like to be invited to the next Circle",
 };
 
 function summary(circle: HostCircle) {
@@ -98,6 +100,23 @@ export default async function HostPage() {
                       ))}
                       <span className="host-small">{when(request.at)}</span>
                     </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <h2>Invite to the next Circle</h2>
+            {circle.wantsNext.length === 0 ? <p className="host-empty">None yet. Guests can ask after the Circle.</p> : (
+              <p>{circle.wantsNext.join(", ")}</p>
+            )}
+
+            <h2>Recommended friends</h2>
+            {circle.recommendations.length === 0 ? <p className="host-empty">None yet. Guests can recommend friends after the Circle.</p> : (
+              <ul className="host-requests">
+                {circle.recommendations.map((rec, index) => (
+                  <li key={index}>
+                    <p><strong>{rec.from}</strong> recommends <strong>{rec.recommended}</strong></p>
+                    <span className="host-small">{when(rec.at)}</span>
                   </li>
                 ))}
               </ul>

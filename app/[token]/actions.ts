@@ -91,6 +91,29 @@ export async function requestIntroduction(token: string, toGuest: string, note: 
   return { ok: true };
 }
 
+/** After the evening: the guest would like an invitation to the next Circle. Asking twice counts once. */
+export async function wantNextCircle(token: string): Promise<Result> {
+  const found = await owned(token);
+  if (!found) return { ok: false, reason: "elsewhere" };
+  const [asked] = await database()`SELECT 1 FROM guest_events WHERE guest_id = ${found.guest.id} AND kind = 'wants_next' LIMIT 1`;
+  if (!asked) await logEvent(found.guest.id, "wants_next");
+  return { ok: true };
+}
+
+/** After the evening: a friend the guest recommends for a future Circle, as a name, email or LinkedIn. */
+export async function recommendFriend(token: string, text: string): Promise<Result> {
+  const found = await owned(token);
+  if (!found) return { ok: false, reason: "elsewhere" };
+  const recommended = String(text ?? "").replace(/\s+/g, " ").trim().slice(0, 300);
+  if (!recommended) return { ok: false, reason: "invalid" };
+  if (!await withinLimit(`recommend:${found.guest.id}`, 20, 60 * 60)) return { ok: false, reason: "invalid" };
+  await database()`
+    INSERT INTO recommendations (circle_id, from_guest, recommended) VALUES (${found.circle.id}, ${found.guest.id}, ${recommended})
+  `;
+  await logEvent(found.guest.id, "recommended");
+  return { ok: true };
+}
+
 /** On the night: who has the page open, so their seats light up. */
 export async function whoIsHere(token: string): Promise<string[]> {
   const found = await owned(token);

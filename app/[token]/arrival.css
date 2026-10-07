@@ -113,6 +113,9 @@ body.inside .orb { opacity: 1; }
 .go { position: relative; padding: 14px 30px; border: 0; border-radius: 999px; color: var(--bone); font-size: 15px; letter-spacing: .02em;
   background: radial-gradient(closest-side, rgba(239,227,207,.15), rgba(239,227,207,.05) 70%, rgba(239,227,207,0));
   transition: box-shadow .6s var(--curve), background .6s var(--curve), opacity .6s var(--curve); }
+a.go, a.quiet { display: inline-block; text-decoration-line: none; }
+.recommend { width: min(100%, 420px); display: grid; gap: 6px; justify-items: center; }
+a.quiet { text-decoration-line: underline; }
 .go:hover { background: radial-gradient(closest-side, rgba(239,227,207,.22), rgba(239,227,207,.08) 70%, rgba(239,227,207,0)); box-shadow: 0 0 40px rgba(239,227,207,.14); }
 .go:disabled { opacity: .4; cursor: default; box-shadow: none; }
 .countdown { font-variant-numeric: tabular-nums; letter-spacing: .04em; color: var(--fg); }
