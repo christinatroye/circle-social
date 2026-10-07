@@ -373,7 +373,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       setMode("reveal");
       setCentre(`<p class="c-title">${esc(c.title)}</p>`);
       show([
-        '<p class="voice" id="arrived">The others have arrived.</p>',
+        '<p class="voice" id="arrived">Others joining in this Circle</p>',
         '<div class="person" id="person"><p class="small">Touch any seat to meet them. If there&#39;s someone you&#39;d like to know, request an introduction.</p></div>',
         c.roomUrl && londonParts(new Date().toISOString()).date === start.date
           ? `<div class="room-link"><p class="eyebrow ceremony">Tonight&#39;s room:</p><p class="small countdown" id="countdown"></p><div class="actions"><button class="go beacon" type="button" id="enter-now">Enter Circle</button></div><p class="small">The doors open at ${esc(doors.time)} UK time${esc(localTime(doorsAt, doors.weekday))}.</p></div>`
