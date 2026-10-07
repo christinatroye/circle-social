@@ -138,7 +138,7 @@ export function openBeauty(ask: () => Promise<{ ok: boolean }>, onClose: () => v
 
   if (!reduce) {
     frame = requestAnimationFrame(step);
-    timers.push(window.setTimeout(() => { release(); timers.push(window.setInterval(release, 3200)); }, 6500));
+    timers.push(window.setTimeout(() => { release(); timers.push(window.setInterval(release, 2200)); }, 4500));
   }
 
   const invite = page.querySelector(".bz-invite") as HTMLButtonElement;

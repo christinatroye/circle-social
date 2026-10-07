@@ -8,12 +8,14 @@ import { useEffect, useRef, useState } from "react";
  */
 
 const LEVEL = 0.3;
-const KEY = "circle-music";
+const BASE_KEY = "circle-music";
 
 type Player = { audio: HTMLAudioElement; ctx: AudioContext; gain: GainNode };
 
-const remembered = () => { try { return localStorage.getItem(KEY); } catch { return null; } };
-const remember = (v: "on" | "off") => { try { localStorage.setItem(KEY, v); } catch {} };
+// Each track keeps its own on/off, so turning the arrival music off doesn't silence the after page.
+const keyFor = (src: string) => src === "/arrival-music.mp3" ? BASE_KEY : `${BASE_KEY}:${src}`;
+const remembered = (src: string) => { try { return localStorage.getItem(keyFor(src)); } catch { return null; } };
+const remember = (src: string, v: "on" | "off") => { try { localStorage.setItem(keyFor(src), v); } catch {} };
 
 /** `src` is the track: the arrival music, or a different one for the page after the evening. */
 export function ArrivalMusic({ src = "/arrival-music.mp3" }: { src?: string }) {
@@ -63,7 +65,7 @@ export function ArrivalMusic({ src = "/arrival-music.mp3" }: { src?: string }) {
     const playing = () => !!player.current && !player.current.audio.paused && player.current.ctx.state === "running";
     const kick = (e?: Event) => {
       if (e && (e.target as HTMLElement).closest?.(".music")) return;
-      if (remembered() === "off" || playing()) return done();
+      if (remembered(src) === "off" || playing()) return done();
       start();
     };
     const KICKS = ["pointerdown", "pointerup", "touchend", "keydown"] as const;
@@ -102,8 +104,8 @@ export function ArrivalMusic({ src = "/arrival-music.mp3" }: { src?: string }) {
       aria-label={on ? "Turn music off" : "Turn music on"}
       aria-pressed={on}
       onClick={() => {
-        if (on) { remember("off"); toggle.current?.stop(1.5); }
-        else { remember("on"); toggle.current?.start(); }
+        if (on) { remember(src, "off"); toggle.current?.stop(1.5); }
+        else { remember(src, "on"); toggle.current?.start(); }
       }}
     >
       <svg viewBox="0 0 24 24" aria-hidden="true">
