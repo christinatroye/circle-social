@@ -107,6 +107,7 @@ body.inside .orb { opacity: 1; }
   transition: box-shadow .6s var(--curve), background .6s var(--curve), opacity .6s var(--curve); }
 .go:hover { background: radial-gradient(closest-side, rgba(239,227,207,.22), rgba(239,227,207,.08) 70%, rgba(239,227,207,0)); box-shadow: 0 0 40px rgba(239,227,207,.14); }
 .go:disabled { opacity: .4; cursor: default; box-shadow: none; }
+.countdown { font-variant-numeric: tabular-nums; letter-spacing: .04em; color: var(--fg); }
 /* The way in: a warm button that breathes slowly, so it reads as the thing to press. */
 .go.beacon { padding: 16px 40px; font-size: 16px; color: #fff8ec; border: 1px solid rgba(239,227,207,.45);
   background: radial-gradient(closest-side, rgba(239,227,207,.32), rgba(239,227,207,.14) 70%, rgba(239,227,207,.06));

@@ -376,13 +376,21 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
         '<p class="voice" id="arrived">The others have arrived.</p>',
         '<div class="person" id="person"><p class="small">Touch any seat to meet them. If there&#39;s someone you&#39;d like to know, request an introduction.</p></div>',
         c.roomUrl && londonParts(new Date().toISOString()).date === start.date
-          ? `<div class="room-link"><p class="eyebrow ceremony">Tonight&#39;s room:</p><div class="actions"><button class="go beacon" type="button" id="enter-now">Enter Circle</button></div><p class="small">The doors open at ${esc(doors.time)} UK time.</p></div>`
+          ? `<div class="room-link"><p class="eyebrow ceremony">Tonight&#39;s room:</p><p class="small countdown" id="countdown"></p><div class="actions"><button class="go beacon" type="button" id="enter-now">Enter Circle</button></div><p class="small">The doors open at ${esc(doors.time)} UK time${esc(localTime(doorsAt, doors.weekday))}.</p></div>`
           : `<div class="room-link"><p class="eyebrow ceremony">The link to the room will appear here on ${esc(start.weekday)}. It will also be in your Luma invitation and calendar.</p></div>`,
         me.speaker ? "" : '<div class="actions"><button class="quiet" type="button" id="expect">What to expect</button><button class="quiet" type="button" id="cant">I can no longer come</button></div>',
       ].filter(Boolean), el => {
         el.querySelector("#expect")?.addEventListener("click", S.expect);
         el.querySelector("#cant")?.addEventListener("click", S.confirmCancel);
         el.querySelector("#enter-now")?.addEventListener("click", S.enterRoom);
+        const tick = () => {
+          const out = root.querySelector("#countdown");
+          if (!out) return;
+          const left = Math.max(0, Math.ceil((Date.parse(c.startsAt) - Date.now()) / 60000));
+          const h = Math.floor(left / 60), m = left % 60, unit = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
+          out.textContent = left ? `Circle starts in ${h ? `${unit(h, "hour")}: ` : ""}${unit(m, "minute")}` : "Circle starts now.";
+        };
+        if (el.querySelector("#countdown")) { tick(); intervals.push(window.setInterval(tick, 15000)); }
       });
     },
 
