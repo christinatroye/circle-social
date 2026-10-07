@@ -157,6 +157,48 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
     later(() => { centre.innerHTML = html; centre.classList.remove("swap"); }, 300);
   }
 
+  /* ---------- After the Circle: the seats as a frame around the words ---------- */
+  let frameObserver: ResizeObserver | null = null;
+  function frameCopy() {
+    const frame = document.createElement("div");
+    frame.className = "frame";
+    frame.setAttribute("aria-hidden", "true");
+    const dots = seats.map(({ you }, k) => {
+      const d = document.createElement("i");
+      if (you) d.className = "you";
+      d.style.transitionDelay = reduce ? "0s" : `${(k * 0.12).toFixed(2)}s`;
+      frame.appendChild(d);
+      return d;
+    });
+    root.appendChild(frame);
+    // Even steps along a softened rectangle (a superellipse) just outside the words.
+    const lay = () => {
+      const stage = root.getBoundingClientRect(), box = copy.getBoundingClientRect();
+      const padX = Math.min(28, Math.max(10, (stage.width - box.width) / 2 - 8)), padY = 34;
+      const cx = box.left - stage.left + box.width / 2, cy = box.top - stage.top + box.height / 2;
+      const a = box.width / 2 + padX, b = box.height / 2 + padY, n = 5;
+      const pts: [number, number][] = [];
+      for (let i = 0; i <= 720; i++) {
+        const t = -Math.PI / 2 + i * Math.PI / 360, c = Math.cos(t), s = Math.sin(t);
+        pts.push([cx + a * Math.sign(c) * Math.abs(c) ** (2 / n), cy + b * Math.sign(s) * Math.abs(s) ** (2 / n)]);
+      }
+      const len = [0];
+      for (let i = 1; i < pts.length; i++) len.push(len[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+      const total = len[len.length - 1];
+      let j = 0;
+      dots.forEach((d, k) => {
+        const want = k * total / dots.length;
+        while (j < len.length - 1 && len[j + 1] < want) j++;
+        d.style.transform = `translate(${pts[j][0].toFixed(1)}px,${pts[j][1].toFixed(1)}px)`;
+      });
+    };
+    lay();
+    requestAnimationFrame(() => frame.classList.add("on"));
+    frameObserver = new ResizeObserver(lay);
+    frameObserver.observe(copy);
+    frameObserver.observe(root);
+  }
+
   /* ---------- Words, one moment at a time ---------- */
   function show(parts: string[], after?: (el: HTMLElement) => void) {
     const render = () => {
@@ -453,22 +495,21 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       arrive();
       setMode("kept");
       centre.innerHTML = "";
-      // The room empties: the seats go out one by one, then the ring folds away and the words rise.
-      const pace = reduce ? 0 : 0.18, start = reduce ? 0 : 0.8;
-      seats.forEach(({ el }, k) => {
-        el.style.transition = `opacity .9s var(--curve) ${(start + k * pace).toFixed(2)}s`;
-        el.classList.add("out");
-      });
-      later(() => ring.classList.add("gone"), reduce ? 0 : (start + seats.length * pace + 0.9) * 1000);
+      // The ring folds away and its seats gather around the words instead, like a frame.
+      ring.classList.add("gone");
+      later(() => frameCopy(), reduce ? 0 : 1200);
       show([
         `<p class="voice">Thank you for being part of ${esc(c.title)}, ${esc(me.first)}.</p>`,
         '<p class="small">How was it for you?</p>',
         '<div class="feedback" id="feedback"><div class="write"><label for="line" class="visually-hidden">How was it for you?</label><input id="line" type="text" maxlength="300" autocomplete="off" placeholder="One line is plenty"></div><div class="actions"><button class="quiet" type="button" id="send-line">Send</button></div></div>',
+        '<div class="breath" aria-hidden="true"></div>',
         '<div class="actions"><button class="glimpse" type="button" id="glimpse">A first glimpse of the next Circle</button></div>',
+        '<div class="breath" aria-hidden="true"></div>',
         '<p class="small">We have some extraordinary Circles coming up. If someone comes to mind who belongs in a room like this, we&#39;d like to know who.</p>',
-        '<div class="recommend" id="recommend"><div class="write"><label for="friend" class="visually-hidden">Recommend a friend</label><input id="friend" type="text" maxlength="300" autocomplete="off" placeholder="Their name, email or LinkedIn"></div><div class="actions"><button class="quiet" type="button" id="send-friend">Recommend a friend</button></div></div>',
+        '<div class="actions" id="open-friend"><button class="quiet" type="button">Recommend a friend</button></div>',
+        '<div class="recommend" id="recommend" hidden><div class="write"><label for="friend" class="visually-hidden">Recommend a friend</label><input id="friend" type="text" maxlength="300" autocomplete="off" placeholder="Their name, email or LinkedIn"></div><div class="actions"><button class="quiet" type="button" id="send-friend">Send</button></div></div>',
         '<p class="small">Circle is quietly opening up to hosts who want to hold their gatherings in beautiful online rooms.</p>',
-        '<div class="actions"><a class="go beacon" href="https://entercircle.co" target="_blank" rel="noopener">Request early access</a></div>',
+        '<div class="actions"><a class="quiet" href="https://entercircle.co" target="_blank" rel="noopener">Request early access</a></div>',
       ], el => {
         const lineBox = el.querySelector("#feedback") as HTMLElement, line = el.querySelector("#line") as HTMLInputElement, sendLine = el.querySelector("#send-line") as HTMLButtonElement;
         const sendFeedback = () => {
@@ -484,6 +525,13 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
         const glimpse = el.querySelector("#glimpse") as HTMLButtonElement;
         glimpse.addEventListener("click", () => {
           closeBeauty = openBeauty(() => actions.wantNextCircle(), () => { closeBeauty = null; glimpse.focus({ preventScroll: true }); });
+        });
+        // The friend box stays closed until asked for, so only one box is open at a time.
+        const opener = el.querySelector("#open-friend") as HTMLElement;
+        opener.querySelector("button")!.addEventListener("click", () => {
+          opener.remove();
+          box.hidden = false;
+          input.focus({ preventScroll: true });
         });
         const box = el.querySelector("#recommend") as HTMLElement, input = el.querySelector("#friend") as HTMLInputElement, send = el.querySelector("#send-friend") as HTMLButtonElement;
         const go = () => {
@@ -572,6 +620,8 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
   return () => {
     disposed = true;
     closeBeauty?.();
+    frameObserver?.disconnect();
+    root.querySelector(".frame")?.remove();
     timers.forEach(clearTimeout); intervals.forEach(clearInterval);
     cancelAnimationFrame(raf);
     window.removeEventListener("resize", onResize);
