@@ -1,7 +1,7 @@
 /*
  * The first glimpse of the next Circle, Beauty: Christina's Oxblood rose (ported from her
  * unfold room's Rose.tsx), opening and letting go of a petal every few seconds.
- * It lies over the after page and goes away again with Back.
+ * It lies over the after page and goes away again with Next, which moves the guest on.
  */
 
 const NS = "http://www.w3.org/2000/svg";
@@ -86,7 +86,7 @@ export function openBeauty(ask: () => Promise<{ ok: boolean }>, onClose: () => v
     '<p class="bz-lede">Our guest is one of the world&#39;s leading thinkers on beauty.</p>' +
     '<p class="bz-sub">An intimate Circle, by invitation. You are seeing it first.</p>' +
     '<div class="bz-ask"><button class="bz-invite" type="button">I&#39;d love to be considered</button></div>' +
-    '<button class="bz-back" type="button">Back</button>' +
+    '<button class="bz-back" type="button">Next</button>' +
     "</div>";
   document.body.appendChild(page);
   document.body.classList.add("in-beauty");
