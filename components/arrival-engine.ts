@@ -420,7 +420,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       setCentre(`<p class="c-title">Your Circle is awaiting</p><p class="c-sub">${esc(start.time)} UK time</p>`);
       show([
         `<p class="eyebrow">${esc(start.date)}</p>`,
-        '<p class="big">Tonight.</p>',
+        '<p class="big">Soon.</p>',
         c.roomUrl
           ? `<div class="room-link"><p class="small countdown" id="countdown"></p><div class="actions"><button class="go beacon" type="button" id="enter-now">Enter Circle</button></div><p class="small">The doors open at ${esc(doors.time)} UK time${esc(localTime(doorsAt, doors.weekday))}.</p></div>`
           : `<p class="small">We open the doors at ${esc(doors.time)}.</p>`,
