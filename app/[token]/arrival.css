@@ -203,8 +203,8 @@ body.in-beauty .stage { visibility: hidden; }
 .bz-grain { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .32; mix-blend-mode: overlay; pointer-events: none; }
 .bz-words { position: absolute; left: 0; right: 0; bottom: 0; z-index: 1; display: grid; justify-items: center; gap: 14px; padding: 0 30px calc(env(safe-area-inset-bottom, 0px) + 54px); text-align: center; }
 .bz-eyebrow { font-size: 11px; letter-spacing: .42em; text-transform: uppercase; color: rgba(243,235,224,.5); }
-/* Set like the entercircle.co hero: large enough for Fraunces's fine display cut, and no glow to thicken it. */
-.bz-title { margin: 0; font-family: var(--display); font-weight: 300; font-size: clamp(3.4rem, 19vw, 5.2rem); line-height: 1.06; color: #f3e6d8; letter-spacing: -.01em; }
+/* Set like the entercircle.co hero on a laptop: optical size pinned to its 84, so phones get the same narrow, fine display cut. No glow to thicken it. */
+.bz-title { margin: 0; font-family: var(--display); font-weight: 300; font-variation-settings: "opsz" 84; font-size: clamp(3.4rem, 19vw, 5.2rem); line-height: 1.06; color: #f3e6d8; letter-spacing: -.01em; }
 .bz-lede { font-family: var(--voice); font-weight: 300; font-size: 1.25rem; line-height: 1.45; color: rgba(243,235,224,.78); max-width: 26ch; text-wrap: balance; }
 .bz-sub { font-size: 13.5px; line-height: 1.6; color: rgba(243,235,224,.5); margin-top: -6px; text-wrap: balance; }
 .bz-invite { margin-top: 4px; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: rgba(243,235,224,.82); background: none; border: 1px solid rgba(243,235,224,.3); border-radius: 999px; padding: 13px 26px; transition: border-color .4s var(--curve), color .4s var(--curve); }
