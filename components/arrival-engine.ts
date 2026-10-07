@@ -417,13 +417,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       arrive();
       intervals.splice(0).forEach(clearInterval);
       setMode("day");
-      const lightHere = (ids: string[]) => {
-        const set = new Set(ids);
-        seats.forEach(s => s.el.classList.toggle("here", Boolean(s.person && set.has(s.person.id))));
-        const count = root.querySelector("#count");
-        if (count) count.textContent = `${seats.filter(s => s.el.classList.contains("here")).length + 1} here`;
-      };
-      setCentre(`<p class="c-title" id="count">1 here</p><p class="c-sub">${esc(start.time)} UK time</p>`);
+      setCentre(`<p class="c-title">Your Circle is awaiting</p><p class="c-sub">${esc(start.time)} UK time</p>`);
       show([
         `<p class="eyebrow">${esc(start.date)}</p>`,
         '<p class="big">Tonight.</p>',
@@ -433,7 +427,6 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
         me.speaker ? "" : '<div class="actions"><button class="quiet" type="button" id="expect">What to expect</button></div>',
       ].filter(Boolean), el => {
         el.querySelector("#expect")?.addEventListener("click", S.expect);
-        later(() => lightHere(others.filter(p => p.here).map(p => p.id)), 400);
         el.querySelector("#enter-now")?.addEventListener("click", S.enterRoom);
         const tick = () => {
           const out = root.querySelector("#countdown");
@@ -444,9 +437,6 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
         };
         tick();
         intervals.push(window.setInterval(tick, 15000));
-        intervals.push(window.setInterval(async () => {
-          try { lightHere(await actions.whoIsHere()); } catch { /* the ring simply stays as it is */ }
-        }, 30000));
       });
     },
 
