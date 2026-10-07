@@ -158,7 +158,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
   }
 
   /** After the Circle: one line to write, sent or skipped, then a moment of thanks before the next step. */
-  function oneLine(o: { lead: string[]; label: string; placeholder: string; sendLabel?: string; skip?: boolean; save: (text: string) => Promise<{ ok: boolean }>; thanks: string; next: () => void }) {
+  function oneLine(o: { lead: string[]; label: string; placeholder: string; sendLabel?: string; skip?: boolean; optional?: boolean; save: (text: string) => Promise<{ ok: boolean }>; thanks: string; next: () => void }) {
     show([
       ...o.lead,
       `<div class="feedback"><div class="write"><label for="line" class="visually-hidden">${o.label}</label><input id="line" type="text" maxlength="300" autocomplete="off" placeholder="${o.placeholder}"></div>` +
@@ -166,7 +166,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
     ], el => {
       const line = el.querySelector("#line") as HTMLInputElement, send = el.querySelector("#send-line") as HTMLButtonElement;
       const go = () => {
-        if (!line.value.trim()) { line.focus(); return; }
+        if (!line.value.trim()) { if (o.optional) o.next(); else line.focus(); return; }
         void attempt(send, () => o.save(line.value), () => {
           show([`<p class="voice">${o.thanks}</p>`]);
           later(o.next, reduce ? 800 : 2600);
@@ -483,7 +483,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
     afterThanks() {
       oneLine({
         lead: [`<p class="voice">Thank you for being part of ${esc(c.title)}, ${esc(me.first)}.</p>`, '<p class="small">How was it for you?</p>'],
-        label: "How was it for you?", placeholder: "One line is plenty", sendLabel: "Send, and see what&#39;s next", skip: false,
+        label: "How was it for you?", placeholder: "One line is plenty", sendLabel: "See what&#39;s next in Circle", skip: false, optional: true,
         save: text => actions.sendFeedback(text), thanks: "Thank you. That means a lot.", next: () => S.afterGlimpse(),
       });
     },
