@@ -452,7 +452,14 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
     after() {
       arrive();
       setMode("kept");
-      setCentre(titleCentre(mine.dayMonth));
+      centre.innerHTML = "";
+      // The room empties: the seats go out one by one, then the ring folds away and the words rise.
+      const pace = reduce ? 0 : 0.18, start = reduce ? 0 : 0.8;
+      seats.forEach(({ el }, k) => {
+        el.style.transition = `opacity .9s var(--curve) ${(start + k * pace).toFixed(2)}s`;
+        el.classList.add("out");
+      });
+      later(() => ring.classList.add("gone"), reduce ? 0 : (start + seats.length * pace + 0.9) * 1000);
       show([
         `<p class="voice">Thank you for being part of ${esc(c.title)}, ${esc(me.first)}.</p>`,
         '<p class="small">How was it for you?</p>',
