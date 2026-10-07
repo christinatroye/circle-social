@@ -174,16 +174,12 @@ a.quiet { text-decoration-line: underline; }
 .stage { padding-block: 76px 64px; }
 @media (prefers-reduced-motion: reduce) { .ceremony { animation: none; -webkit-text-fill-color: currentColor; background: none; } .go.beacon { animation: none; box-shadow: 0 0 30px rgba(239,227,207,.28); } }
 
-/* After the Circle: the ring folds away and its seats frame the words. */
-.ring.gone { width: 0; opacity: 0; transition: width 1.2s var(--curve), opacity .5s var(--curve); }
-.frame { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
-.frame i { position: absolute; left: 0; top: 0; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%; background: var(--bone); opacity: 0; transition: opacity 1.2s var(--curve); }
-.frame.on i { opacity: .3; }
-.frame.on i.you { opacity: 1; box-shadow: 0 0 18px rgba(239,227,207,.75); width: 13px; height: 13px; margin: -6.5px 0 0 -6.5px; }
+/* After the Circle: the room as a small emblem above the words. */
 
+.ring.emblem { width: min(36vw, 20vh, 150px); }
+.ring.emblem .seat i { width: 6px; height: 6px; }
 /* After the Circle: the one-line feedback box. */
-.breath { height: 22px; }
-.recommend[hidden] { display: none; }
+.quiet.dim { opacity: .7; }
 .feedback { width: min(100%, 420px); display: grid; gap: 6px; justify-items: center; }
 
 /* Beauty, the first glimpse of the next Circle: the Oxblood room's rose, over the after page. */
