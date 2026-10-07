@@ -458,7 +458,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
         '<p class="small">How was it for you?</p>',
         '<div class="feedback" id="feedback"><div class="write"><label for="line" class="visually-hidden">How was it for you?</label><input id="line" type="text" maxlength="300" autocomplete="off" placeholder="One line is plenty"></div><div class="actions"><button class="quiet" type="button" id="send-line">Send</button></div></div>',
         '<div class="actions"><button class="glimpse" type="button" id="glimpse">A first glimpse of the next Circle</button></div>',
-        '<p class="small">We have some extraordinary Circles coming up. If you know someone who&#39;d love to be part of one, we&#39;d be glad to hear who.</p>',
+        '<p class="small">We have some extraordinary Circles coming up. If someone comes to mind who belongs in a room like this, we&#39;d like to know who.</p>',
         '<div class="recommend" id="recommend"><div class="write"><label for="friend" class="visually-hidden">Recommend a friend</label><input id="friend" type="text" maxlength="300" autocomplete="off" placeholder="Their name, email or LinkedIn"></div><div class="actions"><button class="quiet" type="button" id="send-friend">Recommend a friend</button></div></div>',
         '<p class="small">Circle is quietly opening up to hosts who want to hold their gatherings in beautiful online rooms.</p>',
         '<div class="actions"><a class="go beacon" href="https://entercircle.co" target="_blank" rel="noopener">Request early access</a></div>',
