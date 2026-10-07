@@ -522,8 +522,10 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
     afterHost() {
       show([
         '<p class="small">Circle is quietly opening up to hosts who want to hold their gatherings in beautiful online rooms.</p>',
-        '<div class="actions"><a class="go beacon" href="https://entercircle.co" target="_blank" rel="noopener">Request early access</a></div>',
-      ]);
+        '<div class="actions"><a class="go beacon" id="early" href="https://entercircle.co" target="_blank" rel="noopener">Request early access</a></div>',
+      ], el => {
+        el.querySelector("#early")?.addEventListener("click", () => { actions.wantEarlyAccess().catch(() => {}); });
+      });
     },
 
     elsewhere() {
