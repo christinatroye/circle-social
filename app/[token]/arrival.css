@@ -180,6 +180,10 @@ a.quiet { text-decoration-line: underline; }
 .ring.emblem .seat i { width: 6px; height: 6px; }
 /* After the Circle: the one-line feedback box. */
 .quiet.dim { opacity: .7; }
+.quiet.asleep { opacity: .38; }
+#send-line { transition: opacity .7s var(--curve), color .4s var(--curve); }
+.write.nudge::after { animation: nudge 1.4s var(--curve); }
+@keyframes nudge { 30% { opacity: 1; left: 0; right: 0; box-shadow: 0 0 14px rgba(217,212,238,.6); } }
 .feedback { width: min(100%, 420px); display: grid; gap: 6px; justify-items: center; }
 
 /* Beauty, the first glimpse of the next Circle: the Oxblood room's rose, over the after page. */
