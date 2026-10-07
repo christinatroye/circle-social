@@ -427,23 +427,24 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       show([
         `<p class="eyebrow">${esc(start.date)}</p>`,
         '<p class="big">Tonight.</p>',
-        `<p class="small" id="status">We open the doors at ${esc(doors.time)}.</p>`,
-        '<div class="actions later" id="act"><button class="go" type="button" id="enter">Enter the room</button></div>',
+        c.roomUrl
+          ? `<div class="room-link"><p class="small countdown" id="countdown"></p><div class="actions"><button class="go beacon" type="button" id="enter-now">Enter Circle</button></div><p class="small">The doors open at ${esc(doors.time)} UK time${esc(localTime(doorsAt, doors.weekday))}.</p></div>`
+          : `<p class="small">We open the doors at ${esc(doors.time)}.</p>`,
         me.speaker ? "" : '<div class="actions"><button class="quiet" type="button" id="expect">What to expect</button></div>',
       ].filter(Boolean), el => {
         el.querySelector("#expect")?.addEventListener("click", S.expect);
         later(() => lightHere(others.filter(p => p.here).map(p => p.id)), 400);
-        el.querySelector("#enter")!.addEventListener("click", S.enterRoom);
-        const open = () => {
-          const st = root.querySelector("#status") as HTMLElement | null, act = root.querySelector("#act") as HTMLElement | null;
-          if (!st || !act || !act.classList.contains("later")) return;
-          st.classList.remove("say"); void st.offsetWidth; st.textContent = "The doors are open."; st.classList.add("say");
-          act.classList.remove("later"); act.style.animationDelay = "0s"; act.classList.remove("say"); void act.offsetWidth; act.classList.add("say");
+        el.querySelector("#enter-now")?.addEventListener("click", S.enterRoom);
+        const tick = () => {
+          const out = root.querySelector("#countdown");
+          if (!out) return;
+          const left = Math.max(0, Math.ceil((Date.parse(c.startsAt) - Date.now()) / 60000));
+          const h = Math.floor(left / 60), m = left % 60, unit = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
+          out.textContent = left ? `Circle starts in ${h ? `${unit(h, "hour")}: ` : ""}${unit(m, "minute")}` : "Circle starts now.";
         };
-        const check = () => { if (Date.now() >= Date.parse(doorsAt) && c.roomUrl) open(); };
-        check();
+        tick();
+        intervals.push(window.setInterval(tick, 15000));
         intervals.push(window.setInterval(async () => {
-          check();
           try { lightHere(await actions.whoIsHere()); } catch { /* the ring simply stays as it is */ }
         }, 30000));
       });
