@@ -3,10 +3,10 @@ export type Phase = "before" | "reveal" | "day" | "after";
 
 const HOUR = 60 * 60 * 1000;
 
-/** Before the reveal, from the reveal, from one hour before the start, and two hours after it. */
+/** Before the reveal, from the reveal, from one hour before the start, and one hour after it. */
 export function phaseFor(startsAt: string, revealAt: string, now = new Date()): Phase {
   const t = now.getTime(), starts = Date.parse(startsAt);
-  if (t >= starts + 2 * HOUR) return "after";
+  if (t >= starts + 1 * HOUR) return "after";
   if (t >= starts - 1 * HOUR) return "day";
   return t >= Date.parse(revealAt) ? "reveal" : "before";
 }
@@ -39,4 +39,6 @@ export type ArrivalActions = {
   requestIntroduction: (to: string, note: string) => Promise<{ ok: boolean }>;
   whoIsHere: () => Promise<string[]>;
   addThisDevice: (email: string) => Promise<{ ok: boolean }>;
+  recommendFriend: (text: string) => Promise<{ ok: boolean }>;
+  wantNextCircle: () => Promise<{ ok: boolean }>;
 };

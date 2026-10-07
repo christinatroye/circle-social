@@ -5,7 +5,7 @@ import type { ArrivalData } from "@/lib/arrival";
 import { startArrival } from "@/components/arrival-engine";
 import { CircleMark } from "@/components/CircleMark";
 import { ArrivalMusic } from "@/components/ArrivalMusic";
-import { addThisDevice, claimLink, requestIntroduction, saveIntroduction, sawIntroduction, setCancelled, whoIsHere } from "./actions";
+import { addThisDevice, claimLink, recommendFriend, wantNextCircle, requestIntroduction, saveIntroduction, sawIntroduction, setCancelled, whoIsHere } from "./actions";
 
 export default function Arrival({ data }: { data: ArrivalData }) {
   const root = useRef<HTMLDivElement>(null);
@@ -25,6 +25,8 @@ export default function Arrival({ data }: { data: ArrivalData }) {
       requestIntroduction: (to, note) => requestIntroduction(token, to, note),
       whoIsHere: () => whoIsHere(token),
       addThisDevice: email => addThisDevice(token, email),
+      recommendFriend: text => recommendFriend(token, text),
+      wantNextCircle: () => wantNextCircle(token),
     });
   }, []);
 
@@ -54,7 +56,7 @@ export default function Arrival({ data }: { data: ArrivalData }) {
     <>
       <div className="orb" aria-hidden="true" ref={orb}><div /><div className="orb-main" /><div className="orb-core" /></div>
       <div className="top" aria-hidden="true"><CircleMark className="mark" /><span>Circle</span></div>
-      <ArrivalMusic />
+      <ArrivalMusic src={data.phase === "after" ? "/after-music.mp3" : undefined} />
       <main className="stage" ref={root}>
         <div className="ring" data-mode="door">
           <button className="hold" type="button" aria-label="Hold to enter"><span className="halo" /></button>

@@ -453,8 +453,26 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       setCentre(titleCentre(mine.dayMonth));
       show([
         `<p class="voice">Thank you for being part of ${esc(c.title)}, ${esc(me.first)}.</p>`,
-        '<p class="small">We hope to see you at the next Circle.</p>',
-      ]);
+        '<div class="actions" id="next"><button class="go" type="button" id="want-next">I&#39;d like to be invited to the next Circle</button></div>',
+        '<p class="small">Circle is quietly opening up to hosts who want to hold their gatherings in beautiful online rooms.</p>',
+        '<div class="actions"><a class="go beacon" href="https://entercircle.co" target="_blank" rel="noopener">Request early access</a></div>',
+        '<p class="small">We have some extraordinary Circles coming up. If you know someone who&#39;d love to be part of one, we&#39;d be glad to hear who.</p>',
+        '<div class="recommend" id="recommend"><div class="write"><label for="friend" class="visually-hidden">Recommend a friend</label><input id="friend" type="text" maxlength="300" autocomplete="off" placeholder="Their name, email or LinkedIn"></div><div class="actions"><button class="quiet" type="button" id="send-friend">Recommend a friend</button></div></div>',
+      ], el => {
+        const next = el.querySelector("#want-next") as HTMLButtonElement;
+        next.addEventListener("click", () => void attempt(next, () => actions.wantNextCircle(), () => {
+          el.querySelector("#next")!.outerHTML = '<p class="small say">Thank you. We&#39;ll invite you to the next one.</p>';
+        }));
+        const box = el.querySelector("#recommend") as HTMLElement, input = el.querySelector("#friend") as HTMLInputElement, send = el.querySelector("#send-friend") as HTMLButtonElement;
+        const go = () => {
+          if (!input.value.trim()) { input.focus(); return; }
+          void attempt(send, () => actions.recommendFriend(input.value), () => {
+            box.outerHTML = '<p class="small say">Thank you. We&#39;ll take it from here.</p>';
+          });
+        };
+        send.addEventListener("click", go);
+        input.addEventListener("keydown", e => { if (e.key === "Enter") go(); });
+      });
     },
 
     elsewhere() {

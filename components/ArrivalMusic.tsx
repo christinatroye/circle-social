@@ -7,7 +7,6 @@ import { useEffect, useRef, useState } from "react";
  * Their choice is remembered on this device. It falls silent as they enter the room.
  */
 
-const SRC = "/arrival-music.mp3";
 const LEVEL = 0.3;
 const KEY = "circle-music";
 
@@ -16,7 +15,8 @@ type Player = { audio: HTMLAudioElement; ctx: AudioContext; gain: GainNode };
 const remembered = () => { try { return localStorage.getItem(KEY); } catch { return null; } };
 const remember = (v: "on" | "off") => { try { localStorage.setItem(KEY, v); } catch {} };
 
-export function ArrivalMusic() {
+/** `src` is the track: the arrival music, or a different one for the page after the evening. */
+export function ArrivalMusic({ src = "/arrival-music.mp3" }: { src?: string }) {
   const player = useRef<Player | null>(null);
   const toggle = useRef<{ start: () => void; stop: (seconds: number) => void } | null>(null);
   const [on, setOn] = useState(false);
@@ -25,7 +25,7 @@ export function ArrivalMusic() {
     // Built inside a touch, so iOS lets it play. The gain node lets it fade there too.
     const unlock = () => {
       if (!player.current) {
-        const audio = new Audio(SRC);
+        const audio = new Audio(src);
         audio.loop = true;
         const ctx = new AudioContext();
         // The mark shows sound only once it is really audible.
@@ -93,7 +93,7 @@ export function ArrivalMusic() {
       const p = player.current;
       if (p) { p.audio.pause(); void p.ctx.close(); player.current = null; }
     };
-  }, []);
+  }, [src]);
 
   return (
     <button
