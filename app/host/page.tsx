@@ -33,6 +33,7 @@ const EVENTS: Record<string, string> = {
   recommended: "recommended a friend",
   wants_next: "would love to be considered for Beauty",
   feedback: "left a line of feedback",
+  early_access: "requested early access to host",
 };
 
 function summary(circle: HostCircle) {

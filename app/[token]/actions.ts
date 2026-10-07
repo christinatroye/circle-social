@@ -100,6 +100,15 @@ export async function wantNextCircle(token: string): Promise<Result> {
   return { ok: true };
 }
 
+/** After the evening: the guest tapped Request early access (to host their own gatherings). Tapping twice counts once. */
+export async function wantEarlyAccess(token: string): Promise<Result> {
+  const found = await owned(token);
+  if (!found) return { ok: false, reason: "elsewhere" };
+  const [asked] = await database()`SELECT 1 FROM guest_events WHERE guest_id = ${found.guest.id} AND kind = 'early_access' LIMIT 1`;
+  if (!asked) await logEvent(found.guest.id, "early_access");
+  return { ok: true };
+}
+
 /** After the evening: a friend the guest recommends for a future Circle, as a name, email or LinkedIn. */
 export async function recommendFriend(token: string, text: string): Promise<Result> {
   const found = await owned(token);
