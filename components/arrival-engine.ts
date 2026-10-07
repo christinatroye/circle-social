@@ -417,7 +417,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       arrive();
       intervals.splice(0).forEach(clearInterval);
       setMode("day");
-      setCentre(`<p class="c-title">Your Circle is awaiting</p><p class="c-sub">${esc(start.time)} UK time</p>`);
+      setCentre(`<p class="c-title">Your Circle awaits</p><p class="c-sub">${esc(start.time)} UK time</p>`);
       show([
         `<p class="eyebrow">${esc(start.date)}</p>`,
         '<p class="big">Soon.</p>',
