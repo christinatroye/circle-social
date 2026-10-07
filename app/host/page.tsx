@@ -34,6 +34,11 @@ const EVENTS: Record<string, string> = {
   wants_next: "would love to be considered for Beauty",
   feedback: "left a line of feedback",
   early_access: "requested early access to host",
+  after_opened: "opened their after-Circle page",
+  glimpse_opened: "opened the glimpse of Beauty",
+  glimpse_passed: "went on without opening the glimpse",
+  recommend_skipped: "skipped recommending a friend",
+  reached_end: "reached the hosting step",
 };
 
 function summary(circle: HostCircle) {

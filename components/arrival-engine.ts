@@ -1,4 +1,4 @@
-import type { ArrivalActions, ArrivalData, Person } from "@/lib/arrival";
+import type { AfterStep, ArrivalActions, ArrivalData, Person } from "@/lib/arrival";
 import { openBeauty } from "@/components/beauty";
 
 /*
@@ -157,8 +157,11 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
     later(() => { centre.innerHTML = html; centre.classList.remove("swap"); }, 300);
   }
 
+  /** After the Circle: note each step a guest reaches, for the host page. Never in the way. */
+  function step(name: AfterStep) { actions.logStep(name).catch(() => {}); }
+
   /** After the Circle: one line to write, sent or skipped, then a moment of thanks before the next step. */
-  function oneLine(o: { lead: string[]; label: string; placeholder: string; sendLabel?: string; skip?: boolean; gate?: boolean; save: (text: string) => Promise<{ ok: boolean }>; thanks: string; next: () => void }) {
+  function oneLine(o: { lead: string[]; label: string; placeholder: string; sendLabel?: string; skip?: boolean; gate?: boolean; onSkip?: () => void; save: (text: string) => Promise<{ ok: boolean }>; thanks: string; next: () => void }) {
     show([
       ...o.lead,
       `<div class="feedback"><div class="write"><label for="line" class="visually-hidden">${o.label}</label><input id="line" type="text" maxlength="300" autocomplete="off" placeholder="${o.placeholder}"></div>` +
@@ -183,7 +186,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       }
       send.addEventListener("click", go);
       line.addEventListener("keydown", e => { if (e.key === "Enter") go(); });
-      el.querySelector("#skip")?.addEventListener("click", () => o.next());
+      el.querySelector("#skip")?.addEventListener("click", () => { o.onSkip?.(); o.next(); });
     });
   }
 
@@ -485,6 +488,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       ring.classList.add("emblem");
       setMode("kept");
       centre.innerHTML = "";
+      step("after_opened");
       S.afterThanks();
     },
 
@@ -505,9 +509,10 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       ], el => {
         const glimpse = el.querySelector("#glimpse") as HTMLButtonElement;
         glimpse.addEventListener("click", () => {
+          step("glimpse_opened");
           closeBeauty = openBeauty(() => actions.wantNextCircle(), () => { closeBeauty = null; S.afterFriend(); });
         });
-        el.querySelector("#on")!.addEventListener("click", () => S.afterFriend());
+        el.querySelector("#on")!.addEventListener("click", () => { step("glimpse_passed"); S.afterFriend(); });
       });
     },
 
@@ -516,10 +521,12 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
         lead: ['<p class="small">We have some extraordinary Circles coming up. If someone comes to mind who belongs in a room like this, we&#39;d like to know who.</p>'],
         label: "Recommend a friend", placeholder: "Their name, email or LinkedIn",
         save: text => actions.recommendFriend(text), thanks: "Thank you. We&#39;ll take it from here.", next: () => S.afterHost(),
+        onSkip: () => step("recommend_skipped"),
       });
     },
 
     afterHost() {
+      step("reached_end");
       show([
         '<p class="small">Circle is quietly opening up to hosts who want to hold their gatherings in beautiful online rooms.</p>',
         '<div class="actions"><a class="go beacon" id="early" href="https://entercircle.co" target="_blank" rel="noopener">Request early access</a></div>',
