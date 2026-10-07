@@ -31,6 +31,10 @@ export type ArrivalData = {
   others: Person[];
 };
 
+/** Steps on the after-Circle page, logged once per guest so the host can see how far each person went. */
+export const AFTER_STEPS = ["after_opened", "glimpse_opened", "glimpse_passed", "recommend_skipped", "reached_end"] as const;
+export type AfterStep = (typeof AFTER_STEPS)[number];
+
 export type ArrivalActions = {
   claim: () => Promise<{ ok: boolean; reason?: string }>;
   sawIntroduction: () => Promise<unknown>;
@@ -42,5 +46,6 @@ export type ArrivalActions = {
   recommendFriend: (text: string) => Promise<{ ok: boolean }>;
   wantNextCircle: () => Promise<{ ok: boolean }>;
   wantEarlyAccess: () => Promise<{ ok: boolean }>;
+  logStep: (step: AfterStep) => Promise<{ ok: boolean }>;
   sendFeedback: (line: string) => Promise<{ ok: boolean }>;
 };

@@ -4,6 +4,7 @@ import { randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
 import { database, withinLimit } from "@/lib/db.server";
 import { DEVICE_COOKIE, deviceKey, guestForToken, hash, holdsLink, logEvent, othersInCircle, touch } from "@/lib/guests.server";
+import { AFTER_STEPS } from "@/lib/arrival";
 
 type Result = { ok: true } | { ok: false; reason: "gone" | "elsewhere" | "invalid" };
 
@@ -106,6 +107,16 @@ export async function wantEarlyAccess(token: string): Promise<Result> {
   if (!found) return { ok: false, reason: "elsewhere" };
   const [asked] = await database()`SELECT 1 FROM guest_events WHERE guest_id = ${found.guest.id} AND kind = 'early_access' LIMIT 1`;
   if (!asked) await logEvent(found.guest.id, "early_access");
+  return { ok: true };
+}
+
+/** After the evening: a step the guest reached on the after page. Each step counts once. */
+export async function logAfterStep(token: string, step: string): Promise<Result> {
+  if (!(AFTER_STEPS as readonly string[]).includes(step)) return { ok: false, reason: "invalid" };
+  const found = await owned(token);
+  if (!found) return { ok: false, reason: "elsewhere" };
+  const [seen] = await database()`SELECT 1 FROM guest_events WHERE guest_id = ${found.guest.id} AND kind = ${step} LIMIT 1`;
+  if (!seen) await logEvent(found.guest.id, step);
   return { ok: true };
 }
 
