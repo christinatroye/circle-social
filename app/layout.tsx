@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Fraunces, Jost } from "next/font/google";
 
-const fraunces = Fraunces({ subsets: ["latin"], weight: ["300", "400"], style: ["normal", "italic"], variable: "--font-fraunces", display: "swap" });
+// Variable with the optical-size axis, like entercircle.co: large headings get Fraunces's fine display cut instead of the heavier text cut.
+const fraunces = Fraunces({ subsets: ["latin"], style: ["normal", "italic"], axes: ["opsz"], variable: "--font-fraunces", display: "swap" });
 const cormorant = Cormorant_Garamond({ subsets: ["latin"], weight: ["300", "400"], style: ["italic"], variable: "--font-cormorant", display: "swap" });
 const jost = Jost({ subsets: ["latin"], weight: ["300", "400"], variable: "--font-jost", display: "swap" });
 
