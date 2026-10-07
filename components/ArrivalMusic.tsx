@@ -3,9 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 
 /*
- * Quiet music for the arrival page. Browsers only allow sound after a touch, so it rises as the
- * guest holds the door. Anyone coming back later skips the door: for them it stays off until they
- * touch the sound mark. Their choice is remembered on this device. It falls silent as they enter the room.
+ * Quiet music for the arrival page, on unless the guest turns it off with the sound mark.
+ * Their choice is remembered on this device. It falls silent as they enter the room.
  */
 
 const SRC = "/arrival-music.mp3";
@@ -29,6 +28,10 @@ export function ArrivalMusic() {
         const audio = new Audio(SRC);
         audio.loop = true;
         const ctx = new AudioContext();
+        // The mark shows sound only once it is really audible.
+        const sync = () => { if (!audio.paused && ctx.state === "running") setOn(true); };
+        audio.addEventListener("playing", sync);
+        ctx.addEventListener("statechange", sync);
         const gain = ctx.createGain();
         gain.gain.value = 0;
         ctx.createMediaElementSource(audio).connect(gain).connect(ctx.destination);
@@ -47,7 +50,7 @@ export function ArrivalMusic() {
       g.setValueAtTime(g.value, now);
       g.linearRampToValueAtTime(level, now + seconds);
     };
-    const start = () => { unlock(); fadeTo(LEVEL, 4); setOn(true); };
+    const start = () => { unlock(); fadeTo(LEVEL, 4); };
     const stop = (seconds: number) => {
       fadeTo(0, seconds);
       const p = player.current;
@@ -55,26 +58,22 @@ export function ArrivalMusic() {
       setOn(false);
     };
 
-    const onPointerDown = (e: PointerEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.closest(".music")) return;
-      const choice = remembered();
-      // Holding the door: get ready in silence, rise once they are through.
-      if (target.closest(".hold") && choice !== "off") { unlock(); return; }
-      // Back again, having chosen music last time: the first touch brings it back.
-      if (choice === "on" && !player.current?.audio.played.length) start();
+    // On by default. Browsers usually hold sound until the first touch or key, so try now and
+    // again on each early touch until it is actually playing, unless the guest turned it off.
+    const playing = () => !!player.current && !player.current.audio.paused && player.current.ctx.state === "running";
+    const kick = (e?: Event) => {
+      if (e && (e.target as HTMLElement).closest?.(".music")) return;
+      if (remembered() === "off" || playing()) return done();
+      start();
     };
+    const KICKS = ["pointerdown", "pointerup", "touchend", "keydown"] as const;
+    const done = () => KICKS.forEach(ev => document.removeEventListener(ev, kick, true));
+    KICKS.forEach(ev => document.addEventListener(ev, kick, true));
+    kick();
+
     const onClick = (e: MouseEvent) => {
       if ((e.target as HTMLElement).closest("#enter-now")) stop(1.2);
     };
-    // Through the door: the music rises, once.
-    let rose = false;
-    const inside = new MutationObserver(() => {
-      if (rose || !document.body.classList.contains("inside") || !player.current) return;
-      rose = true;
-      if (remembered() !== "off") start();
-    });
-    inside.observe(document.body, { attributes: true, attributeFilter: ["class"] });
 
     // Silent while the page is out of sight.
     const onVisibility = () => {
@@ -84,13 +83,11 @@ export function ArrivalMusic() {
       else void p.ctx.resume();
     };
 
-    document.addEventListener("pointerdown", onPointerDown, true);
     document.addEventListener("click", onClick, true);
     document.addEventListener("visibilitychange", onVisibility);
     toggle.current = { start, stop };
     return () => {
-      inside.disconnect();
-      document.removeEventListener("pointerdown", onPointerDown, true);
+      done();
       document.removeEventListener("click", onClick, true);
       document.removeEventListener("visibilitychange", onVisibility);
       const p = player.current;
