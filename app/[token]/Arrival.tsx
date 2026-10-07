@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import type { ArrivalData } from "@/lib/arrival";
 import { startArrival } from "@/components/arrival-engine";
 import { CircleMark } from "@/components/CircleMark";
+import { ArrivalMusic } from "@/components/ArrivalMusic";
 import { addThisDevice, claimLink, requestIntroduction, saveIntroduction, sawIntroduction, setCancelled, whoIsHere } from "./actions";
 
 export default function Arrival({ data }: { data: ArrivalData }) {
@@ -53,6 +54,7 @@ export default function Arrival({ data }: { data: ArrivalData }) {
     <>
       <div className="orb" aria-hidden="true" ref={orb}><div /><div className="orb-main" /><div className="orb-core" /></div>
       <div className="top" aria-hidden="true"><CircleMark className="mark" /><span>Circle</span></div>
+      <ArrivalMusic />
       <main className="stage" ref={root}>
         <div className="ring" data-mode="door">
           <button className="hold" type="button" aria-label="Hold to enter"><span className="halo" /></button>
