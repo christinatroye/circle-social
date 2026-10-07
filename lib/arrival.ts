@@ -41,4 +41,5 @@ export type ArrivalActions = {
   addThisDevice: (email: string) => Promise<{ ok: boolean }>;
   recommendFriend: (text: string) => Promise<{ ok: boolean }>;
   wantNextCircle: () => Promise<{ ok: boolean }>;
+  sendFeedback: (line: string) => Promise<{ ok: boolean }>;
 };

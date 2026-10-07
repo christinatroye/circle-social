@@ -91,7 +91,7 @@ export async function requestIntroduction(token: string, toGuest: string, note: 
   return { ok: true };
 }
 
-/** After the evening: the guest would like an invitation to the next Circle. Asking twice counts once. */
+/** After the evening: the guest would love to be considered for the next Circle, Beauty. Asking twice counts once. */
 export async function wantNextCircle(token: string): Promise<Result> {
   const found = await owned(token);
   if (!found) return { ok: false, reason: "elsewhere" };
@@ -111,6 +111,20 @@ export async function recommendFriend(token: string, text: string): Promise<Resu
     INSERT INTO recommendations (circle_id, from_guest, recommended) VALUES (${found.circle.id}, ${found.guest.id}, ${recommended})
   `;
   await logEvent(found.guest.id, "recommended");
+  return { ok: true };
+}
+
+/** After the evening: one line about what stayed with the guest. */
+export async function sendFeedback(token: string, text: string): Promise<Result> {
+  const found = await owned(token);
+  if (!found) return { ok: false, reason: "elsewhere" };
+  const line = String(text ?? "").replace(/\s+/g, " ").trim().slice(0, 300);
+  if (!line) return { ok: false, reason: "invalid" };
+  if (!await withinLimit(`feedback:${found.guest.id}`, 10, 60 * 60)) return { ok: false, reason: "invalid" };
+  await database()`
+    INSERT INTO feedback (circle_id, guest_id, line) VALUES (${found.circle.id}, ${found.guest.id}, ${line})
+  `;
+  await logEvent(found.guest.id, "feedback");
   return { ok: true };
 }
 

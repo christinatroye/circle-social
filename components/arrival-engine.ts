@@ -1,4 +1,5 @@
 import type { ArrivalActions, ArrivalData, Person } from "@/lib/arrival";
+import { openBeauty } from "@/components/beauty";
 
 /*
  * The arrival page, ported from the In Circle Arrival prototype. One ring stays centred:
@@ -92,6 +93,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
   const doorsAt = new Date(Date.parse(c.startsAt) - 5 * 60 * 1000).toISOString(), doors = londonParts(doorsAt);
   const timers: number[] = [], intervals: number[] = [];
   let disposed = false;
+  let closeBeauty: (() => void) | null = null;
   const later = (fn: () => void, ms: number) => { timers.push(window.setTimeout(() => { if (!disposed) fn(); }, ms)); };
 
   /* ---------- Seats: the speaker at the top, you near the bottom ---------- */
@@ -453,16 +455,29 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       setCentre(titleCentre(mine.dayMonth));
       show([
         `<p class="voice">Thank you for being part of ${esc(c.title)}, ${esc(me.first)}.</p>`,
-        '<div class="actions" id="next"><button class="go" type="button" id="want-next">I&#39;d like to be invited to the next Circle</button></div>',
-        '<p class="small">Circle is quietly opening up to hosts who want to hold their gatherings in beautiful online rooms.</p>',
-        '<div class="actions"><a class="go beacon" href="https://entercircle.co" target="_blank" rel="noopener">Request early access</a></div>',
+        '<p class="small">How was it for you?</p>',
+        '<div class="feedback" id="feedback"><div class="write"><label for="line" class="visually-hidden">How was it for you?</label><input id="line" type="text" maxlength="300" autocomplete="off" placeholder="One line is plenty"></div><div class="actions"><button class="quiet" type="button" id="send-line">Send</button></div></div>',
+        '<div class="actions"><button class="glimpse" type="button" id="glimpse">A first glimpse of the next Circle</button></div>',
         '<p class="small">We have some extraordinary Circles coming up. If you know someone who&#39;d love to be part of one, we&#39;d be glad to hear who.</p>',
         '<div class="recommend" id="recommend"><div class="write"><label for="friend" class="visually-hidden">Recommend a friend</label><input id="friend" type="text" maxlength="300" autocomplete="off" placeholder="Their name, email or LinkedIn"></div><div class="actions"><button class="quiet" type="button" id="send-friend">Recommend a friend</button></div></div>',
+        '<p class="small">Circle is quietly opening up to hosts who want to hold their gatherings in beautiful online rooms.</p>',
+        '<div class="actions"><a class="go beacon" href="https://entercircle.co" target="_blank" rel="noopener">Request early access</a></div>',
       ], el => {
-        const next = el.querySelector("#want-next") as HTMLButtonElement;
-        next.addEventListener("click", () => void attempt(next, () => actions.wantNextCircle(), () => {
-          el.querySelector("#next")!.outerHTML = '<p class="small say">Thank you. We&#39;ll invite you to the next one.</p>';
-        }));
+        const lineBox = el.querySelector("#feedback") as HTMLElement, line = el.querySelector("#line") as HTMLInputElement, sendLine = el.querySelector("#send-line") as HTMLButtonElement;
+        const sendFeedback = () => {
+          if (!line.value.trim()) { line.focus(); return; }
+          void attempt(sendLine, () => actions.sendFeedback(line.value), () => {
+            const asked = lineBox.previousElementSibling;
+            if (asked) asked.remove();
+            lineBox.outerHTML = '<p class="small say">Thank you. That means a lot.</p>';
+          });
+        };
+        sendLine.addEventListener("click", sendFeedback);
+        line.addEventListener("keydown", e => { if (e.key === "Enter") sendFeedback(); });
+        const glimpse = el.querySelector("#glimpse") as HTMLButtonElement;
+        glimpse.addEventListener("click", () => {
+          closeBeauty = openBeauty(() => actions.wantNextCircle(), () => { closeBeauty = null; glimpse.focus({ preventScroll: true }); });
+        });
         const box = el.querySelector("#recommend") as HTMLElement, input = el.querySelector("#friend") as HTMLInputElement, send = el.querySelector("#send-friend") as HTMLButtonElement;
         const go = () => {
           if (!input.value.trim()) { input.focus(); return; }
@@ -549,6 +564,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
 
   return () => {
     disposed = true;
+    closeBeauty?.();
     timers.forEach(clearTimeout); intervals.forEach(clearInterval);
     cancelAnimationFrame(raf);
     window.removeEventListener("resize", onResize);

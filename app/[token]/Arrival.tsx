@@ -5,7 +5,7 @@ import type { ArrivalData } from "@/lib/arrival";
 import { startArrival } from "@/components/arrival-engine";
 import { CircleMark } from "@/components/CircleMark";
 import { ArrivalMusic } from "@/components/ArrivalMusic";
-import { addThisDevice, claimLink, recommendFriend, wantNextCircle, requestIntroduction, saveIntroduction, sawIntroduction, setCancelled, whoIsHere } from "./actions";
+import { addThisDevice, claimLink, recommendFriend, sendFeedback, wantNextCircle, requestIntroduction, saveIntroduction, sawIntroduction, setCancelled, whoIsHere } from "./actions";
 
 export default function Arrival({ data }: { data: ArrivalData }) {
   const root = useRef<HTMLDivElement>(null);
@@ -27,6 +27,7 @@ export default function Arrival({ data }: { data: ArrivalData }) {
       addThisDevice: email => addThisDevice(token, email),
       recommendFriend: text => recommendFriend(token, text),
       wantNextCircle: () => wantNextCircle(token),
+      sendFeedback: line => sendFeedback(token, line),
     });
   }, []);
 

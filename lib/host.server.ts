@@ -15,6 +15,7 @@ export type HostCircle = {
   requests: { id: string; from: string; to: string; note: string; status: string; at: string }[];
   recommendations: { from: string; recommended: string; at: string }[];
   wantsNext: string[];
+  feedback: { from: string; line: string; at: string }[];
   activity: { name: string; kind: string; at: string }[];
 };
 
@@ -29,7 +30,7 @@ export async function hostCircles(): Promise<HostCircle[]> {
   const sql = database();
   const circles = await sql`SELECT id, title, speaker, starts_at, reveal_at FROM circles ORDER BY starts_at DESC`;
   return Promise.all(circles.map(async circle => {
-    const [guests, requests, recommendations, wantsNext, activity] = await Promise.all([
+    const [guests, requests, recommendations, wantsNext, feedback, activity] = await Promise.all([
       sql`SELECT * FROM guests WHERE circle_id = ${circle.id} ORDER BY role DESC, name`,
       sql`
         SELECT r.id, f.name AS from_name, t.name AS to_name, r.note, r.status, r.created_at
@@ -45,6 +46,12 @@ export async function hostCircles(): Promise<HostCircle[]> {
         SELECT DISTINCT g.name FROM guest_events e JOIN guests g ON g.id = e.guest_id
         WHERE g.circle_id = ${circle.id} AND e.kind = 'wants_next' ORDER BY g.name
       `,
+      // Kept apart so the host page still opens before the feedback table exists.
+      sql`
+        SELECT g.name AS from_name, f.line, f.created_at
+        FROM feedback f JOIN guests g ON g.id = f.guest_id
+        WHERE f.circle_id = ${circle.id} ORDER BY f.created_at DESC
+      `.catch(() => []),
       sql`
         SELECT g.name, e.kind, e.at FROM guest_events e JOIN guests g ON g.id = e.guest_id
         WHERE g.circle_id = ${circle.id} ORDER BY e.at DESC LIMIT 40
@@ -67,6 +74,7 @@ export async function hostCircles(): Promise<HostCircle[]> {
         from: String(row.from_name), recommended: String(row.recommended), at: new Date(row.created_at).toISOString(),
       })),
       wantsNext: wantsNext.map(row => String(row.name)),
+      feedback: feedback.map(row => ({ from: String(row.from_name), line: String(row.line), at: new Date(row.created_at).toISOString() })),
       activity: activity.map(row => ({ name: String(row.name), kind: String(row.kind), at: new Date(row.at).toISOString() })),
     };
   }));
