@@ -84,7 +84,7 @@ export function openBeauty(ask: () => Promise<{ ok: boolean }>, onClose: () => v
     '<p class="bz-eyebrow">The next Circle</p>' +
     '<h2 class="bz-title">Beauty</h2>' +
     '<p class="bz-lede">Our guest is one of the world&#39;s leading thinkers on beauty.</p>' +
-    '<p class="bz-sub">An intimate Circle, by invitation. You are seeing it first.</p>' +
+    '<p class="bz-sub">An intimate Circle, by invitation. Places are very limited.</p>' +
     '<div class="bz-ask"><button class="bz-invite" type="button">I&#39;d love to be considered</button></div>' +
     '<button class="bz-back" type="button">Next</button>' +
     "</div>";
