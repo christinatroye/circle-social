@@ -78,3 +78,13 @@ ALTER TABLE guests ADD COLUMN IF NOT EXISTS introduction_draft varchar(320);
 
 -- Other devices a guest opened their link on, by typing the email their invitation went to.
 ALTER TABLE guests ADD COLUMN IF NOT EXISTS other_devices text[] NOT NULL DEFAULT '{}';
+
+-- People who applied for a seat on a public Circle page, such as in.entercircle.co/perfect.
+CREATE TABLE IF NOT EXISTS seat_requests (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  event varchar(60) NOT NULL,
+  name varchar(120) NOT NULL,
+  email varchar(254) NOT NULL,
+  line varchar(300) NOT NULL DEFAULT '',
+  created_at timestamptz NOT NULL DEFAULT now()
+);
