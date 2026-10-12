@@ -3,6 +3,7 @@ import Image from "next/image";
 import { CircleMark } from "@/components/CircleMark";
 import { SITE_URL } from "@/lib/email.server";
 import portrait from "@/public/events/heather-widdows.webp";
+import { ApplyForSeat } from "./ApplyForSeat";
 import "./perfect.css";
 
 const title = "Perfect, a Circle with Heather Widdows";
@@ -37,6 +38,7 @@ export default function PerfectPage() {
         </div>
 
         <p className="event-facts">Small group. Invite only. Online. Not recorded.</p>
+        <ApplyForSeat />
       </article>
     </main>
   );

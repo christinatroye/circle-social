@@ -1,7 +1,7 @@
 import { CircleMark } from "@/components/CircleMark";
 import { SITE_URL } from "@/lib/email.server";
 import { requireHost } from "@/lib/host-auth.server";
-import { hostCircles, type HostCircle, type HostGuest } from "@/lib/host.server";
+import { hostCircles, seatRequests, type HostCircle, type HostGuest } from "@/lib/host.server";
 import { signOut } from "../login/actions";
 import { setRequestStatus } from "./actions";
 import { CopyLink } from "./CopyLink";
@@ -51,7 +51,7 @@ function summary(circle: HostCircle) {
 
 export default async function HostPage() {
   await requireHost();
-  const circles = await hostCircles();
+  const [circles, applications] = await Promise.all([hostCircles(), seatRequests()]);
   return (
     <main className="host-page">
       <header className="host-top">
@@ -59,6 +59,21 @@ export default async function HostPage() {
         <span>Guests</span>
         <form action={signOut}><button className="host-quiet">Sign out</button></form>
       </header>
+      <section className="host-circle">
+        <h1>Applications</h1>
+        <p className="host-meta">People who applied for a seat at in.entercircle.co/perfect.</p>
+        {applications.length === 0 ? <p className="host-empty">None yet.</p> : (
+          <ul className="host-requests">
+            {applications.map((application, index) => (
+              <li key={index}>
+                <p><strong>{application.name}</strong> <span className="host-small">{application.email}</span></p>
+                {application.line && <p className="host-intro">{application.line}</p>}
+                <span className="host-small">{when(application.at)}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
       {circles.length === 0 && <p className="host-empty">No Circles yet. Import a guest list from Luma to begin.</p>}
       {circles.map(circle => {
         const guests = [...circle.guests].sort((a, b) => a.name.localeCompare(b.name, "en", { sensitivity: "base" }));
