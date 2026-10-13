@@ -187,12 +187,48 @@ body:has(.mk), body:has(.mk-stage) { margin: 0; background: #f8f5ef; }
 .mk-tools .mk-tool-chosen { border-color: color-mix(in srgb, var(--mk-brand) 70%, var(--mk-ink)); opacity: 1; }
 .mk-tools .mk-tool-lit { background: color-mix(in srgb, var(--mk-light) 22%, transparent); box-shadow: 0 0 24px color-mix(in srgb, var(--mk-light) 30%, transparent); opacity: 1; }
 .mk-tools .mk-tool-quiet { opacity: .3; }
+/* On a laptop every control sits in the row, as in the live room; More and Present PDF belong to the phone. */
+.mk-more-actions { display: contents; }
+.mk-tools .mk-more, .mk-tools .mk-tool-phone, .mk-tool-short { display: none; }
+.mk-tools > button:nth-child(1) { order: 2; }
+.mk-tools > button:nth-child(2) { order: 4; }
+.mk-tools > button:nth-child(3) { order: 7; }
+.mk-tools > button:nth-child(4) { order: 8; }
+.mk-more-actions > button:nth-child(1) { order: 1; }
+.mk-more-actions > button:nth-child(2) { order: 3; }
+.mk-more-actions > button:nth-child(3) { order: 5; }
+.mk-more-actions > button:nth-child(4) { order: 6; }
+.mk-more-actions > button:nth-child(n+5) { order: 9; }
 
 /* Before you go. */
 .mk-closing { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; padding: 0 24px 80px; text-align: center; }
 .mk-eyebrow { margin: 0; font-size: 10.5px; letter-spacing: 4px; text-transform: uppercase; color: var(--mk-muted); }
 .mk-closing blockquote { margin: 0; max-width: 620px; font-family: var(--mk-display); font-style: italic; font-size: clamp(1.6rem, 3vw, 2.2rem); line-height: 1.35; }
 .mk-from { margin: 0; font-family: var(--mk-display); font-size: 18px; color: var(--mk-muted); }
+.mk-close-body { margin: 0; max-width: 620px; font-family: var(--mk-display); font-size: clamp(1.4rem, 2.6vw, 1.9rem); line-height: 1.4; }
+.mk-pips { display: flex; gap: 8px; }
+.mk-pips i { width: 5px; height: 5px; border-radius: 50%; background: var(--mk-muted); opacity: .4; }
+.mk-pips .mk-pip-on { opacity: 1; }
+
+/* What did you take away?, as the live room asks it after the circle. */
+.mk-takeaway { display: flex; align-items: center; justify-content: center; padding: 92px 24px 90px; overflow: auto; }
+.mk-rejoin { position: absolute; top: 30px; right: 30px; padding: 4px 0; border: 0; background: none; color: var(--mk-muted); font-family: var(--mk-body); font-size: 11px; letter-spacing: .08em; text-decoration: underline; text-decoration-thickness: .5px; text-underline-offset: 4px; cursor: pointer; }
+.mk-takeaway-column { display: flex; flex-direction: column; align-items: center; width: min(92vw, 620px); }
+.mk-takeaway-mark { display: block; max-width: 120px; max-height: 40px; margin-bottom: 26px; opacity: .35; }
+.mk-takeaway-mark.mk-mark-word { font-family: var(--mk-display); font-size: 18px; }
+.mk-takeaway-column h2 { margin: 0 0 56px; font-family: var(--mk-display); font-size: clamp(30px, 4vw, 44px); font-weight: 400; line-height: 1.05; text-align: center; color: var(--mk-ink); }
+.mk-takeaway-column textarea { width: 100%; min-height: 118px; padding: 18px 0; resize: none; border: 0; border-top: 1px solid color-mix(in srgb, var(--mk-ink) 22%, transparent); border-bottom: 1px solid color-mix(in srgb, var(--mk-ink) 22%, transparent); border-radius: 0; outline: none; background: transparent; color: var(--mk-ink); font-family: var(--mk-display); font-size: 24px; line-height: 1.45; }
+.mk-takeaway-column textarea::placeholder { color: var(--mk-muted); font-style: italic; font-size: 20px; text-align: center; }
+.mk-choices { display: flex; justify-content: center; gap: 62px; margin-top: 25px; }
+.mk-choices label { display: flex; align-items: center; gap: 13px; font-family: var(--mk-body); font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--mk-muted); cursor: pointer; }
+.mk-choices label:has(input:checked) { color: var(--mk-ink); }
+.mk-choices input { position: absolute; opacity: 0; pointer-events: none; }
+.mk-switch { position: relative; width: 25px; height: 13px; border: 1px solid color-mix(in srgb, var(--mk-ink) 35%, transparent); border-radius: 999px; transition: border-color .35s cubic-bezier(.2,.8,.2,1), background .35s cubic-bezier(.2,.8,.2,1); }
+.mk-switch > span { position: absolute; top: 2px; left: 2px; width: 7px; height: 7px; border-radius: 50%; background: var(--mk-muted); transition: transform .35s cubic-bezier(.2,.8,.2,1), background .35s cubic-bezier(.2,.8,.2,1); }
+.mk-choices input:checked + .mk-switch { border-color: color-mix(in srgb, var(--mk-ink) 60%, transparent); background: color-mix(in srgb, var(--mk-ink) 8%, transparent); }
+.mk-choices input:checked + .mk-switch > span { transform: translateX(12px); background: var(--mk-ink); }
+.mk-choices input:focus-visible + .mk-switch { outline: 2px solid color-mix(in srgb, var(--mk-ink) 45%, transparent); outline-offset: 4px; }
+.mk-takeaway-go { display: inline-flex; align-items: center; gap: 12px; margin-top: 38px; padding: 10px 4px; border: 0; background: none; color: var(--mk-ink); font-family: var(--mk-body); font-size: 10px; letter-spacing: .24em; text-transform: uppercase; cursor: pointer; }
 
 @keyframes mk-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 @keyframes mk-appear { from { opacity: 0; } to { opacity: 1; } }
@@ -217,7 +253,18 @@ body:has(.mk), body:has(.mk-stage) { margin: 0; background: #f8f5ef; }
   .mk-forming { margin: 0 16px 24px; min-height: 280px; }
   .mk-bar { left: 12px; right: 12px; transform: none; overflow-x: auto; }
   .mk-bar-mark { display: none; }
-  .mk-tools { display: none; }
+  /* On a phone the live room keeps five controls in the bar and the rest behind More. */
+  .mk-tools { left: 10px; right: 10px; bottom: 16px; width: auto; transform: none; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); padding: 5px; }
+  .mk-tools button { min-width: 0; padding: 8px 2px; gap: 6px; font-size: 9px; letter-spacing: .1em; }
+  .mk-tools .mk-more { display: flex; order: 12; }
+  .mk-tools .mk-more svg circle { fill: currentColor; stroke: none; }
+  .mk-tool-long { display: none; }
+  .mk-tool-short { display: inline; }
+  .mk-more-actions { position: absolute; left: 0; right: 0; bottom: calc(100% + 10px); display: none; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2px; padding: 8px; border-radius: 3px; border: 1px solid color-mix(in srgb, var(--mk-ink) 18%, transparent); background: color-mix(in srgb, var(--mk-ground) 94%, transparent); box-shadow: 0 14px 30px #0005; }
+  .mk-more-open .mk-more-actions { display: grid; }
+  .mk-more-actions > button { order: 0 !important; }
+  .mk-tools .mk-tool-phone { display: flex; }
+  .mk-choices { flex-direction: column; align-items: flex-start; gap: 22px; }
   .mk-ring { width: 92vw; height: 60vh; }
   .mk-pager { display: none; }
 }

@@ -157,7 +157,7 @@ export function Maker() {
         {moment === "welcome" && <Welcome brand={brand} onContinue={() => setMoment("arrival")} />}
         {moment === "arrival" && <Arrival brand={brand} onEnter={() => setMoment("room")} />}
         {moment === "room" && <Room seats={seats} onLeave={() => setMoment("closing")} />}
-        {moment === "closing" && <Closing onContinue={() => setStep("reserve")} />}
+        {moment === "closing" && <Closing brand={brand} onRejoin={() => setMoment("room")} onLeave={() => setStep("reserve")} />}
         <div className="mk-bar">
           <CircleMark className="mk-bar-mark" />
           <div className="mk-bar-moments" role="tablist" aria-label="Your guests’ journey">
