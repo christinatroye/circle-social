@@ -88,3 +88,17 @@ CREATE TABLE IF NOT EXISTS seat_requests (
   line varchar(300) NOT NULL DEFAULT '',
   created_at timestamptz NOT NULL DEFAULT now()
 );
+
+-- Every room Circle AI designs, with what it read and chose, so the taste can be checked and improved.
+CREATE TABLE IF NOT EXISTS room_log (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  site varchar(300) NOT NULL,
+  reading jsonb NOT NULL,
+  choice jsonb,
+  model varchar(60),
+  ms integer,
+  input_tokens integer,
+  output_tokens integer,
+  correction text,
+  created_at timestamptz NOT NULL DEFAULT now()
+);

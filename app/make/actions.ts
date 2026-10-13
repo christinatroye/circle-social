@@ -3,6 +3,8 @@
 import { headers } from "next/headers";
 import { type Brand, ROOM_FONTS, luminance, parseHex, roomColours, siteName } from "@/lib/brand";
 import { withinLimit } from "@/lib/db.server";
+import { designRoom } from "@/lib/circle-ai/design.server";
+import { logRoom } from "@/lib/circle-ai/log.server";
 import { readSite } from "@/lib/read-site.server";
 
 export type Reading = { status: "read"; brand: Brand } | { status: "error"; message: string };
@@ -25,12 +27,17 @@ export async function readBrand(address: string): Promise<Reading> {
     return { status: "error", message: "We couldn't open that website. Please check the address and try again." };
   }
 
-  const brandHex = site.themeColour ?? site.colours[0] ?? "#6238cf";
-  const accentHex = site.colours.find(c => c !== brandHex) ?? brandHex;
+  // Circle AI chooses within the canon; the plain rules below stand in when it can't.
+  const design = await designRoom(site);
+  await logRoom(site, design);
+  const ai = design?.choice;
+
+  const brandHex = ai?.brand ?? site.themeColour ?? site.colours[0] ?? "#6238cf";
+  const accentHex = ai?.accent ?? site.colours.find(c => c !== brandHex) ?? brandHex;
   const themeRgb = site.themeColour ? parseHex(site.themeColour) : null;
-  const dark = site.darkPage || (!!themeRgb && luminance(themeRgb) < 0.06);
-  const display = site.fonts[0] ?? ROOM_FONTS.display;
-  const body = site.fonts[1] ?? ROOM_FONTS.body;
+  const dark = ai?.dark ?? (site.darkPage || (!!themeRgb && luminance(themeRgb) < 0.06));
+  const display = ai?.fonts.display ?? site.fonts[0] ?? ROOM_FONTS.display;
+  const body = ai?.fonts.body ?? site.fonts[1] ?? ROOM_FONTS.body;
 
   return {
     status: "read",
@@ -42,11 +49,11 @@ export async function readBrand(address: string): Promise<Reading> {
       colours: roomColours(brandHex, accentHex, dark),
       dark,
       fonts: { display, body },
-      values: [],
+      values: ai?.values ?? [],
       arriving: [],
-      arrival: site.logo ? "breathe" : "gather",
+      arrival: ai?.arrival ?? (site.logo ? "breathe" : "gather"),
       mood: null,
-      reading: `Your colours${site.fonts.length ? ", your type" : ""}${site.logo ? " and your mark" : ""}, carried into the room.`,
+      reading: ai?.reading ?? `Your colours${site.fonts.length ? ", your type" : ""}${site.logo ? " and your mark" : ""}, carried into the room.`,
     },
   };
 }
