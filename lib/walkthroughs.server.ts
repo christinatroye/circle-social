@@ -41,11 +41,11 @@ const ukTime = (iso: string) => new Intl.DateTimeFormat("en-GB", {
 }).format(new Date(iso)).replace(/\s?([ap]m)$/, "$1");
 
 /**
- * Tells Christina (ADMIN_EMAIL) what happened on a booking page. A booking comes with a calendar invite, so it lands in her calendar.
+ * Tells Christina (christina@entercircle.co) what happened on a booking page. A booking comes with a calendar invite, so it lands in her calendar.
  * Only Christina is emailed, never the guest. A failed email never undoes what was saved.
  */
 export async function notifyHost(walkthrough: Walkthrough, kind: WalkthroughRow["kind"], { name = "", email = "", startsAt = "" }: { name?: string; email?: string; startsAt?: string }) {
-  const key = process.env.RESEND_API_KEY, from = process.env.EMAIL_FROM, to = process.env.ADMIN_EMAIL?.trim();
+  const key = process.env.RESEND_API_KEY, from = process.env.EMAIL_FROM, to = "christina@entercircle.co";
   if (!key || !from || !to) return;
   const link = `${SITE_URL}/speedrun/${walkthrough.code}`;
   const message = {
