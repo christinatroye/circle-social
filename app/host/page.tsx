@@ -2,6 +2,7 @@ import { CircleMark } from "@/components/CircleMark";
 import { SITE_URL } from "@/lib/email.server";
 import { requireHost } from "@/lib/host-auth.server";
 import { hostCircles, seatRequests, type HostCircle, type HostGuest } from "@/lib/host.server";
+import { walkthroughRows } from "@/lib/walkthroughs.server";
 import { signOut } from "../login/actions";
 import { setRequestStatus } from "./actions";
 import { CopyLink } from "./CopyLink";
@@ -16,6 +17,8 @@ export const dynamic = "force-dynamic";
 const when = (iso: string) => new Intl.DateTimeFormat("en-GB", {
   timeZone: "Europe/London", weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit",
 }).format(new Date(iso));
+
+const WALKTHROUGH_KINDS = { booked: "Booked", teammate: "To invite to the same walk-through", suggested: "Suggested" };
 
 const EVENTS: Record<string, string> = {
   opened: "opened their link",
@@ -51,7 +54,7 @@ function summary(circle: HostCircle) {
 
 export default async function HostPage() {
   await requireHost();
-  const [circles, applications] = await Promise.all([hostCircles(), seatRequests()]);
+  const [circles, applications, walkthroughs] = await Promise.all([hostCircles(), seatRequests(), walkthroughRows()]);
   return (
     <main className="host-page">
       <header className="host-top">
@@ -69,6 +72,21 @@ export default async function HostPage() {
                 <p><strong>{application.name}</strong> <span className="host-small">{application.email}</span></p>
                 {application.line && <p className="host-intro">{application.line}</p>}
                 <span className="host-small">{when(application.at)}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+      <section className="host-circle">
+        <h1>Walk-throughs</h1>
+        <p className="host-meta">Times booked, people to invite and times suggested on the walk-through booking pages. You are emailed each one; guests are sent nothing, so send invitations yourself.</p>
+        {walkthroughs.length === 0 ? <p className="host-empty">None yet.</p> : (
+          <ul className="host-requests">
+            {walkthroughs.map((row, index) => (
+              <li key={index}>
+                <p><strong>{row.name}</strong> <span className="host-small">{row.email}</span></p>
+                <p className="host-intro">{WALKTHROUGH_KINDS[row.kind]}{row.startsAt && ` ${when(row.startsAt)} UK time`}</p>
+                <span className="host-small">{row.code} · {when(row.at)}</span>
               </li>
             ))}
           </ul>
