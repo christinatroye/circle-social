@@ -1,0 +1,223 @@
+/* The room maker. The wrapper is entercircle.co: cream, Fraunces, Jost. The room inside wears the host's brand. */
+body:has(.mk), body:has(.mk-stage) { margin: 0; background: #f8f5ef; }
+
+.mk {
+  --paper: #f8f5ef;
+  --sand: #eae3d5;
+  --ink: #17110d;
+  --ink-soft: rgba(26, 20, 14, .6);
+  --ink-faint: rgba(26, 20, 14, .4);
+  --curve: cubic-bezier(.2, .8, .2, 1);
+  min-height: 100vh; min-height: 100dvh;
+  background: var(--paper); color: var(--ink);
+  font-family: var(--font-jost), system-ui, sans-serif; font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+  display: flex; flex-direction: column;
+}
+
+.mk-header { height: 68px; flex: none; box-sizing: border-box; padding: 0 40px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(26, 20, 14, .08); }
+.mk-brand { display: flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none; font-family: var(--font-fraunces), Georgia, serif; font-size: 13px; letter-spacing: .46em; text-transform: uppercase; }
+.mk-header-mark { width: 26px; height: 26px; fill: var(--ink); }
+
+.mk-body { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.mk-ask { padding: 72px 64px 64px 80px; max-width: 560px; display: flex; flex-direction: column; animation: mk-rise .7s var(--curve) both; }
+.mk-ask form { display: flex; flex-direction: column; }
+.mk-ask h1 { margin: 0; font-family: var(--font-fraunces), Georgia, serif; font-weight: 300; font-variation-settings: "opsz" 84; font-size: clamp(2.4rem, 4.4vw, 4rem); line-height: 1.08; letter-spacing: -.01em; }
+.mk-label { margin: 0 0 22px; font-size: 10px; letter-spacing: .38em; text-transform: uppercase; color: var(--ink-faint); }
+.mk-label-gap { margin: 40px 0 14px; }
+.mk-sub { margin: 24px 0 0; font-size: 17px; line-height: 1.7; color: var(--ink-soft); }
+.mk-note { margin: 16px 0 0; font-size: 13px; color: var(--ink-soft); }
+.mk-error { margin: 14px 0 0; font-size: 14px; color: #8a2f1d; }
+
+.mk-progress { display: flex; justify-content: space-between; align-items: center; margin-bottom: 34px; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-faint); }
+.mk-back { padding: 0; background: none; border: 0; font: inherit; font-size: 13px; letter-spacing: 0; text-transform: none; color: var(--ink-soft); cursor: pointer; }
+
+.mk-field { margin-top: 40px; display: flex; flex-direction: column; gap: 10px; font-size: 10px; letter-spacing: .3em; text-transform: uppercase; color: var(--ink-faint); }
+.mk-field input { font: inherit; font-size: 20px; letter-spacing: 0; text-transform: none; color: var(--ink); background: transparent; border: 0; border-bottom: 1px solid rgba(26, 20, 14, .3); padding: 6px 0 10px; outline: none; border-radius: 0; }
+.mk-field input:focus { border-bottom-color: var(--ink); }
+
+/* One button, black like entercircle.co's. */
+.mk-go { align-self: flex-start; margin-top: 34px; height: 50px; padding: 0 30px; display: inline-flex; align-items: center; border: 0; border-radius: 0; background: #0f0a07; color: #f1e8d8; font: inherit; font-size: 11px; font-weight: 400; letter-spacing: .22em; text-transform: uppercase; text-decoration: none; cursor: pointer; transition: opacity .4s var(--curve); }
+.mk-go:disabled, .mk-go-waiting { opacity: .45; cursor: default; }
+
+.mk-rows { margin-top: 36px; display: flex; flex-direction: column; }
+.mk-rows button { display: flex; justify-content: space-between; align-items: baseline; padding: 20px 4px; background: none; border: 0; border-bottom: 1px solid rgba(26, 20, 14, .1); font: inherit; color: var(--ink-soft); cursor: pointer; text-align: left; transition: color .4s var(--curve); }
+.mk-rows button span { font-family: var(--font-fraunces), Georgia, serif; font-size: 24px; }
+.mk-rows button small { font-size: 14px; }
+.mk-rows button[aria-pressed="true"] { color: var(--ink); }
+.mk-rows button[aria-pressed="true"] span::after { content: ""; display: inline-block; width: 6px; height: 6px; margin-left: 14px; vertical-align: middle; border-radius: 50%; background: var(--ink); }
+
+.mk-pills { margin-top: 30px; display: flex; flex-wrap: wrap; gap: 10px; }
+.mk-label-gap + .mk-pills { margin-top: 0; }
+.mk-pills button { padding: 11px 18px; border-radius: 999px; border: 0; background: rgba(26, 20, 14, .05); font: inherit; font-size: 14px; color: var(--ink-soft); cursor: pointer; transition: background .4s var(--curve), color .4s var(--curve); }
+.mk-pills button[aria-pressed="true"] { background: var(--ink); color: #f1e8d8; }
+
+.mk-drops { margin-top: 30px; display: grid; grid-template-columns: 1fr 2fr; gap: 14px; }
+.mk-drop { position: relative; height: 150px; border-radius: 10px; background: var(--sand); display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; font-size: 13px; color: var(--ink-soft); text-align: center; padding: 0 12px; }
+.mk-drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.mk-drop img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: 16px; box-sizing: border-box; }
+.mk-drop-wide img { object-fit: cover; padding: 0; }
+
+/* The room taking shape beside the questions. */
+.mk-forming { position: relative; margin: 24px; border-radius: 14px; overflow: hidden; background: var(--sand); transition: background 1.6s var(--curve); }
+.mk-forming[data-read] { background: radial-gradient(60% 70% at 100% 0%, color-mix(in srgb, var(--mk-brand) 75%, transparent) 0%, transparent 70%), radial-gradient(60% 70% at 0% 40%, color-mix(in srgb, var(--mk-accent) 60%, transparent) 0%, transparent 70%), var(--mk-ground); }
+.mk-forming-light { position: absolute; left: 50%; top: 50%; width: 46%; aspect-ratio: 1.1; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(ellipse, rgba(255, 246, 234, .9) 0%, rgba(255, 246, 234, 0) 70%); animation: mk-halo 6.5s ease-in-out infinite; }
+.mk-forming-seat { position: absolute; width: 9%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; background: rgba(26, 20, 14, .08); transition: background 1.2s var(--curve), left .8s var(--curve), top .8s var(--curve); }
+.mk-forming[data-read] .mk-forming-seat { background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--mk-ground) 60%, var(--mk-ink)) 0%, var(--mk-ink) 100%); opacity: .8; }
+.mk-forming-caption { position: absolute; left: 0; right: 0; bottom: 22px; margin: 0; text-align: center; font-size: 10px; letter-spacing: .3em; text-transform: uppercase; color: var(--ink-faint); }
+.mk-forming[data-read] .mk-forming-caption { color: var(--mk-muted); }
+
+/* The last screen. */
+.mk-reserve-body { flex: 1; max-width: 620px; margin: 0 auto; padding: 110px 24px 80px; display: flex; flex-direction: column; align-items: center; text-align: center; animation: mk-rise .9s var(--curve) both; }
+.mk-reserve-body h1 { margin: 0; font-family: var(--font-fraunces), Georgia, serif; font-weight: 300; font-variation-settings: "opsz" 84; font-size: clamp(2.6rem, 5vw, 4rem); line-height: 1.08; letter-spacing: -.01em; }
+.mk-reserve-body .mk-go { align-self: center; margin-top: 40px; }
+
+/* The host's room. Every moment wears the brand through these variables. */
+.mk-stage {
+  --curve: cubic-bezier(.2, .8, .2, 1);
+  --breath: 6.5s;
+  position: fixed; inset: 0; overflow: hidden;
+  color: var(--mk-ink); font-family: var(--mk-body); font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+  background:
+    radial-gradient(62% 66% at 99% -2%, color-mix(in srgb, var(--mk-brand) 85%, transparent) 0%, color-mix(in srgb, var(--mk-brand) 30%, transparent) 46%, transparent 70%),
+    radial-gradient(58% 62% at -2% 26%, color-mix(in srgb, var(--mk-accent) 80%, transparent) 0%, color-mix(in srgb, var(--mk-accent) 28%, transparent) 46%, transparent 70%),
+    radial-gradient(46% 44% at 6% 104%, color-mix(in srgb, var(--mk-brand) 50%, transparent) 0%, color-mix(in srgb, var(--mk-brand) 18%, transparent) 40%, transparent 72%),
+    radial-gradient(40% 34% at 92% 88%, color-mix(in srgb, var(--mk-accent) 50%, transparent) 0%, color-mix(in srgb, var(--mk-accent) 16%, transparent) 42%, transparent 74%),
+    radial-gradient(112% 92% at 46% 40%, var(--mk-ground) 0%, var(--mk-edge) 100%);
+}
+.mk-stage.mk-dark {
+  background:
+    radial-gradient(60% 70% at 100% 0%, color-mix(in srgb, var(--mk-brand) 55%, transparent) 0%, transparent 70%),
+    radial-gradient(55% 65% at 0% 60%, color-mix(in srgb, var(--mk-accent) 35%, transparent) 0%, transparent 70%),
+    radial-gradient(100% 90% at 50% 46%, color-mix(in srgb, var(--mk-ground) 80%, white) 0%, var(--mk-ground) 50%, color-mix(in srgb, var(--mk-ground) 70%, black) 100%);
+}
+.mk-moment { position: absolute; inset: 0; animation: mk-appear 1.2s ease-in-out both; }
+
+.mk-bar { position: absolute; z-index: 5; left: 50%; top: 18px; transform: translateX(-50%); display: flex; align-items: center; gap: 6px; padding: 6px 6px 6px 16px; border-radius: 999px; background: rgba(248, 245, 239, .9); color: #17110d; font-family: var(--font-jost), system-ui, sans-serif; box-shadow: 0 12px 40px rgba(0, 0, 0, .12); white-space: nowrap; }
+.mk-bar-mark { width: 20px; height: 20px; fill: #17110d; margin-right: 8px; flex: none; }
+.mk-bar-moments { display: flex; gap: 2px; }
+.mk-bar-moments button { padding: 9px 14px; border: 0; border-radius: 999px; background: none; font: inherit; font-size: 13px; color: rgba(26, 20, 14, .55); cursor: pointer; }
+.mk-bar-moments button[aria-selected="true"] { background: rgba(26, 20, 14, .07); color: #17110d; }
+.mk-bar-go { margin-left: 8px; padding: 11px 18px; border: 0; border-radius: 999px; background: #0f0a07; color: #f1e8d8; font: inherit; font-size: 10px; letter-spacing: .2em; text-transform: uppercase; cursor: pointer; }
+.mk-reading { position: absolute; z-index: 5; left: 0; right: 0; top: 78px; margin: 0; text-align: center; font-family: var(--font-jost), system-ui, sans-serif; font-size: 12px; color: var(--mk-muted); }
+
+/* The arrival. One breath is 6.5 seconds, rising for 42% of it. Nothing moves more than a few percent. */
+.mk-arrival { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.mk-mood { position: absolute; inset: -6%; background-size: cover; background-position: center; opacity: 0; filter: blur(10px) saturate(.85); animation: mk-mood-in 4s ease-in-out .3s forwards, mk-drift 40s ease-in-out infinite alternate; }
+.mk-glow { position: absolute; left: 50%; top: 44%; width: min(56vw, 640px); aspect-ratio: 1.15; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(ellipse, color-mix(in srgb, var(--mk-light) 95%, transparent) 0%, color-mix(in srgb, var(--mk-light) 45%, transparent) 36%, transparent 70%); opacity: 0; animation: mk-appear 3s ease-in-out .4s forwards; }
+.mk-glow span { position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(ellipse, color-mix(in srgb, var(--mk-light) 60%, transparent) 0%, transparent 55%); animation: mk-halo-inner var(--breath) ease-in-out 1s infinite; }
+.mk-arrival-centre { position: relative; height: 34vh; display: flex; align-items: center; justify-content: center; opacity: 0; animation: mk-appear 3.2s ease-in-out 1.8s forwards; }
+.mk-mark { max-width: min(44vw, 460px); max-height: 22vh; object-fit: contain; animation: mk-breathe var(--breath) ease-in-out 1.8s infinite; }
+/* Lift a logo off its white or black box (filters in RoomPreview.tsx). */
+.mk-filters { position: absolute; width: 0; height: 0; }
+.mk-mark-flood { flood-color: var(--mk-brand); }
+.mk-on-light { filter: url(#mk-lift-light); }
+.mk-on-dark { filter: url(#mk-lift-dark); }
+/* As the Speedrun room's mark: a touch more contrast than the light behind it, and a far, faint shadow
+   that follows the shape, so it reads as a gap rather than a sticker. */
+.mk-on-clear, .mk-mark-textured { filter: contrast(1.12) drop-shadow(0 14px 28px color-mix(in srgb, var(--mk-ink) 18%, transparent)); }
+.mk-mark-textured { display: block; width: min(44vw, 460px); background-size: cover; background-position: center; -webkit-mask-size: contain; mask-size: contain; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-position: center; mask-position: center; }
+.mk-welcome-mark.mk-mark-textured { width: min(52vw, 220px); }
+/* A logo in a box of its own colour: the box's edges dissolve into the room instead of standing as a card. */
+.mk-on-boxed { -webkit-mask-image: radial-gradient(closest-side, #000 55%, transparent 100%); mask-image: radial-gradient(closest-side, #000 55%, transparent 100%); border-radius: 0; }
+.mk-mark-word, .mk-gathered { font-family: var(--mk-display); font-weight: 300; font-size: clamp(2.6rem, 6vw, 5rem); letter-spacing: .01em; color: var(--mk-ink); text-align: center; max-width: 80vw; }
+.mk-arrival-words { position: relative; display: flex; flex-direction: column; align-items: center; gap: 30px; }
+.mk-guide { margin: 0; font-size: 10.5px; letter-spacing: 4px; text-transform: uppercase; color: var(--mk-muted); opacity: 0; animation: mk-appear 2s ease-in-out 5s forwards; }
+.mk-enter { padding: 14px 34px; border: 0; border-radius: 999px; font-family: var(--mk-display); font-style: italic; font-size: 20px; color: var(--mk-ink); background: color-mix(in srgb, var(--mk-light) 30%, transparent); box-shadow: 0 0 40px color-mix(in srgb, var(--mk-light) 55%, transparent); cursor: pointer; opacity: 0; animation: mk-appear 2s ease-in-out 6s forwards; }
+.mk-made { position: absolute; left: 0; right: 0; bottom: 32px; margin: 0; text-align: center; font-size: 11px; letter-spacing: .12em; color: var(--mk-muted); opacity: .8; }
+
+/* First light: the night lifts slowly into their colours. */
+.mk-night { position: absolute; inset: 0; background: radial-gradient(90% 80% at 50% 46%, color-mix(in srgb, var(--mk-brand) 35%, #1d1a33) 0%, #17142a 60%, #0f0d1d 100%); animation: mk-lift 7s var(--curve) .6s forwards; }
+.mk-star { position: absolute; width: 2px; height: 2px; border-radius: 50%; background: #f1f3f7; opacity: .6; animation: mk-fade-out 6s ease-in-out forwards; }
+
+/* Stars gathering: specks drift in from the dark and settle into the name. */
+.mk-arrival-gather { background: radial-gradient(90% 80% at 50% 46%, color-mix(in srgb, var(--mk-brand) 30%, #15132a) 0%, #0f0d1d 100%); color: #f1ecf7; }
+.mk-arrival-gather .mk-gathered, .mk-arrival-gather .mk-enter { color: #f6f1ea; }
+.mk-arrival-gather .mk-guide { color: rgba(241, 236, 247, .7); }
+.mk-arrival-gather .mk-tiles button, .mk-arrival-first-light .mk-tiles button { color: #f6f1ea; border-color: rgba(246, 241, 234, .3); }
+.mk-gather { position: absolute; left: 50%; top: 44%; }
+.mk-speck { position: absolute; width: 3px; height: 3px; border-radius: 50%; background: #fff6ea; box-shadow: 0 0 6px 1px rgba(255, 246, 234, .7); opacity: 0; animation: mk-gather 9s var(--curve) forwards; }
+
+/* Veils: sheer cloth drifting across the light. */
+.mk-veil { position: absolute; border-radius: 50%; filter: blur(28px); background: radial-gradient(ellipse, color-mix(in srgb, var(--mk-ink) 28%, transparent) 0%, transparent 70%); transform-origin: 20% 50%; animation: mk-veil 24s ease-in-out infinite; }
+.mk-veil-1 { left: -10%; top: 22%; width: 60%; height: 32%; }
+.mk-veil-2 { left: 56%; top: 52%; width: 55%; height: 30%; animation-duration: 28s; animation-delay: -9s; }
+.mk-veil-3 { left: 12%; top: 70%; width: 48%; height: 24%; animation-duration: 32s; animation-delay: -15s; }
+
+/* Camera and mic, as the live room has it. */
+.mk-tiles { display: flex; gap: 8px; opacity: 0; animation: mk-appear 2s ease-in-out 5.6s forwards; }
+.mk-tiles button { width: 84px; height: 76px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; background: color-mix(in srgb, white 18%, transparent); border: 1px solid color-mix(in srgb, var(--mk-ink) 25%, transparent); border-radius: 3px; color: var(--mk-ink); font-family: var(--mk-body); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; }
+.mk-tiles small { font-size: 9px; color: var(--mk-muted); }
+.mk-tiles .mk-tile-quiet { opacity: .6; }
+.mk-stage svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+.mk-take { margin-top: 24px; padding: 14px 34px; background: transparent; border: 1px solid color-mix(in srgb, var(--mk-ink) 60%, transparent); border-radius: 3px; color: var(--mk-ink); font-family: var(--mk-body); font-size: 13px; letter-spacing: .24em; text-transform: uppercase; cursor: pointer; }
+
+/* The way in, as the live room's first screen: the mark above a hairline, two quiet fields, Continue. */
+.mk-welcome { display: flex; flex-direction: column; align-items: center; }
+.mk-welcome-head { width: 100%; margin-top: 110px; padding-bottom: 28px; display: flex; justify-content: center; border-bottom: 1px solid color-mix(in srgb, var(--mk-ink) 14%, transparent); }
+.mk-welcome-mark { max-width: min(52vw, 220px); max-height: 64px; object-fit: contain; }
+.mk-welcome-mark.mk-mark-word { font-size: 30px; max-width: 80vw; }
+.mk-welcome-form { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; padding-bottom: 80px; width: min(360px, 84vw); }
+.mk-welcome-form input { width: 100%; padding: 10px 0; border: 0; border-bottom: 1px solid color-mix(in srgb, var(--mk-ink) 28%, transparent); background: none; font-family: var(--mk-display); font-size: 20px; text-align: center; color: var(--mk-ink); outline: none; }
+.mk-welcome-form input::placeholder { color: var(--mk-muted); font-style: italic; }
+.mk-welcome-form input:focus { border-bottom-color: var(--mk-ink); }
+.mk-optional { margin: -8px 0 0; font-size: 10px; letter-spacing: .24em; text-transform: uppercase; color: var(--mk-muted); }
+
+/* The room, as the live Alien room: speaker in the light at the centre, the ring around, the host's toolbar. */
+.mk-room-light { position: absolute; left: 50%; top: 47%; width: 46vw; height: 62vh; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(ellipse, color-mix(in srgb, var(--mk-light) 80%, transparent) 0%, color-mix(in srgb, var(--mk-light) 35%, transparent) 38%, transparent 70%); animation: mk-halo var(--breath) ease-in-out infinite; }
+.mk-present { position: absolute; left: 30px; top: 30px; margin: 0; font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--mk-muted); opacity: .8; }
+.mk-leave { position: absolute; right: 30px; top: 24px; padding: 12px 22px; background: color-mix(in srgb, #7a3a2a 18%, transparent); border: 1px solid color-mix(in srgb, #b0644c 70%, transparent); border-radius: 2px; font-family: var(--mk-body); font-size: 12px; letter-spacing: .24em; text-transform: uppercase; color: var(--mk-ink); cursor: pointer; }
+.mk-ring { position: absolute; left: 50%; top: 47%; width: min(86vw, 1320px); height: min(66vh, 640px); transform: translate(-50%, -50%); }
+.mk-centre { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.mk-face-speaker { width: clamp(150px, 24vh, 260px) !important; box-shadow: 0 0 0 1px color-mix(in srgb, var(--mk-light) 70%, transparent), 0 0 60px color-mix(in srgb, var(--mk-light) 70%, transparent); font-size: 40px !important; }
+.mk-centre-name { display: flex; align-items: center; gap: 12px; font-family: var(--mk-display); font-size: clamp(16px, 2vw, 22px); letter-spacing: .2em; text-transform: uppercase; color: var(--mk-ink); white-space: nowrap; }
+.mk-queue { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; margin-left: 8px; border-radius: 50%; background: color-mix(in srgb, var(--mk-light) 85%, var(--mk-brand)); color: var(--mk-ink); font-family: var(--mk-body); font-size: 11px; letter-spacing: 0; }
+.mk-person { position: absolute; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; }
+.mk-face { width: clamp(56px, 10.5vh, 104px); aspect-ratio: 1; box-sizing: border-box; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--mk-ink) 22%, transparent); background: radial-gradient(circle at 50% 30%, color-mix(in srgb, var(--mk-light) 50%, var(--mk-field)) 0%, color-mix(in srgb, var(--mk-field) 45%, var(--mk-ink)) 100%); display: flex; align-items: center; justify-content: center; font-family: var(--mk-display); font-size: 26px; color: color-mix(in srgb, var(--mk-ground) 85%, white); }
+.mk-off .mk-face { background: color-mix(in srgb, var(--mk-ink) 6%, transparent); color: var(--mk-muted); }
+.mk-off .mk-name { opacity: .5; }
+.mk-speaking .mk-face { box-shadow: 0 0 0 2px color-mix(in srgb, var(--mk-light) 80%, transparent), 0 0 40px color-mix(in srgb, var(--mk-light) 85%, transparent); }
+.mk-name { position: absolute; top: 100%; margin-top: 10px; display: flex; align-items: center; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--mk-ink); opacity: .85; white-space: nowrap; }
+.mk-pager { position: absolute; left: 50%; bottom: 124px; transform: translateX(-50%); display: flex; align-items: center; gap: 22px; color: var(--mk-muted); font-size: 18px; }
+.mk-pager i { width: 6px; height: 6px; border-radius: 50%; background: var(--mk-muted); opacity: .5; }
+.mk-pager .mk-pip-on { opacity: 1; }
+.mk-tools { position: absolute; left: 50%; bottom: 24px; transform: translateX(-50%); width: min(94vw, 1180px); display: flex; justify-content: space-around; align-items: stretch; padding: 10px 8px; box-sizing: border-box; border-radius: 6px; border: 1px solid color-mix(in srgb, var(--mk-ink) 10%, transparent); background: color-mix(in srgb, var(--mk-ink) 4%, transparent); }
+.mk-tools button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-width: 70px; max-width: 110px; padding: 10px 8px; background: none; border: 1px solid transparent; border-radius: 4px; font-family: var(--mk-body); font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--mk-ink); opacity: .8; text-align: center; }
+.mk-tools .mk-tool-chosen { border-color: color-mix(in srgb, var(--mk-brand) 70%, var(--mk-ink)); opacity: 1; }
+.mk-tools .mk-tool-lit { background: color-mix(in srgb, var(--mk-light) 22%, transparent); box-shadow: 0 0 24px color-mix(in srgb, var(--mk-light) 30%, transparent); opacity: 1; }
+.mk-tools .mk-tool-quiet { opacity: .3; }
+
+/* Before you go. */
+.mk-closing { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; padding: 0 24px 80px; text-align: center; }
+.mk-eyebrow { margin: 0; font-size: 10.5px; letter-spacing: 4px; text-transform: uppercase; color: var(--mk-muted); }
+.mk-closing blockquote { margin: 0; max-width: 620px; font-family: var(--mk-display); font-style: italic; font-size: clamp(1.6rem, 3vw, 2.2rem); line-height: 1.35; }
+.mk-from { margin: 0; font-family: var(--mk-display); font-size: 18px; color: var(--mk-muted); }
+
+@keyframes mk-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes mk-appear { from { opacity: 0; } to { opacity: 1; } }
+@keyframes mk-breathe { 0%, 100% { transform: scale(.975); } 42% { transform: scale(1); } }
+@keyframes mk-halo { 0%, 100% { opacity: .6; transform: translate(-50%, -50%) scale(.96); } 42% { opacity: 1; transform: translate(-50%, -50%) scale(1.02); } }
+@keyframes mk-halo-inner { 0%, 100% { opacity: .6; transform: scale(.96); } 42% { opacity: 1; transform: scale(1.02); } }
+@keyframes mk-lift { to { opacity: 0; } }
+@keyframes mk-fade-out { to { opacity: 0; } }
+@keyframes mk-gather { 0% { opacity: 0; transform: translate(var(--from-x), var(--from-y)); } 20% { opacity: .9; } 85% { opacity: .7; } 100% { opacity: 0; transform: translate(0, 0); } }
+@keyframes mk-veil { 0%, 100% { transform: rotate(-8deg) translateX(0) scaleY(1); } 50% { transform: rotate(-2deg) translateX(40px) scaleY(1.15); } }
+@keyframes mk-mood-in { to { opacity: .35; } }
+@keyframes mk-drift { from { transform: scale(1) translate(0, 0); } to { transform: scale(1.04) translate(-1%, -1%); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .mk-stage *, .mk * { animation-duration: .01s !important; animation-iteration-count: 1 !important; animation-delay: 0s !important; }
+}
+
+@media (max-width: 860px) {
+  .mk-header { padding: 0 16px; }
+  .mk-body { grid-template-columns: 1fr; }
+  .mk-ask { padding: 40px 16px 24px; }
+  .mk-forming { margin: 0 16px 24px; min-height: 280px; }
+  .mk-bar { left: 12px; right: 12px; transform: none; overflow-x: auto; }
+  .mk-bar-mark { display: none; }
+  .mk-tools { display: none; }
+  .mk-ring { width: 92vw; height: 60vh; }
+  .mk-pager { display: none; }
+}
