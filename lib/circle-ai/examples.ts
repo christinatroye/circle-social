@@ -50,13 +50,16 @@ export const EXAMPLES: RoomExample[] = [
   {
     name: "Oxblood",
     site: "murielhaas.com",
-    values: ["growth", "care"],
-    colours: { brand: "#110608", accent: "#e5b3a4", dark: true, notes: "An oxblood ground (#110608) with a rose accent (#e5b3a4)." },
+    values: ["embodiment", "pleasure", "power", "peace"],
+    colours: {
+      brand: "#110608", accent: "#e5b3a4", dark: true,
+      notes: "An oxblood ground (#110608) with a soft rose light (#e5b3a4). Her brand guide is near-black #14191E, cream #F3EBE0 and oxblood #681119; the room takes the oxblood far deeper and adds a rose that isn't in the guide, because her brief asked for warmth, softness and an exhale. Her moodboard: crimson silk, pomegranate, red velvet, oxblood leather, honey, a dark flower.",
+    },
     fonts: { display: "Ideas", body: "Public Sans" },
     arrival: "custom",
-    arrivalNotes: "Muriel's flower opens.",
-    why: "Muriel's own deep oxblood and rose, carried in with her typefaces. Her values (growth, care) were Claude's guess.",
-    confirmed: false,
+    arrivalNotes: "Muriel's flower opens, and a ball of light expands like a breath (her words: \"the expanding light ball that feels like breath expanding\").",
+    why: "Weekly coaching and group sessions. Her brief: arriving should feel calm, grounded, down-regulated, connected to the senses, soft and sensual; \"entering feels like an exhale, a warm embrace\". The room came from that brief and her moodboard, not from her website.",
+    confirmed: true,
   },
   {
     name: "Alien",

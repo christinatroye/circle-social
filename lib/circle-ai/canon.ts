@@ -18,7 +18,9 @@ export const CANON = {
     "A logo never swells. A logo that grows reads as an advert, not a threshold.",
   ],
   colour: [
-    "The brand's colour becomes the room's ground, with a warm light at the centre. The website decides whether the room is light or dark.",
+    "The host's own words lead. What they say the gathering is for and how people should feel decides the room's mood, depth and light; the website comes second (Christina: \"the website should not be the first order informer\").",
+    "Brand colours are a starting point, not a paint chart. Take them deeper or softer to suit the feeling: Muriel's brand oxblood is #681119, but her room's ground is the far deeper #110608 with a soft rose light (#e5b3a4) that isn't in her brand at all, because her brief asked for an exhale and a warm embrace.",
+    "The brand's colour becomes the room's ground, with a warm light at the centre. Without a description, the website decides whether the room is light or dark.",
     "When a brand has two distinct colours, the room's sky is a pale blend of both, leaning to the second, and the strong first colour keeps to one corner. A room filled with one strong colour is too much (Christina on Speedrun: \"too purple, make it more blue, white with shades of purple\").",
     "Pick the brand's real colours, not a stray link or button colour. The host's mood picture may lend the accent; it never turns a light room dark.",
     "The people are the brightest thing in the room, not the room.",

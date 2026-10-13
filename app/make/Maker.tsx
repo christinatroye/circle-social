@@ -1,6 +1,6 @@
 "use client";
 
-import { type ChangeEvent, type FormEvent, useEffect, useRef, useState } from "react";
+import { type ChangeEvent, type CSSProperties, type FormEvent, useEffect, useRef, useState } from "react";
 import { CircleMark } from "@/components/CircleMark";
 import { ARRIVALS, type Brand, PURPOSES, RHYTHMS, SIZES, pictureColours, roomColours } from "@/lib/brand";
 import { readBrand, type Reading } from "./actions";
@@ -62,16 +62,108 @@ function readPicture(url: string): Promise<ReturnType<typeof pictureColours> | n
   });
 }
 
-/** A faint ring of seats in the brand's colours: the room taking shape while the host answers. */
-function Forming({ brand, seats, caption }: { brand: Brand | null; seats: number; caption: string }) {
+/** The moods of entercircle.co's own room, and the words that lean a gathering towards each. */
+const MOODS = [
+  { name: "Warm", hue: 30, words: /\b(warm|candle|gold|amber|sun|honey|cos[yi]|hearth|autumn|home|earth|wood|glow)/g },
+  { name: "Alive", hue: 120, words: /\b(alive|forest|green|nature|garden|grow|plant|spring|fresh|leaf|wild|energ|mindful|wellbeing|health)/g },
+  { name: "Calm", hue: 185, words: /\b(calm|sea|ocean|water|breath|still|quiet|peace|soft|rest|slow|sky|blue|clear|gentle|meditat)/g },
+  { name: "Mystic", hue: 240, words: /\b(night|star|space|cosm|alien|physics|moon|dream|myst|magic|universe|future|deep)/g },
+  { name: "Intimate", hue: 305, words: /\b(intimate|rose|pink|love|tender|feminin|sister|heart|close|vulnerab|sacred|body|embod)/g },
+  { name: "Ardent", hue: 360, words: /\b(bold|red|passion|oxblood|wine|blood|fierce|ardent|power|desire|burn|fire|sensual|crimson)/g },
+];
+
+/** The mood the host's words lean towards most, or -1 while nothing leans. */
+function moodOf(words: string) {
+  const text = words.toLowerCase();
+  let best = -1, most = 0;
+  MOODS.forEach((m, i) => {
+    const count = text.match(m.words)?.length ?? 0;
+    if (count > most) { best = i; most = count; }
+  });
+  return best;
+}
+
+/** Where a hue sits along the moods, from 0 (Warm) to 1 (Ardent). */
+function along(hue: number) {
+  const i = Math.max(0, MOODS.findIndex((m, k) => k === MOODS.length - 1 || hue < MOODS[k + 1].hue));
+  if (i >= MOODS.length - 1) return 1;
+  return (i + (hue - MOODS[i].hue) / (MOODS[i + 1].hue - MOODS[i].hue)) / (MOODS.length - 1);
+}
+
+function hsl(hue: number, saturation: number, lightness: number, alpha = 1) {
+  return `hsl(${hue.toFixed(1)} ${saturation}% ${lightness}% / ${alpha.toFixed(3)})`;
+}
+
+/**
+ * The light listening while the host writes, as entercircle.co's own room does: it drifts slowly, wanders through
+ * the moods while nothing is written, then turns towards the mood the words lean to.
+ */
+function useListening(mood: number, writing: boolean) {
+  const [light, setLight] = useState({ hue: 30, x: 56, y: 50 });
+  const aim = useRef({ mood, writing });
+  useEffect(() => { aim.current = { mood, writing }; }, [mood, writing]);
+  useEffect(() => {
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let frame = 0, start = 0, hue = 30;
+    const tick = (now: number) => {
+      if (!start) start = now;
+      const t = (now - start) / 1000;
+      const { mood, writing } = aim.current;
+      const goal = mood >= 0 ? MOODS[mood].hue : writing || still ? hue : 30 + 165 * (1 - Math.cos((t * 2 * Math.PI) / 56));
+      hue += (goal - hue) * (still ? 1 : .025);
+      setLight(still ? { hue, x: 56, y: 50 } : {
+        hue,
+        x: 56 + Math.sin(t * .38) * 9 + Math.sin(t * .17) * 5,
+        y: 50 + Math.cos(t * .28) * 7 + Math.cos(t * .21) * 4,
+      });
+      frame = window.requestAnimationFrame(tick);
+    };
+    frame = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
+  return light;
+}
+
+/**
+ * The room beside the questions. While the host writes, a light listens and turns towards their mood;
+ * once Circle has read them, the room takes on its own colours.
+ */
+function Forming({ brand, seats, caption, words, listening }: { brand: Brand | null; seats: number; caption: string; words: string; listening: boolean }) {
+  const mood = moodOf(words);
+  const { hue, x, y } = useListening(mood, !!words.trim());
+  // No seats while the host writes: only the light listens. The ring appears once the room is read.
+  const filled = brand ? seats : 0;
+  // The light grows a little as the gathering is described.
+  const strength = .42 + Math.min(1, words.trim().length / 240) * .2;
+  const at = `${x.toFixed(1)}% ${y.toFixed(1)}%`;
   return (
-    <aside className="mk-forming" style={brand ? brandStyle(brand) : undefined} data-read={brand ? "" : undefined} aria-hidden="true">
+    <aside className="mk-forming" style={{ ...(brand ? brandStyle(brand) : {}), "--mk-mood": hsl(hue, 62, 68) } as CSSProperties} data-read={brand ? "" : undefined} aria-hidden="true">
+      <div className="mk-listen" style={{
+        background: [
+          `radial-gradient(ellipse at ${at}, transparent 0%, rgba(0,0,0,.5) 70%, rgba(0,0,0,.8) 100%)`,
+          `radial-gradient(ellipse 64% 60% at ${at}, ${hsl(hue, 62, 68, strength)} 0%, ${hsl(hue, 50, 48, strength * .55)} 30%, ${hsl(hue, 45, 28, strength * .22)} 55%, transparent 74%)`,
+          `radial-gradient(ellipse 30% 28% at ${at}, ${hsl(hue, 62, 74, .24)} 0%, transparent 70%)`,
+          hsl(hue, 55, 10),
+        ].join(", "),
+      }} />
+      <div className="mk-forming-brand" />
       <div className="mk-forming-light" />
-      {Array.from({ length: seats }, (_, i) => {
-        const a = (i * 2 * Math.PI) / seats - Math.PI / 2;
-        return <span key={i} className="mk-forming-seat" style={{ left: `${50 + 34 * Math.cos(a)}%`, top: `${50 + 34 * Math.sin(a)}%`, transitionDelay: `${i * 60}ms` }} />;
-      })}
-      <p className="mk-forming-caption">{caption}</p>
+      <div className="mk-forming-ring">
+        {Array.from({ length: seats }, (_, i) => {
+          const a = (i * 2 * Math.PI) / seats - Math.PI / 2;
+          return <span key={i} className="mk-forming-seat" data-filled={i < filled ? "" : undefined} style={{ left: `${50 + 44 * Math.cos(a)}%`, top: `${50 + 44 * Math.sin(a)}%`, transitionDelay: brand ? `${i * 60}ms` : undefined }} />;
+        })}
+      </div>
+      {listening && !brand ? (
+        <div className="mk-moods" style={{ "--mk-along": `${(along(hue) * 100).toFixed(2)}%` } as CSSProperties}>
+          <div className="mk-moods-names">
+            {MOODS.map((m, i) => <span key={m.name} data-near={Math.abs(along(hue) - i / (MOODS.length - 1)) < .1 ? "" : undefined}>{m.name}</span>)}
+          </div>
+          <div className="mk-moods-line"><i /></div>
+        </div>
+      ) : (
+        <p className="mk-forming-caption">{caption}</p>
+      )}
     </aside>
   );
 }
@@ -80,6 +172,8 @@ function Forming({ brand, seats, caption }: { brand: Brand | null; seats: number
 export function Maker() {
   const [step, setStep] = useState<Step>("site");
   const [address, setAddress] = useState("");
+  const [gathering, setGathering] = useState("");
+  const [withSite, setWithSite] = useState(false);
   const [size, setSize] = useState<(typeof SIZES)[number]["id"]>("circle");
   const [purpose, setPurpose] = useState<string>("");
   const [name, setName] = useState("");
@@ -99,6 +193,8 @@ export function Maker() {
   // The host's own pictures win over what the site said: their logo is the mark, their mood picture lends its colour.
   const brand: Brand | null = read && {
     ...read,
+    // With no website, the room carries the name the host gives it.
+    name: read.name || name || "Circle",
     // When the host's mark is a clean shape and the site's own logo sits in a box of colour, the site's logo fills the
     // mark, the way the Speedrun room shows its moving gradient only through its letters.
     ...(logo && logo.backing === "clear" && siteLogo?.backing === "boxed"
@@ -131,7 +227,7 @@ export function Maker() {
     setError("");
     setReading(null);
     named.current = false;
-    const promise = readBrand(address);
+    const promise = readBrand(address, gathering);
     pending.current = promise;
     promise.then(result => {
       if (pending.current !== promise) return;
@@ -146,7 +242,7 @@ export function Maker() {
     if (file && file.type.startsWith("image/") && file.size < 15_000_000) keep(URL.createObjectURL(file));
   }
 
-  const caption = reading?.status === "read" ? `Read from ${reading.brand.site}` : address ? `Reading ${address.replace(/^https?:\/\//, "").replace(/\/$/, "")}` : "Your room will appear here";
+  const caption = reading?.status === "read" ? (reading.brand.site ? `Read from ${reading.brand.site}` : "Read from your words") : gathering && !address ? "Reading your words" : address ? `Reading ${address.replace(/^https?:\/\//, "").replace(/\/$/, "")}` : "Your room will appear here";
   const index = QUESTIONS.indexOf(step);
 
   if ((step === "room" || step === "reserve") && brand) {
@@ -180,7 +276,7 @@ export function Maker() {
         <a className="mk-brand" href="https://entercircle.co"><CircleMark className="mk-header-mark" /><span>Circle</span></a>
       </header>
       <div className="mk-body">
-        <section className="mk-ask">
+        <section className={`mk-ask${step === "site" ? " mk-ask-open" : ""}`}>
           {index > 0 && (
             <div className="mk-progress">
               <button type="button" className="mk-back" onClick={() => setStep(QUESTIONS[index - 1])}>Back</button>
@@ -190,15 +286,18 @@ export function Maker() {
 
           {step === "site" && (
             <form onSubmit={startReading}>
-              <p className="mk-label">Make a room</p>
-              <h1>Your gatherings, in a room that looks like you.</h1>
-              <p className="mk-sub">Paste your website. Circle turns your colours, your mark and your mood into a room your people walk into.</p>
-              <label className="mk-field">Your website
-                <input value={address} onChange={e => setAddress(e.target.value)} placeholder="yourwebsite.com" inputMode="url" autoComplete="url" autoCapitalize="none" spellCheck={false} required />
-              </label>
+              <h1>Design your gathering.</h1>
+              <p className="mk-sub">Your words become the room.</p>
+              <textarea className="mk-words" value={gathering} aria-label="Tell us about your gathering" rows={1} maxLength={6000}
+                placeholder="A quarterly ritual for our distributed creative team."
+                onChange={e => { setGathering(e.target.value); e.target.style.height = "auto"; e.target.style.height = `${e.target.scrollHeight}px`; }} />
+              {withSite || address ? (
+                <input className="mk-site" value={address} onChange={e => setAddress(e.target.value)} aria-label="Your website" placeholder="yourwebsite.com" inputMode="url" autoComplete="url" autoCapitalize="none" spellCheck={false} autoFocus={withSite && !address} />
+              ) : (
+                <button type="button" className="mk-add-site" onClick={() => setWithSite(true)}>+ Add your website</button>
+              )}
               {error && <p className="mk-error" role="alert">{error}</p>}
-              <button type="submit" className="mk-go">Make it mine</button>
-              <p className="mk-note">Free to make and walk around.</p>
+              <button type="submit" className="mk-link-go" disabled={!gathering.trim() && !address.trim()}>Shape the room <span aria-hidden="true">→</span></button>
             </form>
           )}
 
@@ -263,7 +362,7 @@ export function Maker() {
             </>
           )}
         </section>
-        <Forming brand={brand} seats={seats} caption={caption} />
+        <Forming brand={brand} seats={seats} caption={caption} words={gathering} listening={step === "site"} />
       </div>
     </main>
   );
