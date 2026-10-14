@@ -31,7 +31,7 @@ export default function PerfectPage() {
         <p className="event-when">Tuesday 10 November · 6pm UK time</p>
 
         <div className="event-copy">
-          <p>What does it mean to be beautiful now? When filters reshape our faces before anyone sees them. When AI generates perfect people who don’t exist and we compare ourselves to them anyway. When a whole industry runs on the feeling that you’re almost, but never quite, enough.</p>
+          <p>What does it mean to be beautiful now? When filters reshape our faces and AI generates perfect people we compare ourselves to anyway. When the face that used to belong to a film star is now available on the high street. When a whole industry runs on the feeling that you’re almost, but never quite, enough.</p>
           <p>Prof. Heather Widdows is the philosopher who argued that beauty isn’t vanity. It’s ethics. Her book <i>Perfect Me: Beauty as an Ethical Ideal</i> makes the case that beauty has quietly become one of the dominant moral frameworks of our time, shaping how we judge ourselves, each other, and what counts as a good life. Named a book of the year by The Atlantic and groundbreaking by Vogue.</p>
           <p>This is not a conversation about skincare or self-love. It’s about how beauty became a moral demand, what it costs us to comply, and whether the ideal survives when perfection is no longer scarce.</p>
           <p className="event-opens">Heather opens, then the room joins in. No need to be an expert, just curious.</p>
