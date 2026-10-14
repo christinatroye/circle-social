@@ -4,7 +4,7 @@ import { type ChangeEvent, useActionState, useEffect, useState } from "react";
 import { CircleMark } from "@/components/CircleMark";
 import { applyForSeat, type Application } from "./actions";
 
-/** The "Apply for a seat" button, and the quiet screen it opens: the form, then the thank you. */
+/** The "Request a seat" button, and the quiet screen it opens: the form, then the thank you. */
 export function ApplyForSeat() {
   const [open, setOpen] = useState(false);
   // Controlled, so a "please check your email" answer doesn't empty what they typed.
@@ -24,7 +24,7 @@ export function ApplyForSeat() {
 
   return (
     <>
-      <button type="button" className="event-go" onClick={() => setOpen(true)}>Apply for a seat</button>
+      <button type="button" className="event-go" onClick={() => setOpen(true)}>Request a seat</button>
       {open && (
         <div className="event-apply" role="dialog" aria-modal="true" aria-labelledby="apply-heading">
           <div className="event-apply-inner">
@@ -37,7 +37,7 @@ export function ApplyForSeat() {
               </>
             ) : (
               <form action={send} className="event-form" noValidate>
-                <h2 id="apply-heading">Apply for a seat</h2>
+                <h2 id="apply-heading">Request a seat</h2>
                 <input {...field("name")} placeholder="Your name" aria-label="Your name" autoComplete="name" maxLength={120} required autoFocus />
                 <input {...field("email")} type="email" placeholder="Your email" aria-label="Your email" autoComplete="email" maxLength={254} required />
                 <label htmlFor="apply-line">What draws you to this Circle?</label>
