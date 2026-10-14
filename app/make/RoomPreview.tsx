@@ -1,6 +1,6 @@
 "use client";
 
-import type { CSSProperties } from "react";
+import { type CSSProperties, useState } from "react";
 import type { Brand } from "@/lib/brand";
 
 export type Moment = "welcome" | "arrival" | "room" | "closing";
@@ -157,19 +157,33 @@ export function Arrival({ brand, onEnter }: { brand: Brand; onEnter: () => void 
 
 const PEOPLE = ["You", "Aria Bell", "Ben Okafor", "Cleo Marsh", "Dev Patel", "Esme Laurent", "Felix Grant", "Gia Romano", "Hal Iversen", "Iris Novak", "Jon Reyes", "Kemi Adeyemi", "Lior Ben-David", "Maya Lindqvist", "Noor Haddad", "Otto Brandt"];
 
-const TOOLS: [string, string, string?][] = [
-  ["Reset circle", "M12 3a9 9 0 1 0 9 9", "quiet"],
-  ["Speak", ICONS.mic, "chosen"],
-  ["Mute others", "M9 5a3 3 0 0 1 6 0v6a3 3 0 0 1-6 0zM5 11a7 7 0 0 0 14 0M12 18v3M4 4l16 16"],
-  ["Camera", ICONS.camera, "lit"],
-  ["Blur", ICONS.blur],
-  ["Hide self-view", "M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 9a3 3 0 1 0 0 6 3 3 0 1 0 0-6"],
-  ["I’d like to speak", "M8 13V6a1.5 1.5 0 0 1 3 0v5M11 11V4a1.5 1.5 0 0 1 3 0v7M14 11V5.5a1.5 1.5 0 0 1 3 0V14a6 6 0 0 1-6 6h-1a5 5 0 0 1-4-2l-3-4a1.5 1.5 0 0 1 2.4-1.8L8 14"],
-  ["Chat", "M4 5h16v11H9l-5 4z"],
-  ["Share", "M3 4h18v12H3zM8 20h8M12 16v4"],
-  ["Leave a note", "M3 6h18v12H3zM3 6l9 7 9-7"],
-  ["Warmth", "M12 3c3 4 5 6 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z"],
+// The live room's controls in its own order. On a laptop they all sit in one row; on a phone only the "bar" ones do,
+// and the rest wait behind More, with Present PDF, which a laptop reaches through Share.
+type Tool = { label: string; d: string; look?: string; bar?: true; short?: string; phoneOnly?: true };
+const TOOLS: Tool[] = [
+  { label: "Reset Circle", d: "M12 3a9 9 0 1 0 9 9", look: "quiet" },
+  { label: "Speak", d: ICONS.mic, look: "chosen", bar: true },
+  { label: "Mute others", d: "M9 5a3 3 0 0 1 6 0v6a3 3 0 0 1-6 0zM5 11a7 7 0 0 0 14 0M12 18v3M4 4l16 16" },
+  { label: "Camera", d: ICONS.camera, look: "lit", bar: true },
+  { label: "Blur", d: ICONS.blur },
+  { label: "Hide self-view", d: "M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 9a3 3 0 1 0 0 6 3 3 0 1 0 0-6" },
+  { label: "I’d like to speak", short: "Speak next", d: "M8 13V6a1.5 1.5 0 0 1 3 0v5M11 11V4a1.5 1.5 0 0 1 3 0v7M14 11V5.5a1.5 1.5 0 0 1 3 0V14a6 6 0 0 1-6 6h-1a5 5 0 0 1-4-2l-3-4a1.5 1.5 0 0 1 2.4-1.8L8 14", bar: true },
+  { label: "Chat", d: "M4 5h16v11H9l-5 4z", bar: true },
+  { label: "Share", d: "M3 4h18v12H3zM8 20h8M12 16v4" },
+  { label: "Present PDF", d: "M6 2h8l4 4v16H6zM14 2v5h5M9 12h6M9 16h6", phoneOnly: true },
+  { label: "Leave a note", d: "M3 6h18v12H3zM3 6l9 7 9-7" },
+  { label: "Warmth", d: "M12 3c3 4 5 6 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z" },
 ];
+
+function ToolButton({ tool }: { tool: Tool }) {
+  const look = [tool.look && `mk-tool-${tool.look}`, tool.phoneOnly && "mk-tool-phone"].filter(Boolean).join(" ");
+  return (
+    <button type="button" className={look || undefined}>
+      <Icon d={tool.d} />
+      {tool.short ? <><span className="mk-tool-long">{tool.label}</span><span className="mk-tool-short">{tool.short}</span></> : tool.label}
+    </button>
+  );
+}
 
 /**
  * Seats spaced evenly along the ring's edge, not by angle, so people at the sides of a wide ring don't bunch up.
@@ -193,6 +207,7 @@ function ringSpots(count: number, aspect: number) {
  * The brand changes colour, type and mark; the structure never changes.
  */
 export function Room({ seats, onLeave }: { seats: number; onLeave: () => void }) {
+  const [more, setMore] = useState(false);
   // Like the live room, one page holds the speaker and fourteen around them; the rest wait on the next page.
   const [speaker, ...ring] = PEOPLE.slice(1, Math.min(seats, 15) + 1);
   const people = [PEOPLE[0], ...ring].slice(0, 14);
@@ -221,21 +236,58 @@ export function Room({ seats, onLeave }: { seats: number; onLeave: () => void })
         })}
       </div>
       {seats > 15 && <div className="mk-pager" aria-hidden="true"><span>‹</span><i className="mk-pip-on" /><i /><span>›</span></div>}
-      <nav className="mk-tools" aria-label="Room controls">
-        {TOOLS.map(([label, d, look]) => <button key={label} type="button" className={look ? `mk-tool-${look}` : undefined}><Icon d={d} />{label}</button>)}
+      <nav className={`mk-tools${more ? " mk-more-open" : ""}`} aria-label="Room controls">
+        {TOOLS.map(tool => tool.bar ? <ToolButton key={tool.label} tool={tool} /> : null)}
+        <button type="button" className="mk-more" aria-expanded={more} onClick={() => setMore(open => !open)}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /></svg>
+          More
+        </button>
+        <div className="mk-more-actions">
+          {TOOLS.map(tool => tool.bar ? null : <ToolButton key={tool.label} tool={tool} />)}
+        </div>
       </nav>
     </section>
   );
 }
 
-/** "Before you go", as the live room closes today. The host writes the closing words. */
-export function Closing({ onContinue }: { onContinue: () => void }) {
+/**
+ * After the circle, as the live room ends: "What did you take away?" first, then "Before you go" with the closing
+ * words and the notes people left, ending on Leave Circle. The pretend guests leave no notes, so the second card
+ * says where notes arrive, as the live room does when there are none.
+ */
+export function Closing({ brand, onRejoin, onLeave }: { brand: Brand; onRejoin: () => void; onLeave: () => void }) {
+  const [card, setCard] = useState<"takeaway" | "passage" | "notes">("takeaway");
+  const [share, setShare] = useState(true);
+  const [copy, setCopy] = useState(false);
+
+  if (card === "takeaway") return (
+    <section className="mk-moment mk-takeaway" aria-label="What did you take away?">
+      <button type="button" className="mk-rejoin" onClick={onRejoin}>Rejoin Circle</button>
+      <form className="mk-takeaway-column" onSubmit={e => { e.preventDefault(); setCard("passage"); }}>
+        <Mark brand={brand} className="mk-takeaway-mark" />
+        <h2>What did you take away?</h2>
+        <textarea rows={3} aria-label="What did you take away?" placeholder={"An insight, a question, an action\nor appreciation. A line is plenty."} />
+        <div className="mk-choices">
+          <label><input type="checkbox" checked={share} onChange={e => setShare(e.target.checked)} /><span className="mk-switch" aria-hidden="true"><span /></span> Share with the host</label>
+          <label><input type="checkbox" checked={copy} onChange={e => setCopy(e.target.checked)} /><span className="mk-switch" aria-hidden="true"><span /></span> Send me a copy</label>
+        </div>
+        <button type="submit" className="mk-takeaway-go"><span>Continue</span><span aria-hidden="true">→</span></button>
+      </form>
+    </section>
+  );
+
+  const last = card === "notes";
   return (
-    <section className="mk-moment mk-closing">
+    <section key={card} className="mk-moment mk-closing">
       <p className="mk-eyebrow">Before you go</p>
-      <blockquote>“Your closing words, or a line from your speaker. Guests carry this out of the room.”</blockquote>
-      <p className="mk-from">Your name</p>
-      <button type="button" className="mk-take" onClick={onContinue}>Continue</button>
+      {last
+        ? <p className="mk-close-body">You can leave notes for people during a circle. They’re delivered here.</p>
+        : <>
+            <blockquote>“Your closing words, or a line from your speaker. Guests carry this out of the room.”</blockquote>
+            <p className="mk-from">Your name</p>
+          </>}
+      <button type="button" className="mk-take" onClick={() => last ? onLeave() : setCard("notes")}>{last ? "Leave Circle" : "Continue"}</button>
+      <span className="mk-pips" aria-hidden="true"><i className={last ? undefined : "mk-pip-on"} /><i className={last ? "mk-pip-on" : undefined} /></span>
     </section>
   );
 }
