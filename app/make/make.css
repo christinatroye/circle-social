@@ -284,7 +284,8 @@ body:has(.mk), body:has(.mk-stage) { margin: 0; background: #eae3d5; }
   .mk-body { grid-template-columns: 1fr; }
   .mk-ask, .mk-ask-open { padding: 40px 16px 48px; }
   .mk-ask-open h1 { font-size: clamp(2.4rem, 10vw, 3.2rem); }
-  .mk-words { margin-top: 36px; }
+  /* Room for the examples to wrap onto a second line. */
+  .mk-words { margin-top: 36px; min-height: 2.8em; }
   /* On a phone the room comes first, a band of light above the words. */
   .mk-forming { order: -1; min-height: 0; height: 38svh; }
   .mk-moods { left: 16px; right: 16px; bottom: 18px; }

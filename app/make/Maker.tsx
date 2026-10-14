@@ -62,14 +62,17 @@ function readPicture(url: string): Promise<ReturnType<typeof pictureColours> | n
   });
 }
 
-/** The moods of entercircle.co's own room, and the words that lean a gathering towards each. */
+/**
+ * The moods of entercircle.co's own room, and the whole words that lean a gathering towards each.
+ * Whole words only, so "startup" isn't read as a star or "software" as soft.
+ */
 const MOODS = [
-  { name: "Warm", hue: 30, words: /\b(warm|candle|gold|amber|sun|honey|cos[yi]|hearth|autumn|home|earth|wood|glow)/g },
-  { name: "Alive", hue: 120, words: /\b(alive|forest|green|nature|garden|grow|plant|spring|fresh|leaf|wild|energ|mindful|wellbeing|health)/g },
-  { name: "Calm", hue: 185, words: /\b(calm|sea|ocean|water|breath|still|quiet|peace|soft|rest|slow|sky|blue|clear|gentle|meditat)/g },
-  { name: "Mystic", hue: 240, words: /\b(night|star|space|cosm|alien|physics|moon|dream|myst|magic|universe|future|deep)/g },
-  { name: "Intimate", hue: 305, words: /\b(intimate|rose|pink|love|tender|feminin|sister|heart|close|vulnerab|sacred|body|embod)/g },
-  { name: "Ardent", hue: 360, words: /\b(bold|red|passion|oxblood|wine|blood|fierce|ardent|power|desire|burn|fire|sensual|crimson)/g },
+  { name: "Warm", hue: 30, words: /\b(warm(th)?|candles?|candlelit|gold(en)?|amber|sun|sunny|sunset|sunlight|honey|cos[yi]|hearth|autumn|home|earth(y)?|wood(en)?|glow(ing)?)\b/g },
+  { name: "Alive", hue: 120, words: /\b(alive|forests?|green|nature|gardens?|grow(th|ing)?|plants?|spring|fresh|leaf|leaves|wild|energy|energi[sz]ing|mindful(ness)?|wellbeing|health(y)?|climate|planet|sustainab(le|ility))\b/g },
+  { name: "Calm", hue: 185, words: /\b(calm(ing)?|sea|seaside|ocean|water|breath(e|ing|work)?|still(ness)?|quiet|peace(ful)?|soft|rest(ful)?|slow|sky|blue|clear|gentle|meditat(e|ion|ive))\b/g },
+  { name: "Mystic", hue: 240, words: /\b(night|stars?|starry|starlight|space|cosmos|cosmic|aliens?|physics|physicists?|moon|dream(s|y)?|myst(ic|ical|ery|erious)|magic(al)?|universe|deep)\b/g },
+  { name: "Intimate", hue: 305, words: /\b(intimate|intimacy|roses?|pink|love|tender|feminine|sisters?|sisterhood|heart|close|closeness|vulnerab(le|ility)|sacred|body|embodi(ed|ment))\b/g },
+  { name: "Ardent", hue: 360, words: /\b(bold|red|passion(ate)?|oxblood|wine|blood|fierce|ardent|powerful|desire|burn(ing)?|fire|fiery|sensual|crimson)\b/g },
 ];
 
 /** The mood the host's words lean towards most, or -1 while nothing leans. */
@@ -168,6 +171,44 @@ function Forming({ brand, seats, caption, words, listening }: { brand: Brand | n
   );
 }
 
+/** What hosts might actually write. Each leans to a different mood, so the light shows what words can do. */
+const EXAMPLES = [
+  "Weekly coaching group, 8 of my clients. Warm, safe.",
+  "Monthly all-hands for our team of 20. Energising.",
+  "Sunday morning meditation for my community. Calm.",
+  "Listening party for our new album. Dreamy, starry.",
+  "Women's circle on the full moon. Intimate and sacred.",
+  "Evening with our best customers. Bold, fiery.",
+];
+
+/** Types the examples out one by one and clears them again, until the host starts writing. */
+function useExample(active: boolean) {
+  const [shown, setShown] = useState("");
+  useEffect(() => {
+    if (!active) return;
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let example = 0, length = 0, timer = 0;
+    const step = () => {
+      const text = EXAMPLES[example];
+      if (still) { setShown(text); return; }
+      if (length < text.length) {
+        length += 1;
+        setShown(text.slice(0, length));
+        // A finished sentence stays a few seconds before the next begins.
+        timer = window.setTimeout(step, length === text.length ? 3200 : 45);
+      } else {
+        example = (example + 1) % EXAMPLES.length;
+        length = 0;
+        setShown("");
+        timer = window.setTimeout(step, 700);
+      }
+    };
+    timer = window.setTimeout(step, 600);
+    return () => window.clearTimeout(timer);
+  }, [active]);
+  return active ? shown : "";
+}
+
 /** The room maker: four questions, an optional look, then the host walks through their own room. */
 export function Maker() {
   const [step, setStep] = useState<Step>("site");
@@ -184,6 +225,7 @@ export function Maker() {
   const [siteLogo, setSiteLogo] = useState<Logo | null>(null);
   const [mood, setMood] = useState<{ url: string; colours: ReturnType<typeof pictureColours> | null } | null>(null);
   const [moment, setMoment] = useState<Moment>("welcome");
+  const example = useExample(step === "site" && !gathering);
   const pending = useRef<Promise<Reading> | null>(null);
   const named = useRef(false);
 
@@ -289,7 +331,7 @@ export function Maker() {
               <h1>Design your gathering.</h1>
               <p className="mk-sub">Your words become the room.</p>
               <textarea className="mk-words" value={gathering} aria-label="Tell us about your gathering" rows={1} maxLength={6000}
-                placeholder="A quarterly ritual for our distributed creative team."
+                placeholder={example}
                 onChange={e => { setGathering(e.target.value); e.target.style.height = "auto"; e.target.style.height = `${e.target.scrollHeight}px`; }} />
               {withSite || address ? (
                 <input className="mk-site" value={address} onChange={e => setAddress(e.target.value)} aria-label="Your website" placeholder="yourwebsite.com" inputMode="url" autoComplete="url" autoCapitalize="none" spellCheck={false} autoFocus={withSite && !address} />
@@ -362,7 +404,7 @@ export function Maker() {
             </>
           )}
         </section>
-        <Forming brand={brand} seats={seats} caption={caption} words={gathering} listening={step === "site"} />
+        <Forming brand={brand} seats={seats} caption={caption} words={gathering || example} listening={step === "site"} />
       </div>
     </main>
   );
