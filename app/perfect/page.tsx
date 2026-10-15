@@ -31,7 +31,7 @@ export default function PerfectPage() {
 
         <div className="event-copy">
           <p>Who are you, really? We used to answer that question by talking about character: our values, our beliefs, the kind of person we were trying to become.</p>
-          <p>Now scroll for a minute: glow-ups, looksmaxxing, Ozempic, anti-ageing. We still talk about becoming a better version of ourselves, but more and more of that work seems to happen on the outside.</p>
+          <p>Now scroll for a minute: glow-ups, looksmaxxing, Ozempic, anti-ageing, artificial faces. We still talk about becoming a better version of ourselves, but more and more of that work seems to happen on the outside.</p>
           <p>Beauty used to be thought of as a gift, something you were born with or could afford. Philosopher Heather Widdows argues that it’s now something we’re all expected to work for, and that how we look has become part of who we are. Effort reads as virtue, and “letting yourself go” sounds like a moral failure.</p>
           <p>The work never really ends, because as soon as you fix one thing, you start noticing the next. Keeping up costs time, money and sometimes your health, but opting out has a price of its own.</p>
           <p>If you think none of this applies to you, her book <i>Perfect Me</i>, named a Book of the Year by The Atlantic and called groundbreaking by Vogue, might change your mind.</p>
