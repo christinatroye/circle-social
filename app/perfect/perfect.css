@@ -32,8 +32,9 @@ body.event-locked { overflow: hidden; }
 
 .event-copy { margin-top: 36px; display: grid; gap: 16px; text-align: left; font-size: 16px; line-height: 1.75; color: var(--soft); }
 .event-copy p { margin: 0; }
-.event-opens { margin-top: 8px !important; text-align: center; font-family: var(--font-cormorant), Georgia, serif; font-style: italic; font-size: 1.3rem; color: var(--cream); }
-.event-facts { margin: 30px 0 0; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; line-height: 2; color: var(--gold); }
+.event-opens { margin: 22px 0 0; text-align: center; text-wrap: balance; font-family: var(--font-cormorant), Georgia, serif; font-style: italic; font-size: 1.3rem; color: var(--cream); }
+.event-when-end { margin-top: 40px; font-size: 15px; color: var(--cream); }
+.event-facts { margin: 12px 0 0; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; line-height: 2; color: var(--gold); }
 
 /* The one button: light, not an outline box. */
 .event-go { margin-top: 26px; padding: 16px 40px; border-radius: 999px; font: inherit; font-size: 16px; color: #fff8ec; cursor: pointer;

@@ -7,7 +7,7 @@ import { ApplyForSeat } from "./ApplyForSeat";
 import "./perfect.css";
 
 const title = "Perfect, a Circle with Heather Widdows";
-const description = "What does it mean to be beautiful now? Tuesday 10 November, online.";
+const description = "Who are you, really? Tuesday 10 November, online.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -28,16 +28,19 @@ export default function PerfectPage() {
       <article className="event-body">
         <h1 className="event-title">Perfect</h1>
         <p className="event-with">A Circle with Heather Widdows</p>
-        <p className="event-when">Tuesday 10 November · 6pm UK time</p>
 
         <div className="event-copy">
-          <p>What does it mean to be beautiful now? When filters reshape our faces and AI generates perfect people we compare ourselves to anyway. When the face that used to belong to a film star is now available on the high street. When a whole industry runs on the feeling that you’re almost, but never quite, enough.</p>
-          <p>Prof. Heather Widdows is the philosopher who argued that beauty isn’t vanity. It’s ethics. Her book <i>Perfect Me: Beauty as an Ethical Ideal</i> makes the case that beauty has quietly become one of the dominant moral frameworks of our time, shaping how we judge ourselves, each other, and what counts as a good life. Named a book of the year by The Atlantic and groundbreaking by Vogue.</p>
-          <p>This is not a conversation about skincare or self-love. It’s about how beauty became a moral demand, what it costs us to comply, and whether the ideal survives when perfection is no longer scarce.</p>
-          <p className="event-opens">Heather opens, then the room joins in. No need to be an expert, just curious.</p>
+          <p>Who are you, really? We used to answer that question by talking about character: our values, our beliefs, the kind of person we were trying to become.</p>
+          <p>Now scroll for a minute: glow-ups, looksmaxxing, Ozempic, anti-ageing. We still talk about becoming a better version of ourselves, but more and more of that work seems to happen on the outside.</p>
+          <p>Beauty used to be thought of as a gift, something you were born with or could afford. Philosopher Heather Widdows argues that it’s now something we’re all expected to work for. Effort reads as virtue, and “letting yourself go” sounds like a moral failure.</p>
+          <p>The work never really ends, because as soon as you fix one thing, you start noticing the next. Keeping up costs time, money and sometimes your health, but opting out has a price of its own.</p>
+          <p>If you think none of this applies to you, her book <i>Perfect Me</i>, named a Book of the Year by The Atlantic and called groundbreaking by Vogue, might change your mind.</p>
+          <p>So where does the self live now? And who gets to decide what a better version of us looks like?</p>
         </div>
 
-        <p className="event-facts">Small group. Invite only. Online. Not recorded.</p>
+        <p className="event-when event-when-end">Tuesday 10 November · 6pm UK time</p>
+        <p className="event-facts">Online. Small group. Invite only. Not recorded.</p>
+        <p className="event-opens">Heather opens, then the room joins in. You’re welcome to speak or simply listen.</p>
         <ApplyForSeat />
       </article>
     </main>
