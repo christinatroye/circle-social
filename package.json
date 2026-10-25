@@ -11,6 +11,7 @@
     "import": "node scripts/import-guests.mjs"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "0.129.0",
     "@neondatabase/serverless": "^1.1.0",
     "jose": "^6.2.9",
     "next": "^16.3.0",

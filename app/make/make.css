@@ -1,9 +1,9 @@
 /* The room maker. The wrapper is entercircle.co: cream, Fraunces, Jost. The room inside wears the host's brand. */
-body:has(.mk), body:has(.mk-stage) { margin: 0; background: #f8f5ef; }
+body:has(.mk), body:has(.mk-stage) { margin: 0; background: #eae3d5; }
 
 .mk {
-  --paper: #f8f5ef;
-  --sand: #eae3d5;
+  --paper: #eae3d5;
+  --sand: rgba(26, 20, 14, .06);
   --ink: #17110d;
   --ink-soft: rgba(26, 20, 14, .6);
   --ink-faint: rgba(26, 20, 14, .4);
@@ -19,9 +19,25 @@ body:has(.mk), body:has(.mk-stage) { margin: 0; background: #f8f5ef; }
 .mk-brand { display: flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none; font-family: var(--font-fraunces), Georgia, serif; font-size: 13px; letter-spacing: .46em; text-transform: uppercase; }
 .mk-header-mark { width: 26px; height: 26px; fill: var(--ink); }
 
-.mk-body { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.mk-body { flex: 1; display: grid; grid-template-columns: minmax(0, 55fr) minmax(0, 45fr); }
 .mk-ask { padding: 72px 64px 64px 80px; max-width: 560px; display: flex; flex-direction: column; animation: mk-rise .7s var(--curve) both; }
 .mk-ask form { display: flex; flex-direction: column; }
+/* The way in, as entercircle.co's hero: the headline, then one line to write on. */
+.mk-ask-open { max-width: 640px; justify-content: center; padding: 56px 60px 64px 80px; }
+.mk-ask-open h1 { max-width: 640px; font-size: clamp(2.8rem, 4.8vw, 4.6rem); line-height: 1.06; }
+.mk-ask-open .mk-sub { margin-top: 22px; font-size: 18px; line-height: 1.78; color: rgba(26, 20, 14, .54); }
+.mk-words { margin-top: 48px; padding: 4px 0 12px; border: 0; border-bottom: 1px solid rgba(26, 20, 14, .28); border-radius: 0; background: transparent; outline: none; resize: none; overflow: hidden; field-sizing: content; min-height: 1.5em; max-height: 40vh; font-family: var(--font-fraunces), Georgia, serif; font-weight: 300; font-variation-settings: "opsz" 48; font-size: clamp(1.4rem, 2.1vw, 1.8rem); line-height: 1.4; color: var(--ink); transition: border-color .5s var(--curve); }
+.mk-words::placeholder { color: rgba(26, 20, 14, .42); font-style: italic; }
+.mk-words:focus { border-bottom-color: var(--ink); }
+.mk-add-site { align-self: flex-start; margin-top: 30px; padding: 0; border: 0; background: none; font: inherit; font-size: 14px; color: rgba(26, 20, 14, .56); cursor: pointer; }
+.mk-site { margin-top: 30px; padding: 4px 0 10px; border: 0; border-bottom: 1px solid rgba(26, 20, 14, .2); border-radius: 0; background: transparent; outline: none; font: inherit; font-size: 17px; color: var(--ink); animation: mk-rise .6s var(--curve) both; }
+.mk-site:focus { border-bottom-color: var(--ink); }
+.mk-site::placeholder { color: rgba(26, 20, 14, .42); }
+/* The way on, as "Request early access →" on entercircle.co. */
+.mk-link-go { align-self: flex-start; margin-top: 48px; padding: 0 0 3px; display: inline-flex; align-items: center; gap: 12px; border: 0; border-bottom: 1px solid rgba(26, 20, 14, .3); background: none; font: inherit; font-size: 15px; color: var(--ink); cursor: pointer; transition: opacity .5s var(--curve), gap .5s var(--curve); }
+.mk-link-go:hover:not(:disabled) { gap: 16px; }
+.mk-link-go:disabled { opacity: .4; cursor: default; }
+
 .mk-ask h1 { margin: 0; font-family: var(--font-fraunces), Georgia, serif; font-weight: 300; font-variation-settings: "opsz" 84; font-size: clamp(2.4rem, 4.4vw, 4rem); line-height: 1.08; letter-spacing: -.01em; }
 .mk-label { margin: 0 0 22px; font-size: 10px; letter-spacing: .38em; text-transform: uppercase; color: var(--ink-faint); }
 .mk-label-gap { margin: 40px 0 14px; }
@@ -35,6 +51,9 @@ body:has(.mk), body:has(.mk-stage) { margin: 0; background: #f8f5ef; }
 .mk-field { margin-top: 40px; display: flex; flex-direction: column; gap: 10px; font-size: 10px; letter-spacing: .3em; text-transform: uppercase; color: var(--ink-faint); }
 .mk-field input { font: inherit; font-size: 20px; letter-spacing: 0; text-transform: none; color: var(--ink); background: transparent; border: 0; border-bottom: 1px solid rgba(26, 20, 14, .3); padding: 6px 0 10px; outline: none; border-radius: 0; }
 .mk-field input:focus { border-bottom-color: var(--ink); }
+.mk-field textarea { font: inherit; font-size: 18px; line-height: 1.5; letter-spacing: 0; text-transform: none; color: var(--ink); background: transparent; border: 0; border-bottom: 1px solid rgba(26, 20, 14, .3); padding: 6px 0 10px; outline: none; border-radius: 0; resize: vertical; }
+.mk-field textarea:focus { border-bottom-color: var(--ink); }
+.mk-field textarea::placeholder { color: var(--ink-faint); }
 
 /* One button, black like entercircle.co's. */
 .mk-go { align-self: flex-start; margin-top: 34px; height: 50px; padding: 0 30px; display: inline-flex; align-items: center; border: 0; border-radius: 0; background: #0f0a07; color: #f1e8d8; font: inherit; font-size: 11px; font-weight: 400; letter-spacing: .22em; text-transform: uppercase; text-decoration: none; cursor: pointer; transition: opacity .4s var(--curve); }
@@ -58,14 +77,28 @@ body:has(.mk), body:has(.mk-stage) { margin: 0; background: #f8f5ef; }
 .mk-drop img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: 16px; box-sizing: border-box; }
 .mk-drop-wide img { object-fit: cover; padding: 0; }
 
-/* The room taking shape beside the questions. */
-.mk-forming { position: relative; margin: 24px; border-radius: 14px; overflow: hidden; background: var(--sand); transition: background 1.6s var(--curve); }
-.mk-forming[data-read] { background: radial-gradient(60% 70% at 100% 0%, color-mix(in srgb, var(--mk-brand) 75%, transparent) 0%, transparent 70%), radial-gradient(60% 70% at 0% 40%, color-mix(in srgb, var(--mk-accent) 60%, transparent) 0%, transparent 70%), var(--mk-ground); }
-.mk-forming-light { position: absolute; left: 50%; top: 50%; width: 46%; aspect-ratio: 1.1; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(ellipse, rgba(255, 246, 234, .9) 0%, rgba(255, 246, 234, 0) 70%); animation: mk-halo 6.5s ease-in-out infinite; }
-.mk-forming-seat { position: absolute; width: 9%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; background: rgba(26, 20, 14, .08); transition: background 1.2s var(--curve), left .8s var(--curve), top .8s var(--curve); }
-.mk-forming[data-read] .mk-forming-seat { background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--mk-ground) 60%, var(--mk-ink)) 0%, var(--mk-ink) 100%); opacity: .8; }
-.mk-forming-caption { position: absolute; left: 0; right: 0; bottom: 22px; margin: 0; text-align: center; font-size: 10px; letter-spacing: .3em; text-transform: uppercase; color: var(--ink-faint); }
+/* The room beside the questions, edge to edge as entercircle.co's mood panel: a light listening while the host writes. */
+.mk-forming { position: relative; min-height: 560px; overflow: hidden; background: #120d09; container-type: size; }
+/* The ring stays a ring, whatever the shape of the panel. */
+.mk-forming-ring { position: absolute; left: 50%; top: 47%; width: min(84cqw, 74cqh); aspect-ratio: 1; transform: translate(-50%, -50%); }
+.mk-listen { position: absolute; inset: 0; }
+.mk-forming-brand { position: absolute; inset: 0; opacity: 0; transition: opacity 1.8s var(--curve); background: radial-gradient(60% 70% at 100% 0%, color-mix(in srgb, var(--mk-brand) 75%, transparent) 0%, transparent 70%), radial-gradient(60% 70% at 0% 40%, color-mix(in srgb, var(--mk-accent) 60%, transparent) 0%, transparent 70%), var(--mk-ground); }
+.mk-forming[data-read] .mk-forming-brand { opacity: 1; }
+.mk-forming-light { position: absolute; left: 50%; top: 50%; width: 46%; aspect-ratio: 1.1; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(ellipse, color-mix(in srgb, var(--mk-light, #fff6ea) 90%, transparent) 0%, transparent 70%); opacity: 0; transition: opacity 1.8s var(--curve); }
+.mk-forming[data-read] .mk-forming-light { opacity: 1; animation: mk-halo 6.5s ease-in-out infinite; }
+/* A seat fills for every few words: the room filling as the gathering is described. */
+.mk-forming-seat { position: absolute; width: 12%; aspect-ratio: 1; transform: translate(-50%, -50%) scale(.86); border-radius: 50%; background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--mk-mood) 26%, transparent) 0%, color-mix(in srgb, var(--mk-mood) 8%, transparent) 100%); box-shadow: 0 0 30px color-mix(in srgb, var(--mk-mood) 18%, transparent); opacity: 0; transition: opacity 1.6s var(--curve), transform 1.6s var(--curve), background 1.2s var(--curve); }
+.mk-forming-seat[data-filled] { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.mk-forming[data-read] .mk-forming-seat { background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--mk-ground) 60%, var(--mk-ink)) 0%, var(--mk-ink) 100%); box-shadow: none; opacity: .8; }
+.mk-forming-caption { position: absolute; left: 0; right: 0; bottom: 28px; margin: 0; text-align: center; font-size: 10px; letter-spacing: .3em; text-transform: uppercase; color: rgba(232, 217, 192, .55); }
 .mk-forming[data-read] .mk-forming-caption { color: var(--mk-muted); }
+/* The moods along the bottom, as on entercircle.co; the glint goes where the words lean. */
+.mk-moods { position: absolute; left: 32px; right: 32px; bottom: 30px; }
+.mk-moods-names { display: flex; justify-content: space-between; margin-bottom: 14px; font-size: 9px; letter-spacing: .28em; text-transform: uppercase; color: rgba(232, 217, 192, .5); }
+.mk-moods-names span { transition: color .8s var(--curve); }
+.mk-moods-names span[data-near] { color: rgba(232, 217, 192, .96); }
+.mk-moods-line { position: relative; height: 1px; background: linear-gradient(to right, hsl(30 60% 52%), hsl(120 50% 40%), hsl(185 58% 44%), hsl(240 55% 50%), hsl(305 58% 50%), hsl(360 62% 48%)); opacity: .7; }
+.mk-moods-line i { position: absolute; top: 50%; left: var(--mk-along); width: 6px; height: 6px; border-radius: 50%; transform: translate(-50%, -50%); background: var(--mk-mood); box-shadow: 0 0 8px 3px color-mix(in srgb, var(--mk-mood) 60%, transparent), 0 0 30px 8px color-mix(in srgb, var(--mk-mood) 30%, transparent); }
 
 /* The last screen. */
 .mk-reserve-body { flex: 1; max-width: 620px; margin: 0 auto; padding: 110px 24px 80px; display: flex; flex-direction: column; align-items: center; text-align: center; animation: mk-rise .9s var(--curve) both; }
@@ -187,12 +220,48 @@ body:has(.mk), body:has(.mk-stage) { margin: 0; background: #f8f5ef; }
 .mk-tools .mk-tool-chosen { border-color: color-mix(in srgb, var(--mk-brand) 70%, var(--mk-ink)); opacity: 1; }
 .mk-tools .mk-tool-lit { background: color-mix(in srgb, var(--mk-light) 22%, transparent); box-shadow: 0 0 24px color-mix(in srgb, var(--mk-light) 30%, transparent); opacity: 1; }
 .mk-tools .mk-tool-quiet { opacity: .3; }
+/* On a laptop every control sits in the row, as in the live room; More and Present PDF belong to the phone. */
+.mk-more-actions { display: contents; }
+.mk-tools .mk-more, .mk-tools .mk-tool-phone, .mk-tool-short { display: none; }
+.mk-tools > button:nth-child(1) { order: 2; }
+.mk-tools > button:nth-child(2) { order: 4; }
+.mk-tools > button:nth-child(3) { order: 7; }
+.mk-tools > button:nth-child(4) { order: 8; }
+.mk-more-actions > button:nth-child(1) { order: 1; }
+.mk-more-actions > button:nth-child(2) { order: 3; }
+.mk-more-actions > button:nth-child(3) { order: 5; }
+.mk-more-actions > button:nth-child(4) { order: 6; }
+.mk-more-actions > button:nth-child(n+5) { order: 9; }
 
 /* Before you go. */
 .mk-closing { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; padding: 0 24px 80px; text-align: center; }
 .mk-eyebrow { margin: 0; font-size: 10.5px; letter-spacing: 4px; text-transform: uppercase; color: var(--mk-muted); }
 .mk-closing blockquote { margin: 0; max-width: 620px; font-family: var(--mk-display); font-style: italic; font-size: clamp(1.6rem, 3vw, 2.2rem); line-height: 1.35; }
 .mk-from { margin: 0; font-family: var(--mk-display); font-size: 18px; color: var(--mk-muted); }
+.mk-close-body { margin: 0; max-width: 620px; font-family: var(--mk-display); font-size: clamp(1.4rem, 2.6vw, 1.9rem); line-height: 1.4; }
+.mk-pips { display: flex; gap: 8px; }
+.mk-pips i { width: 5px; height: 5px; border-radius: 50%; background: var(--mk-muted); opacity: .4; }
+.mk-pips .mk-pip-on { opacity: 1; }
+
+/* What did you take away?, as the live room asks it after the circle. */
+.mk-takeaway { display: flex; align-items: center; justify-content: center; padding: 92px 24px 90px; overflow: auto; }
+.mk-rejoin { position: absolute; top: 30px; right: 30px; padding: 4px 0; border: 0; background: none; color: var(--mk-muted); font-family: var(--mk-body); font-size: 11px; letter-spacing: .08em; text-decoration: underline; text-decoration-thickness: .5px; text-underline-offset: 4px; cursor: pointer; }
+.mk-takeaway-column { display: flex; flex-direction: column; align-items: center; width: min(92vw, 620px); }
+.mk-takeaway-mark { display: block; max-width: 120px; max-height: 40px; margin-bottom: 26px; opacity: .35; }
+.mk-takeaway-mark.mk-mark-word { font-family: var(--mk-display); font-size: 18px; }
+.mk-takeaway-column h2 { margin: 0 0 56px; font-family: var(--mk-display); font-size: clamp(30px, 4vw, 44px); font-weight: 400; line-height: 1.05; text-align: center; color: var(--mk-ink); }
+.mk-takeaway-column textarea { width: 100%; min-height: 118px; padding: 18px 0; resize: none; border: 0; border-top: 1px solid color-mix(in srgb, var(--mk-ink) 22%, transparent); border-bottom: 1px solid color-mix(in srgb, var(--mk-ink) 22%, transparent); border-radius: 0; outline: none; background: transparent; color: var(--mk-ink); font-family: var(--mk-display); font-size: 24px; line-height: 1.45; }
+.mk-takeaway-column textarea::placeholder { color: var(--mk-muted); font-style: italic; font-size: 20px; text-align: center; }
+.mk-choices { display: flex; justify-content: center; gap: 62px; margin-top: 25px; }
+.mk-choices label { display: flex; align-items: center; gap: 13px; font-family: var(--mk-body); font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--mk-muted); cursor: pointer; }
+.mk-choices label:has(input:checked) { color: var(--mk-ink); }
+.mk-choices input { position: absolute; opacity: 0; pointer-events: none; }
+.mk-switch { position: relative; width: 25px; height: 13px; border: 1px solid color-mix(in srgb, var(--mk-ink) 35%, transparent); border-radius: 999px; transition: border-color .35s cubic-bezier(.2,.8,.2,1), background .35s cubic-bezier(.2,.8,.2,1); }
+.mk-switch > span { position: absolute; top: 2px; left: 2px; width: 7px; height: 7px; border-radius: 50%; background: var(--mk-muted); transition: transform .35s cubic-bezier(.2,.8,.2,1), background .35s cubic-bezier(.2,.8,.2,1); }
+.mk-choices input:checked + .mk-switch { border-color: color-mix(in srgb, var(--mk-ink) 60%, transparent); background: color-mix(in srgb, var(--mk-ink) 8%, transparent); }
+.mk-choices input:checked + .mk-switch > span { transform: translateX(12px); background: var(--mk-ink); }
+.mk-choices input:focus-visible + .mk-switch { outline: 2px solid color-mix(in srgb, var(--mk-ink) 45%, transparent); outline-offset: 4px; }
+.mk-takeaway-go { display: inline-flex; align-items: center; gap: 12px; margin-top: 38px; padding: 10px 4px; border: 0; background: none; color: var(--mk-ink); font-family: var(--mk-body); font-size: 10px; letter-spacing: .24em; text-transform: uppercase; cursor: pointer; }
 
 @keyframes mk-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 @keyframes mk-appear { from { opacity: 0; } to { opacity: 1; } }
@@ -213,11 +282,28 @@ body:has(.mk), body:has(.mk-stage) { margin: 0; background: #f8f5ef; }
 @media (max-width: 860px) {
   .mk-header { padding: 0 16px; }
   .mk-body { grid-template-columns: 1fr; }
-  .mk-ask { padding: 40px 16px 24px; }
-  .mk-forming { margin: 0 16px 24px; min-height: 280px; }
+  .mk-ask, .mk-ask-open { padding: 40px 16px 48px; }
+  .mk-ask-open h1 { font-size: clamp(2.4rem, 10vw, 3.2rem); }
+  /* Room for the examples to wrap onto a second line. */
+  .mk-words { margin-top: 36px; min-height: 2.8em; }
+  /* On a phone the room comes first, a band of light above the words. */
+  .mk-forming { order: -1; min-height: 0; height: 38svh; }
+  .mk-moods { left: 16px; right: 16px; bottom: 18px; }
+  .mk-moods-names { font-size: 7px; letter-spacing: .16em; }
   .mk-bar { left: 12px; right: 12px; transform: none; overflow-x: auto; }
   .mk-bar-mark { display: none; }
-  .mk-tools { display: none; }
+  /* On a phone the live room keeps five controls in the bar and the rest behind More. */
+  .mk-tools { left: 10px; right: 10px; bottom: 16px; width: auto; transform: none; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); padding: 5px; }
+  .mk-tools button { min-width: 0; padding: 8px 2px; gap: 6px; font-size: 9px; letter-spacing: .1em; }
+  .mk-tools .mk-more { display: flex; order: 12; }
+  .mk-tools .mk-more svg circle { fill: currentColor; stroke: none; }
+  .mk-tool-long { display: none; }
+  .mk-tool-short { display: inline; }
+  .mk-more-actions { position: absolute; left: 0; right: 0; bottom: calc(100% + 10px); display: none; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2px; padding: 8px; border-radius: 3px; border: 1px solid color-mix(in srgb, var(--mk-ink) 18%, transparent); background: color-mix(in srgb, var(--mk-ground) 94%, transparent); box-shadow: 0 14px 30px #0005; }
+  .mk-more-open .mk-more-actions { display: grid; }
+  .mk-more-actions > button { order: 0 !important; }
+  .mk-tools .mk-tool-phone { display: flex; }
+  .mk-choices { flex-direction: column; align-items: flex-start; gap: 22px; }
   .mk-ring { width: 92vw; height: 60vh; }
   .mk-pager { display: none; }
 }
