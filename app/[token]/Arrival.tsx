@@ -7,6 +7,12 @@ import { CircleMark } from "@/components/CircleMark";
 import { ArrivalMusic } from "@/components/ArrivalMusic";
 import { addThisDevice, claimLink, recommendFriend, logAfterStep, sendFeedback, wantEarlyAccess, wantNextCircle, requestIntroduction, saveIntroduction, sawIntroduction, setCancelled, whoIsHere } from "./actions";
 
+/** The drifting light in each Circle's own hue: the brightest tone, then two deeper ones. Alien's indigo unless a Circle has its own. */
+const ORB: Record<string, [string, string, string]> = {
+  perfect: ["232,190,140", "150,98,58", "92,58,34"],
+};
+const ORB_DEFAULT: [string, string, string] = ["150,150,225", "117,102,135", "68,57,79"];
+
 export default function Arrival({ data }: { data: ArrivalData }) {
   const root = useRef<HTMLDivElement>(null);
   const orb = useRef<HTMLDivElement>(null);
@@ -36,12 +42,12 @@ export default function Arrival({ data }: { data: ArrivalData }) {
   // The drifting light from entercircle.co, in the room's hue.
   useEffect(() => {
     const [vig, main, core] = Array.from(orb.current!.children) as HTMLElement[];
-    const L = "150,150,225";
+    const [L, mid, deep] = ORB[opened.current.circle.slug] ?? ORB_DEFAULT;
     const paint = (x: number, y: number) => {
       const at = `${x.toFixed(1)}% ${y.toFixed(1)}%`;
       vig.style.background = `radial-gradient(ellipse at ${at}, transparent 10%, rgba(0,0,0,0.35) 75%, rgba(0,0,0,0.6) 100%)`;
-      main.style.background = `radial-gradient(ellipse 120% 95% at ${at}, rgba(${L},0.16) 0%, rgba(117,102,135,0.09) 35%, rgba(68,57,79,0.04) 60%, transparent 80%)`;
-      core.style.background = `radial-gradient(ellipse 70% 55% at ${at}, rgba(${L},0.07) 0%, rgba(132,120,162,0.03) 50%, transparent 75%)`;
+      main.style.background = `radial-gradient(ellipse 120% 95% at ${at}, rgba(${L},0.16) 0%, rgba(${mid},0.09) 35%, rgba(${deep},0.04) 60%, transparent 80%)`;
+      core.style.background = `radial-gradient(ellipse 70% 55% at ${at}, rgba(${L},0.07) 0%, rgba(${mid},0.03) 50%, transparent 75%)`;
     };
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { paint(50, 36); return; }
     let frame = 0, start = 0;
@@ -57,6 +63,8 @@ export default function Arrival({ data }: { data: ArrivalData }) {
 
   return (
     <>
+      {/* Lets the page take this Circle's colours from the first paint, so nothing flickers. */}
+      <div className="theme" data-circle={data.circle.slug} hidden />
       <div className="orb" aria-hidden="true" ref={orb}><div /><div className="orb-main" /><div className="orb-core" /></div>
       <div className="top" aria-hidden="true"><CircleMark className="mark" /><span>Circle</span></div>
       <ArrivalMusic src={data.phase === "after" ? "/after-music.mp3" : undefined} />
