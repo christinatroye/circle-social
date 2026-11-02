@@ -12,7 +12,7 @@
 body:has(.event.trust) { background: #031026; }
 .trust .event-title, .trust .event-with { color: #eee9dc; }
 .trust .event-portrait::after { content: none; }
-.trust .event-portrait img { object-position: 74% 35%; -webkit-mask-image: linear-gradient(to bottom, #000 65%, transparent 100%); mask-image: linear-gradient(to bottom, #000 65%, transparent 100%); }
+.trust .event-portrait img { object-position: 52% 30%; -webkit-mask-image: linear-gradient(to bottom, #000 65%, transparent 100%); mask-image: linear-gradient(to bottom, #000 65%, transparent 100%); }
 .trust .event-portrait, .trust .event-body { z-index: 1; }
 
 /* On phones the page is tall, so the water sits behind the title as its own layer instead of covering the whole page. */
@@ -44,6 +44,7 @@ body:has(.event.trust) { background: #031026; }
 .trust-apply .event-form input::placeholder { color: rgba(166,182,204,.85); }
 
 @media (min-width: 900px) {
-  .trust .event-body { transform: translateX(2.5vw); }
-  .trust .event-portrait img { -webkit-mask-image: linear-gradient(to right, #000 70%, transparent 100%); mask-image: linear-gradient(to right, #000 70%, transparent 100%); }
+  /* Like Perfect: the portrait fills the left half and melts softly into the text side; the water fades to navy below the title. */
+  .trust .event-portrait img { -webkit-mask-image: linear-gradient(to right, #000 80%, transparent 100%); mask-image: linear-gradient(to right, #000 80%, transparent 100%); }
+  .event.trust { background: linear-gradient(180deg, rgba(3,16,38,0) 0%, rgba(3,16,38,0) 22%, #031026 55%), #031026 url(/events/trust-water.webp) center top / cover no-repeat; }
 }
