@@ -4,8 +4,8 @@ import { type ChangeEvent, useActionState, useEffect, useState } from "react";
 import { CircleMark } from "@/components/CircleMark";
 import { applyForSeat, type Application } from "./actions";
 
-/** The "Request a seat" button, and the quiet screen it opens: the form, then the thank you. */
-export function ApplyForSeat() {
+/** The "Request a seat" button, and the quiet screen it opens: the form, then the thank you. Shared by the public Circle pages. */
+export function ApplyForSeat({ event = "perfect", className = "" }: { event?: "perfect" | "trust"; className?: string }) {
   const [open, setOpen] = useState(false);
   // Controlled, so a "please check your email" answer doesn't empty what they typed.
   const [fields, setFields] = useState({ name: "", email: "", line: "" });
@@ -26,7 +26,7 @@ export function ApplyForSeat() {
     <>
       <button type="button" className="event-go" onClick={() => setOpen(true)}>Request a seat</button>
       {open && (
-        <div className="event-apply" role="dialog" aria-modal="true" aria-labelledby="apply-heading">
+        <div className={`event-apply ${className}`.trim()} role="dialog" aria-modal="true" aria-labelledby="apply-heading">
           <div className="event-apply-inner">
             <CircleMark className="event-apply-mark" />
             {state.status === "sent" ? (
@@ -37,6 +37,7 @@ export function ApplyForSeat() {
               </>
             ) : (
               <form action={send} className="event-form" noValidate>
+                <input type="hidden" name="event" value={event} />
                 <h2 id="apply-heading">Request a seat</h2>
                 <input {...field("name")} placeholder="Your name" aria-label="Your name" autoComplete="name" maxLength={120} required autoFocus />
                 <input {...field("email")} type="email" placeholder="Your email" aria-label="Your email" autoComplete="email" maxLength={254} required />
