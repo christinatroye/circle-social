@@ -1,0 +1,39 @@
+/* Trust: deep water seen from below. Builds on perfect.css (same layout and type); only colour, background and portrait change. */
+.event.trust {
+  --ground: #0b1d33;
+  --deep: #031026;
+  --cream: #f3ecdc;
+  --soft: #dfe7f1;
+  --dim: #a6b6cc;
+  --gold: #f0da96;
+  background: #031026 url(/events/trust-water.webp) center top / cover no-repeat;
+  isolation: isolate;
+}
+body:has(.event.trust) { background: #031026; }
+.trust .event-title, .trust .event-with { color: #eee9dc; }
+.trust .event-portrait::after { content: none; }
+.trust .event-portrait img { object-position: 50% 35%; -webkit-mask-image: linear-gradient(to bottom, #000 65%, transparent 100%); mask-image: linear-gradient(to bottom, #000 65%, transparent 100%); }
+.trust .event-portrait, .trust .event-body { z-index: 1; }
+
+/* On phones the page is tall, so the water sits behind the title as its own layer instead of covering the whole page. */
+.trust-glow { display: none; }
+@media (max-width: 899px) {
+  .event.trust { background-image: none; }
+  .trust-glow { display: block; position: absolute; left: 0; right: 0; top: calc(min(70vh, 560px) - 260px); height: 100vh; z-index: 0; pointer-events: none;
+    background: url(/events/trust-water.webp) 64% top / cover no-repeat;
+    -webkit-mask-image: linear-gradient(transparent, #000 25%, #000 55%, transparent); mask-image: linear-gradient(transparent, #000 25%, #000 55%, transparent); }
+  .event.trust { position: relative; }
+}
+
+/* A steady, quiet button: no pulse. */
+.trust .event-go { animation: none; color: #fffaf0; border-color: rgba(232,211,154,.35); background: rgba(232,211,154,.06); box-shadow: 0 0 14px rgba(232,211,154,.10); }
+.trust .event-go:hover, .trust .event-go:focus-visible { background: rgba(232,211,154,.14); }
+.trust .event-quiet { text-decoration-color: rgba(166,182,204,.45); }
+.trust-apply.event-apply { background: radial-gradient(70% 50% at 50% 35%, #1d3a55 0%, #0b1d33 55%, #031026 100%); }
+.trust-apply .event-form input { box-shadow: 0 1px 0 rgba(232,211,154,.28); }
+.trust-apply .event-form input:focus { box-shadow: 0 1px 0 rgba(232,211,154,.8); }
+.trust-apply .event-form input::placeholder { color: rgba(166,182,204,.85); }
+
+@media (min-width: 900px) {
+  .trust .event-portrait img { -webkit-mask-image: linear-gradient(to right, #000 70%, transparent 100%); mask-image: linear-gradient(to right, #000 70%, transparent 100%); }
+}
