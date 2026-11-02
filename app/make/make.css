@@ -35,6 +35,15 @@ body:has(.mk), body:has(.mk-stage) { margin: 0; background: #f8f5ef; }
 .mk-field { margin-top: 40px; display: flex; flex-direction: column; gap: 10px; font-size: 10px; letter-spacing: .3em; text-transform: uppercase; color: var(--ink-faint); }
 .mk-field input { font: inherit; font-size: 20px; letter-spacing: 0; text-transform: none; color: var(--ink); background: transparent; border: 0; border-bottom: 1px solid rgba(26, 20, 14, .3); padding: 6px 0 10px; outline: none; border-radius: 0; }
 .mk-field input:focus { border-bottom-color: var(--ink); }
+/* The headline keeps its two lines, as on entercircle.co; on a phone it wraps freely. */
+@media (min-width: 900px) { .mk-one-line { white-space: nowrap; } }
+.mk-field-input { position: relative; display: flex; flex-direction: column; }
+/* The example in the field: the first fades out, then the second fades in and stays. Gone once the host clicks in. */
+.mk-example { position: absolute; left: 0; top: 6px; font-size: 20px; letter-spacing: 0; text-transform: none; color: var(--ink-faint); pointer-events: none; opacity: 0; transition: opacity .4s ease; }
+.mk-example[data-on] { opacity: 1; transition: opacity .5s ease .4s; }
+.mk-add-site { align-self: flex-start; margin-top: 14px; padding: 0; border: 0; background: none; font: inherit; font-size: 13px; color: var(--ink-soft); cursor: pointer; }
+.mk-add-site:hover { color: var(--ink); }
+.mk-field-site { margin-top: 28px; }
 
 /* One button, black like entercircle.co's. */
 .mk-go { align-self: flex-start; margin-top: 34px; height: 50px; padding: 0 30px; display: inline-flex; align-items: center; border: 0; border-radius: 0; background: #0f0a07; color: #f1e8d8; font: inherit; font-size: 11px; font-weight: 400; letter-spacing: .22em; text-transform: uppercase; text-decoration: none; cursor: pointer; transition: opacity .4s var(--curve); }
@@ -63,6 +72,11 @@ body:has(.mk), body:has(.mk-stage) { margin: 0; background: #f8f5ef; }
 .mk-forming[data-read] { background: radial-gradient(60% 70% at 100% 0%, color-mix(in srgb, var(--mk-brand) 75%, transparent) 0%, transparent 70%), radial-gradient(60% 70% at 0% 40%, color-mix(in srgb, var(--mk-accent) 60%, transparent) 0%, transparent 70%), var(--mk-ground); }
 .mk-forming-light { position: absolute; left: 50%; top: 50%; width: 46%; aspect-ratio: 1.1; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(ellipse, rgba(255, 246, 234, .9) 0%, rgba(255, 246, 234, 0) 70%); animation: mk-halo 6.5s ease-in-out infinite; }
 .mk-forming-seat { position: absolute; width: 9%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; background: rgba(26, 20, 14, .08); transition: background 1.2s var(--curve), left .8s var(--curve), top .8s var(--curve); }
+/* Before a website is read: each seat lights up in its mood light, glowing like the entercircle.co homepage. */
+.mk-forming:not([data-read]) .mk-forming-seat { animation: mk-seat-glow 1s var(--curve) var(--lit) both; }
+.mk-forming:not([data-read]) .mk-forming-seat::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 50% 42%, rgb(var(--mood)) 0%, rgba(var(--mood), .85) 40%, color-mix(in srgb, rgb(var(--mood)) 30%, #000) 100%); animation: mk-seat-lit 1s var(--curve) var(--lit) both; }
+@keyframes mk-seat-glow { from { box-shadow: 0 0 0 0 rgba(var(--mood), 0); } to { box-shadow: 0 0 40px 6px rgba(var(--mood), .45); } }
+@keyframes mk-seat-lit { from { opacity: 0; } to { opacity: 1; } }
 .mk-forming[data-read] .mk-forming-seat { background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--mk-ground) 60%, var(--mk-ink)) 0%, var(--mk-ink) 100%); opacity: .8; }
 .mk-forming-caption { position: absolute; left: 0; right: 0; bottom: 22px; margin: 0; text-align: center; font-size: 10px; letter-spacing: .3em; text-transform: uppercase; color: var(--ink-faint); }
 .mk-forming[data-read] .mk-forming-caption { color: var(--mk-muted); }
