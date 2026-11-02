@@ -67,7 +67,8 @@ export default function Arrival({ data }: { data: ArrivalData }) {
       <div className="theme" data-circle={data.circle.slug} hidden />
       <div className="orb" aria-hidden="true" ref={orb}><div /><div className="orb-main" /><div className="orb-core" /></div>
       <div className="top" aria-hidden="true"><CircleMark className="mark" /><span>Circle</span></div>
-      <ArrivalMusic src={data.phase === "after" ? "/after-music.mp3" : undefined} />
+      {/* Music only on the page after the evening; the arrival is silent. */}
+      {data.phase === "after" && <ArrivalMusic src="/after-music.mp3" />}
       <main className="stage" ref={root}>
         <div className="ring" data-mode="door">
           <button className="hold" type="button" aria-label="Hold to enter"><span className="halo" /></button>
