@@ -19,11 +19,11 @@ const when = (iso: string) => new Intl.DateTimeFormat("en-GB", {
 
 const EVENTS: Record<string, string> = {
   opened: "opened their link",
-  saw_introduction: "saw their introduction",
-  introduction_confirmed: "confirmed their introduction",
-  introduction_changed: "changed their introduction",
-  quiet_guest: "chose to be a quiet guest",
-  sharing: "chose to share their introduction",
+  saw_introduction: "saw their bio",
+  introduction_confirmed: "approved their bio",
+  introduction_changed: "changed their bio",
+  quiet_guest: "chose to show just their name",
+  sharing: "chose to share their bio",
   cancelled: "said they can't come",
   uncancelled: "said they can come after all",
   intro_requested: "requested an introduction",
@@ -43,15 +43,26 @@ const EVENTS: Record<string, string> = {
 
 function summary(circle: HostCircle) {
   const count = (status: HostGuest["status"]) => circle.guests.filter(guest => guest.status === status).length;
-  const confirmed = count("Introduction confirmed") + count("Quiet guest");
+  const confirmed = count("Bio approved") + count("Just their name");
   const parts = [`${circle.guests.length} invited`, `${confirmed} confirmed`, `${count("Opened")} opened but not confirmed`, `${count("Not opened")} not opened`];
   if (count("Can't come")) parts.push(`${count("Can't come")} can't come`);
   return parts.join(", ") + ".";
 }
 
-export default async function HostPage() {
+/** The Circle a tab opens on when none is picked: the next one coming up, otherwise the most recent. */
+function defaultCircle(circles: HostCircle[]) {
+  const now = Date.now();
+  const upcoming = circles.filter(circle => new Date(circle.startsAt).getTime() + 2 * 60 * 60 * 1000 > now);
+  return upcoming.at(-1) ?? circles[0];
+}
+
+export default async function HostPage({ searchParams }: PageProps<"/host">) {
   await requireHost();
-  const [circles, applications] = await Promise.all([hostCircles(), seatRequests()]);
+  const [circles, allApplications] = await Promise.all([hostCircles(), seatRequests()]);
+  const picked = (await searchParams).circle;
+  const current = circles.find(circle => circle.slug === picked) ?? defaultCircle(circles);
+  const shown = current ? [current] : [];
+  const applications = allApplications.filter(application => application.event === current?.slug);
   return (
     <main className="host-page">
       <header className="host-top">
@@ -59,23 +70,15 @@ export default async function HostPage() {
         <span>Guests</span>
         <form action={signOut}><button className="host-quiet">Sign out</button></form>
       </header>
-      <section className="host-circle">
-        <h1>Applications</h1>
-        <p className="host-meta">People who applied for a seat at in.entercircle.co/perfect.</p>
-        {applications.length === 0 ? <p className="host-empty">None yet.</p> : (
-          <ul className="host-requests">
-            {applications.map((application, index) => (
-              <li key={index}>
-                <p><strong>{application.name}</strong> <span className="host-small">{application.email}</span></p>
-                {application.line && <p className="host-intro">{application.line}</p>}
-                <span className="host-small">{when(application.at)}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      {circles.length > 1 && (
+        <nav className="host-tabs" aria-label="Circles">
+          {circles.map(circle => (
+            <a key={circle.id} href={`/host?circle=${circle.slug}`} aria-current={circle.id === current?.id ? "page" : undefined}>{circle.title}</a>
+          ))}
+        </nav>
+      )}
       {circles.length === 0 && <p className="host-empty">No Circles yet. Import a guest list from Luma to begin.</p>}
-      {circles.map(circle => {
+      {shown.map(circle => {
         const guests = [...circle.guests].sort((a, b) => a.name.localeCompare(b.name, "en", { sensitivity: "base" }));
         return (
           <section key={circle.id} className="host-circle">
@@ -104,6 +107,15 @@ export default async function HostPage() {
               ))}
             </ul>
             <AddGuest circleId={circle.id} />
+
+            <h2>Activity</h2>
+            {circle.activity.length === 0 ? <p className="host-empty">Nothing yet.</p> : (
+              <ul className="host-activity">
+                {circle.activity.map((event, index) => (
+                  <li key={index}><span className="host-small">{when(event.at)}</span> {event.name} {EVENTS[event.kind] ?? event.kind}</li>
+                ))}
+              </ul>
+            )}
 
             <h2>Introduction requests</h2>
             {circle.requests.length === 0 ? <p className="host-empty">None yet. Guests can ask after the reveal.</p> : (
@@ -139,10 +151,10 @@ export default async function HostPage() {
               </ul>
             )}
 
-            <h2>Would love to be considered for Beauty</h2>
-            {circle.wantsNext.length === 0 ? <p className="host-empty">None yet. Guests can ask after the Circle.</p> : (
+            {circle.wantsNext.length > 0 && <>
+              <h2>Would love to be considered for Beauty</h2>
               <p>{circle.wantsNext.join(", ")}</p>
-            )}
+            </>}
 
             <h2>Recommended friends</h2>
             {circle.recommendations.length === 0 ? <p className="host-empty">None yet. Guests can recommend friends after the Circle.</p> : (
@@ -155,18 +167,22 @@ export default async function HostPage() {
                 ))}
               </ul>
             )}
-
-            <h2>Activity</h2>
-            {circle.activity.length === 0 ? <p className="host-empty">Nothing yet.</p> : (
-              <ul className="host-activity">
-                {circle.activity.map((event, index) => (
-                  <li key={index}><span className="host-small">{when(event.at)}</span> {event.name} {EVENTS[event.kind] ?? event.kind}</li>
-                ))}
-              </ul>
-            )}
           </section>
         );
       })}
+      {current && applications.length > 0 && <section className="host-circle">
+        <h1>Applications</h1>
+        <p className="host-meta">People who applied for a seat at in.entercircle.co/{current.slug}.</p>
+        <ul className="host-requests">
+            {applications.map((application, index) => (
+              <li key={index}>
+                <p><strong>{application.name}</strong> <span className="host-small">{application.email}</span></p>
+                {application.line && <p className="host-intro">{application.line}</p>}
+                <span className="host-small">{when(application.at)}</span>
+              </li>
+            ))}
+        </ul>
+      </section>}
     </main>
   );
 }

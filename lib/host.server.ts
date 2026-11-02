@@ -3,14 +3,14 @@ import { database } from "./db.server";
 
 export type HostGuest = {
   id: string; name: string; email: string; role: "guest" | "speaker"; introduction: string; token: string;
-  status: "Not opened" | "Opened" | "Introduction confirmed" | "Quiet guest" | "Can't come";
+  status: "Not opened" | "Opened" | "Bio approved" | "Just their name" | "Can't come";
   beenBefore: boolean; lastSeen: string | null;
   /** The guest confirmed an introduction that differs from Christina's draft. */
   edited: boolean;
 };
 
 export type HostCircle = {
-  id: string; title: string; speaker: string; startsAt: string; revealAt: string;
+  id: string; slug: string; title: string; speaker: string; startsAt: string; revealAt: string;
   guests: HostGuest[];
   requests: { id: string; from: string; to: string; note: string; status: string; at: string }[];
   recommendations: { from: string; recommended: string; at: string }[];
@@ -21,14 +21,14 @@ export type HostCircle = {
 
 function statusOf(row: Record<string, unknown>): HostGuest["status"] {
   if (row.cancelled_at) return "Can't come";
-  if (row.introduction_confirmed_at) return row.shared ? "Introduction confirmed" : "Quiet guest";
+  if (row.introduction_confirmed_at) return row.shared ? "Bio approved" : "Just their name";
   return row.first_opened_at ? "Opened" : "Not opened";
 }
 
-/** Every Circle, newest first, with its guests, introduction requests and recent activity. */
+/** Every Circle, newest first, with its guests, introduction requests and all activity. */
 export async function hostCircles(): Promise<HostCircle[]> {
   const sql = database();
-  const circles = await sql`SELECT id, title, speaker, starts_at, reveal_at FROM circles ORDER BY starts_at DESC`;
+  const circles = await sql`SELECT id, slug, title, speaker, starts_at, reveal_at FROM circles ORDER BY starts_at DESC`;
   return Promise.all(circles.map(async circle => {
     const [guests, requests, recommendations, wantsNext, feedback, activity] = await Promise.all([
       sql`SELECT * FROM guests WHERE circle_id = ${circle.id} ORDER BY role DESC, name`,
@@ -54,11 +54,11 @@ export async function hostCircles(): Promise<HostCircle[]> {
       `.catch(() => []),
       sql`
         SELECT g.name, e.kind, e.at FROM guest_events e JOIN guests g ON g.id = e.guest_id
-        WHERE g.circle_id = ${circle.id} ORDER BY e.at DESC LIMIT 40
+        WHERE g.circle_id = ${circle.id} ORDER BY e.at DESC
       `,
     ]);
     return {
-      id: String(circle.id), title: String(circle.title), speaker: String(circle.speaker),
+      id: String(circle.id), slug: String(circle.slug), title: String(circle.title), speaker: String(circle.speaker),
       startsAt: new Date(circle.starts_at).toISOString(), revealAt: new Date(circle.reveal_at).toISOString(),
       guests: guests.map(row => ({
         id: String(row.id), name: String(row.name), email: String(row.email), role: row.role, introduction: String(row.introduction),
