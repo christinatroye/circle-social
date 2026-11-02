@@ -28,6 +28,15 @@ body:has(.event.trust) { background: #031026; }
 /* A steady, quiet button: no pulse. */
 .trust .event-go { animation: none; color: #fffaf0; border-color: rgba(232,211,154,.35); background: rgba(232,211,154,.06); box-shadow: 0 0 14px rgba(232,211,154,.10); }
 .trust .event-go:hover, .trust .event-go:focus-visible { background: rgba(232,211,154,.14); }
+/* Water inside: soft dappled light drifts slowly inside the button, like the background. */
+.trust .event-go { position: relative; overflow: hidden; isolation: isolate; }
+.trust .event-go::before { content: ""; position: absolute; inset: -40%; z-index: -1; pointer-events: none; filter: blur(2px);
+  background: radial-gradient(closest-side, rgba(255,240,205,.16), transparent) 20% 40% / 40% 60% no-repeat,
+    radial-gradient(closest-side, rgba(160,200,215,.14), transparent) 70% 60% / 45% 70% no-repeat,
+    radial-gradient(closest-side, rgba(255,240,205,.10), transparent) 50% 30% / 30% 50% no-repeat;
+  animation: trust-water 12s ease-in-out infinite alternate; }
+@keyframes trust-water { from { transform: translate(-8%, 4%) rotate(0deg); } to { transform: translate(8%, -4%) rotate(8deg); } }
+@media (prefers-reduced-motion: reduce) { .trust .event-go::before { animation: none; } }
 .trust .event-quiet { text-decoration-color: rgba(166,182,204,.45); }
 .trust-apply.event-apply { background: radial-gradient(70% 50% at 50% 35%, #1d3a55 0%, #0b1d33 55%, #031026 100%); }
 .trust-apply .event-form input { box-shadow: 0 1px 0 rgba(232,211,154,.28); }
