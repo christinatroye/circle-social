@@ -33,9 +33,12 @@ export default function TrustPage() {
 
         <div className="event-copy">
           <p>Who do you trust, and why?</p>
-          <p>We’re handing more of our lives to AI that even its builders don’t fully understand, and to a handful of companies that shape what billions of us see and know. Anyone can now fake a voice, a face or a headline. We can check more than ever, yet still struggle to know what to believe.</p>
-          <p>Jimmy Wales co-founded Wikipedia on the idea that knowledge could be built in the open, by strangers, with sources to follow and mistakes others could correct. He set up the non-profit that supports it, and Wikipedia remains free of advertising. It depends on trust, but also gives us ways to question it. In <i>The Seven Rules of Trust</i>, he explores what it takes to earn trust, and keep it.</p>
-          <p>We’ve always had to decide who and what to believe, but never at this scale. The question reaches into our closest relationships too. How do we stay open without being naïve? When so little feels certain, the rarest thing may be someone you can truly believe. How do we find them, and how do we become them?</p>
+          <p>Most of what we know, we haven’t checked ourselves. We couldn’t. Getting through an ordinary day means relying on people we’ll never meet and decisions we weren’t there to question.</p>
+          <p>Now we’re turning to AI for answers, while a handful of companies shape what billions of us see and know. Their answers are easy to get. How they arrived at them, and whose interests they serve, can be much harder to see.</p>
+          <p>Jimmy Wales co-founded Wikipedia on the idea that knowledge could be built in the open, by strangers. You can follow the sources and see people disagree. What you read can be challenged and changed.</p>
+          <p>He set up the non-profit that supports it, and Wikipedia remains free of advertising. How much say do we have in the other systems we’ve come to depend on?</p>
+          <p>In <i>The Seven Rules of Trust</i>, Jimmy explores what it takes to earn trust and keep it. Depending on something isn’t the same as trusting it.</p>
+          <p>What part can each of us play in building a world worth trusting? And how do we stay trustworthy ourselves, even when it costs us?</p>
         </div>
 
         <p className="event-when event-when-end">Tuesday 24 November · 6pm UK</p>
