@@ -25,7 +25,7 @@ export type ArrivalData = {
     confirmed: boolean; cancelled: boolean;
   };
   circle: {
-    title: string; speaker: string; speakerLine: string; question: string;
+    slug: string; title: string; speaker: string; speakerLine: string; question: string;
     startsAt: string; revealAt: string; roomUrl: string | null; inviteUrl: string | null; seats: number;
   };
   others: Person[];

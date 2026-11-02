@@ -44,7 +44,7 @@ export default async function GuestPage({ params, searchParams }: PageProps<"/[t
       cancelled: Boolean(guest.cancelled_at),
     },
     circle: {
-      title: circle.title, speaker: circle.speaker, speakerLine: circle.speaker_line, question: circle.question,
+      slug: circle.slug, title: circle.title, speaker: circle.speaker, speakerLine: circle.speaker_line, question: circle.question,
       startsAt: circle.starts_at, revealAt: circle.reveal_at, roomUrl: trusted && (phase === "day" || phase === "reveal") ? circle.room_url : null,
       inviteUrl: INVITATIONS[circle.slug] ?? null,
       seats: trusted ? await seatCount(circle.id) : 0,
