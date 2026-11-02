@@ -1,6 +1,6 @@
 "use client";
 
-import { type ChangeEvent, type FormEvent, useEffect, useRef, useState } from "react";
+import { type CSSProperties, type ChangeEvent, type FormEvent, useEffect, useRef, useState } from "react";
 import { CircleMark } from "@/components/CircleMark";
 import { ARRIVALS, type Brand, PURPOSES, RHYTHMS, SIZES, pictureColours, roomColours } from "@/lib/brand";
 import { readBrand, type Reading } from "./actions";
@@ -11,6 +11,31 @@ const PAYMENT_LINK = "";
 
 type Step = "site" | "size" | "purpose" | "name" | "look" | "room" | "reserve";
 const QUESTIONS: Step[] = ["site", "size", "purpose", "name", "look"];
+
+/** The two examples in the "What are you hosting?" field: the first fades softly into the second, then stays. */
+const EXAMPLES = ["A monthly all-hands for our team", "An energising breathwork session"];
+
+/** The entercircle.co mood lights, Warm at the top and going round the circle to Ardent. */
+const MOODS = ["125,99,70", "128,129,73", "83,129,80", "81,126,117", "73,101,128", "67,79,124", "75,65,125", "91,65,124", "116,67,125", "123,70,80"];
+
+/** The room Circle makes when the host adds no website, or their Instagram can't be read: Circle's own warm dark room. */
+function circleBrand(): Brand {
+  return {
+    site: "", name: "Circle", logo: null, logoBacking: "clear",
+    colours: roomColours("#7d6346", "#b08d57", true), dark: true,
+    fonts: { display: "Cormorant Garamond", body: "Mulish" },
+    values: [], arriving: [], arrival: "gather", mood: null,
+    reading: "Circle’s own warm room. Add your mark and a picture to make it yours.",
+  };
+}
+
+/** A website address as typed, or an Instagram handle or link, turned into an address Circle can read. */
+function siteAddress(value: string) {
+  const v = value.trim();
+  if (!v) return "";
+  const handle = v.match(/^@([\w.]+)$/)?.[1] ?? (!v.includes(".") && /^[\w]+$/.test(v) ? v : null);
+  return handle ? `https://www.instagram.com/${handle}/` : v;
+}
 
 type Backing = Brand["logoBacking"];
 type Logo = { url: string; backing: Backing; ratio: number };
@@ -69,7 +94,8 @@ function Forming({ brand, seats, caption }: { brand: Brand | null; seats: number
       <div className="mk-forming-light" />
       {Array.from({ length: seats }, (_, i) => {
         const a = (i * 2 * Math.PI) / seats - Math.PI / 2;
-        return <span key={i} className="mk-forming-seat" style={{ left: `${50 + 34 * Math.cos(a)}%`, top: `${50 + 34 * Math.sin(a)}%`, transitionDelay: `${i * 60}ms` }} />;
+        // Before a website is read, the seats come in one by one, then light up round the circle in the mood lights.
+        return <span key={i} className="mk-forming-seat" style={{ left: `${50 + 34 * Math.cos(a)}%`, top: `${50 + 34 * Math.sin(a)}%`, transitionDelay: `${i * 60}ms`, "--mood": MOODS[i % MOODS.length], "--lit": `${1.2 + i * 0.09}s` } as CSSProperties} />;
       })}
       <p className="mk-forming-caption">{caption}</p>
     </aside>
@@ -79,6 +105,10 @@ function Forming({ brand, seats, caption }: { brand: Brand | null; seats: number
 /** The room maker: four questions, an optional look, then the host walks through their own room. */
 export function Maker() {
   const [step, setStep] = useState<Step>("site");
+  const [hosting, setHosting] = useState("");
+  const [example, setExample] = useState(0);
+  const [typing, setTyping] = useState(false);
+  const [addingSite, setAddingSite] = useState(false);
   const [address, setAddress] = useState("");
   const [size, setSize] = useState<(typeof SIZES)[number]["id"]>("circle");
   const [purpose, setPurpose] = useState<string>("");
@@ -113,6 +143,11 @@ export function Maker() {
   };
 
   useEffect(() => {
+    const timer = setTimeout(() => setExample(1), 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
     if (read && !named.current) { setName(read.name); named.current = true; }
   }, [read]);
 
@@ -131,10 +166,16 @@ export function Maker() {
     setError("");
     setReading(null);
     named.current = false;
-    const promise = readBrand(address);
+    const site = siteAddress(address);
+    // No website: the host still walks through a room, in Circle's own look, and can add their mark and mood.
+    if (!site) { pending.current = null; setReading({ status: "read", brand: circleBrand() }); setStep("size"); return; }
+    const instagram = site.includes("instagram.com");
+    const promise = readBrand(site);
     pending.current = promise;
     promise.then(result => {
       if (pending.current !== promise) return;
+      // Instagram often won't let itself be read; then the room starts in Circle's look instead of stopping.
+      if (result.status === "error" && instagram) return setReading({ status: "read", brand: circleBrand() });
       setReading(result);
       if (result.status === "error") { setError(result.message); setStep("site"); }
     });
@@ -146,7 +187,7 @@ export function Maker() {
     if (file && file.type.startsWith("image/") && file.size < 15_000_000) keep(URL.createObjectURL(file));
   }
 
-  const caption = reading?.status === "read" ? `Read from ${reading.brand.site}` : address ? `Reading ${address.replace(/^https?:\/\//, "").replace(/\/$/, "")}` : "Your room will appear here";
+  const caption = reading?.status === "read" ? (reading.brand.site ? `Read from ${reading.brand.site}` : "Your room will appear here") : address ? `Reading ${address.replace(/^https?:\/\//, "").replace(/\/$/, "")}` : "Your room will appear here";
   const index = QUESTIONS.indexOf(step);
 
   if ((step === "room" || step === "reserve") && brand) {
@@ -190,15 +231,24 @@ export function Maker() {
 
           {step === "site" && (
             <form onSubmit={startReading}>
-              <p className="mk-label">Make a room</p>
-              <h1>Your gatherings, in a room that looks like you.</h1>
-              <p className="mk-sub">Paste your website. Circle turns your colours, your mark and your mood into a room your people walk into.</p>
-              <label className="mk-field">Your website
-                <input value={address} onChange={e => setAddress(e.target.value)} placeholder="yourwebsite.com" inputMode="url" autoComplete="url" autoCapitalize="none" spellCheck={false} required />
+              <h1><span className="mk-one-line">Host an online gathering</span> <br />that feels like you.</h1>
+              <p className="mk-sub">Tell us what you’re hosting. Our AI designs the whole experience around you, from the invitation to the goodbye.</p>
+              <label className="mk-field">What are you hosting?
+                <span className="mk-field-input">
+                  <input value={hosting} onChange={e => setHosting(e.target.value)} onFocus={() => setTyping(true)} onBlur={() => setTyping(false)} maxLength={200} required />
+                  {!hosting && !typing && EXAMPLES.map((text, i) => <span key={text} className="mk-example" data-on={example === i ? "" : undefined} aria-hidden="true">{text}</span>)}
+                </span>
               </label>
+              {addingSite ? (
+                <label className="mk-field mk-field-site">Website or Instagram
+                  <input value={address} onChange={e => setAddress(e.target.value)} placeholder="yourwebsite.com or @yourname" autoComplete="url" autoCapitalize="none" spellCheck={false} autoFocus />
+                </label>
+              ) : (
+                <button type="button" className="mk-add-site" onClick={() => setAddingSite(true)}>+ Add your website or Instagram</button>
+              )}
               {error && <p className="mk-error" role="alert">{error}</p>}
               <button type="submit" className="mk-go">Make it mine</button>
-              <p className="mk-note">Free to make and walk around.</p>
+              <p className="mk-note">Free to design. Pay when you’re ready to host.</p>
             </form>
           )}
 
@@ -263,7 +313,8 @@ export function Maker() {
             </>
           )}
         </section>
-        <Forming brand={brand} seats={seats} caption={caption} />
+        {/* Without a website, the panel stays as on the first screen: cream, with the seats glowing in the mood lights. */}
+        <Forming brand={brand?.site ? brand : null} seats={seats} caption={caption} />
       </div>
     </main>
   );
