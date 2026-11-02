@@ -37,7 +37,7 @@ export default function TrustPage() {
           <p>Now we’re turning to AI for answers, while a handful of companies shape what billions of us see and know. Their answers are easy to get. How they arrived at them, and whose interests they serve, can be much harder to see.</p>
           <p>Jimmy Wales co-founded Wikipedia on the idea that knowledge could be built in the open, by strangers. You can follow the sources and see people disagree. What you read can be challenged and changed.</p>
           <p>He set up the non-profit that supports it, and Wikipedia remains free of advertising. How much say do we have in the other systems we’ve come to depend on?</p>
-          <p>In <i>The Seven Rules of Trust</i>, Jimmy explores what it takes to earn trust and keep it. Depending on something isn’t the same as trusting it.</p>
+          <p>In his book, <i>The Seven Rules of Trust</i>, Jimmy explores what it takes to earn trust and keep it.</p>
           <p>What part can each of us play in building a world worth trusting? And how do we stay trustworthy ourselves, even when it costs us?</p>
         </div>
 
