@@ -12,7 +12,7 @@
 body:has(.event.trust) { background: #031026; }
 .trust .event-title, .trust .event-with { color: #eee9dc; }
 .trust .event-portrait::after { content: none; }
-.trust .event-portrait img { object-position: 50% 35%; -webkit-mask-image: linear-gradient(to bottom, #000 65%, transparent 100%); mask-image: linear-gradient(to bottom, #000 65%, transparent 100%); }
+.trust .event-portrait img { object-position: 74% 35%; -webkit-mask-image: linear-gradient(to bottom, #000 65%, transparent 100%); mask-image: linear-gradient(to bottom, #000 65%, transparent 100%); }
 .trust .event-portrait, .trust .event-body { z-index: 1; }
 
 /* On phones the page is tall, so the water sits behind the title as its own layer instead of covering the whole page. */
@@ -28,14 +28,14 @@ body:has(.event.trust) { background: #031026; }
 /* A steady, quiet button: no pulse. */
 .trust .event-go { animation: none; color: #fffaf0; border-color: rgba(232,211,154,.35); background: rgba(232,211,154,.06); box-shadow: 0 0 14px rgba(232,211,154,.10); }
 .trust .event-go:hover, .trust .event-go:focus-visible { background: rgba(232,211,154,.14); }
-/* Water inside: soft dappled light drifts slowly inside the button, like the background. */
-.trust .event-go { position: relative; overflow: hidden; isolation: isolate; }
-.trust .event-go::before { content: ""; position: absolute; inset: -40%; z-index: -1; pointer-events: none; filter: blur(2px);
-  background: radial-gradient(closest-side, rgba(255,240,205,.16), transparent) 20% 40% / 40% 60% no-repeat,
-    radial-gradient(closest-side, rgba(160,200,215,.14), transparent) 70% 60% / 45% 70% no-repeat,
-    radial-gradient(closest-side, rgba(255,240,205,.10), transparent) 50% 30% / 30% 50% no-repeat;
-  animation: trust-water 12s ease-in-out infinite alternate; }
-@keyframes trust-water { from { transform: translate(-8%, 4%) rotate(0deg); } to { transform: translate(8%, -4%) rotate(8deg); } }
+/* Water window: the button shows the page's own water, slowly drifting, under a navy veil. */
+.trust .event-go { position: relative; overflow: hidden; isolation: isolate; border-color: rgba(232,211,154,.4); }
+.trust .event-go::before { content: ""; position: absolute; inset: 0; z-index: -2; pointer-events: none;
+  background: url(/events/trust-water.webp) 40% 0% / 520% auto no-repeat; animation: trust-water 14s ease-in-out infinite alternate; }
+.trust .event-go::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(rgba(3,16,38,.08), rgba(3,16,38,.4)); transition: opacity .6s ease; }
+.trust .event-go:hover::after, .trust .event-go:focus-visible::after { opacity: .5; }
+@keyframes trust-water { from { background-position: 30% 4%; } to { background-position: 70% 14%; } }
 @media (prefers-reduced-motion: reduce) { .trust .event-go::before { animation: none; } }
 .trust .event-quiet { text-decoration-color: rgba(166,182,204,.45); }
 .trust-apply.event-apply { background: radial-gradient(70% 50% at 50% 35%, #1d3a55 0%, #0b1d33 55%, #031026 100%); }
@@ -44,5 +44,6 @@ body:has(.event.trust) { background: #031026; }
 .trust-apply .event-form input::placeholder { color: rgba(166,182,204,.85); }
 
 @media (min-width: 900px) {
+  .trust .event-body { transform: translateX(2.5vw); }
   .trust .event-portrait img { -webkit-mask-image: linear-gradient(to right, #000 70%, transparent 100%); mask-image: linear-gradient(to right, #000 70%, transparent 100%); }
 }
