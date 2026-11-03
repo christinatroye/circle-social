@@ -176,7 +176,7 @@ export default async function HostPage({ searchParams }: PageProps<"/host">) {
         <ul className="host-requests">
             {applications.map((application, index) => (
               <li key={index}>
-                <p><strong>{application.name}</strong> <span className="host-small">{application.email}</span></p>
+                <p><strong>{application.name}</strong> <span className="host-tag">{application.invited ? "Invited" : "Public"}</span> <span className="host-small">{application.email}</span></p>
                 {application.line && <p className="host-intro">{application.line}</p>}
                 <span className="host-small">{when(application.at)}</span>
               </li>

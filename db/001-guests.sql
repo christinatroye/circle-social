@@ -88,3 +88,6 @@ CREATE TABLE IF NOT EXISTS seat_requests (
   line varchar(300) NOT NULL DEFAULT '',
   created_at timestamptz NOT NULL DEFAULT now()
 );
+
+-- Where a seat request came from: 'public' (in.entercircle.co/trust) or 'invite' (in.entercircle.co/trust/invite).
+ALTER TABLE seat_requests ADD COLUMN IF NOT EXISTS source varchar(10) NOT NULL DEFAULT 'public';

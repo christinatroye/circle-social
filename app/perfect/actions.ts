@@ -14,12 +14,14 @@ export async function applyForSeat(_previous: Application, form: FormData): Prom
   const email = clean(form.get("email"), 254).toLowerCase();
   const line = clean(form.get("line"), 300);
   const event = form.get("event") === "trust" ? "trust" : "perfect";
+  // Which version of the page they came from: the public page, or the invite page Christina sends personally.
+  const source = form.get("source") === "invite" ? "invite" : "public";
   if (!name) return { status: "invalid", message: "Please add your name." };
   if (!EMAIL.test(email)) return { status: "invalid", message: "Please check your email address." };
   try {
     const ip = (await headers()).get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
     if (!await withinLimit(`apply:${ip}`, 10, 60 * 60)) return { status: "error", message: "That didn't save. Please try again in a moment." };
-    await database()`INSERT INTO seat_requests (event, name, email, line) VALUES (${event}, ${name}, ${email}, ${line})`;
+    await database()`INSERT INTO seat_requests (event, name, email, line, source) VALUES (${event}, ${name}, ${email}, ${line}, ${source})`;
   } catch {
     return { status: "error", message: "That didn't save. Please try again in a moment." };
   }
