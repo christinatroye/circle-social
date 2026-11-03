@@ -1,11 +1,18 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { type ChangeEvent, useActionState, useEffect, useState } from "react";
 import { CircleMark } from "@/components/CircleMark";
 import { applyForSeat, type Application } from "./actions";
 
-/** The "Request a seat" button, and the quiet screen it opens: the form, then the thank you. Shared by the public Circle pages. */
+/**
+ * The "Request a seat" button, and the quiet screen it opens: the form, then the thank you. Shared by the public Circle pages.
+ * On a Circle's invite page (/trust/invite) the button says Accept invitation instead, and the request is tagged Invited on /host.
+ * Either way it is only a request: nobody gets a seat until Christina approves them.
+ */
 export function ApplyForSeat({ event = "perfect", className = "" }: { event?: "perfect" | "trust"; className?: string }) {
+  const invite = usePathname().endsWith("/invite");
+  const ask = invite ? "Accept invitation" : "Request a seat";
   const [open, setOpen] = useState(false);
   // Controlled, so a "please check your email" answer doesn't empty what they typed.
   const [fields, setFields] = useState({ name: "", email: "", line: "" });
@@ -24,12 +31,18 @@ export function ApplyForSeat({ event = "perfect", className = "" }: { event?: "p
 
   return (
     <>
-      <button type="button" className="event-go" onClick={() => setOpen(true)}>Request a seat</button>
+      <button type="button" className="event-go" onClick={() => setOpen(true)}>{ask}</button>
       {open && (
         <div className={`event-apply ${className}`.trim()} role="dialog" aria-modal="true" aria-labelledby="apply-heading">
           <div className="event-apply-inner">
             <CircleMark className="event-apply-mark" />
-            {state.status === "sent" ? (
+            {state.status === "sent" && invite ? (
+              <>
+                <h2 id="apply-heading">Thank you, {state.first}.</h2>
+                <p className="event-apply-note">We’ll send you the details before the evening.</p>
+                <a className="event-quiet" href="https://entercircle.co/circle">See past and upcoming Circles</a>
+              </>
+            ) : state.status === "sent" ? (
               <>
                 <h2 id="apply-heading">Thank you, {state.first}.</h2>
                 <p className="event-apply-note">Circles are small, so we can’t always offer everyone a seat. If we can offer you one, we’ll email you.</p>
@@ -38,7 +51,8 @@ export function ApplyForSeat({ event = "perfect", className = "" }: { event?: "p
             ) : (
               <form action={send} className="event-form" noValidate>
                 <input type="hidden" name="event" value={event} />
-                <h2 id="apply-heading">Request a seat</h2>
+                <input type="hidden" name="source" value={invite ? "invite" : "public"} />
+                <h2 id="apply-heading">{ask}</h2>
                 <input {...field("name")} placeholder="Your name" aria-label="Your name" autoComplete="name" maxLength={120} required autoFocus />
                 <input {...field("email")} type="email" placeholder="Your email" aria-label="Your email" autoComplete="email" maxLength={254} required />
                 <label htmlFor="apply-line">What draws you to this Circle?</label>

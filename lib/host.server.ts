@@ -80,12 +80,14 @@ export async function hostCircles(): Promise<HostCircle[]> {
   }));
 }
 
-export type SeatRequest = { event: string; name: string; email: string; line: string; at: string };
+export type SeatRequest = { event: string; name: string; email: string; line: string; invited: boolean; at: string };
 
-/** Applications from the public Circle pages, newest first. Empty until the seat_requests table exists. */
+/** Applications from the public Circle pages and their invite pages, newest first. Empty until the seat_requests table exists. */
 export async function seatRequests(): Promise<SeatRequest[]> {
-  const rows = await database()`SELECT event, name, email, line, created_at FROM seat_requests ORDER BY created_at DESC`.catch(() => []);
+  // SELECT * so the list still shows (all as Public) before the source column is added.
+  const rows = await database()`SELECT * FROM seat_requests ORDER BY created_at DESC`.catch(() => []);
   return rows.map(row => ({
-    event: String(row.event), name: String(row.name), email: String(row.email), line: String(row.line), at: new Date(row.created_at).toISOString(),
+    event: String(row.event), name: String(row.name), email: String(row.email), line: String(row.line),
+    invited: row.source === "invite", at: new Date(row.created_at).toISOString(),
   }));
 }
