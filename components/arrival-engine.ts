@@ -68,7 +68,7 @@ function localTime(iso: string, ukWeekday: string, range = false) {
 
 /** What to expect from each Circle's speaker, in Christina's words. Circles without one get a plain line. */
 const SPEAKER_NOTES: Record<string, string> = {
-  Perfect: "Heather opens, then the room joins in. You’re welcome to speak or simply listen.",
+  Perfect: "Circle opens by Christina asking Heather a couple of questions, then the room joins in. You’re welcome to speak or simply listen.",
   Alien: "You don't need to know any physics. Daniel's gift is making the biggest questions in science feel human and accessible. He'll take us through a few slides, with plenty of space for questions.",
 };
 

@@ -40,7 +40,7 @@ export default function PerfectPage() {
 
         <p className="event-when event-when-end">Tuesday 10 November · 6pm UK time</p>
         <p className="event-facts">Online. Small group. Invite only. Not recorded.</p>
-        <p className="event-opens">Heather opens, then the room joins in. You’re welcome to speak or simply listen.</p>
+        <p className="event-opens">Circle opens by Christina asking Heather a couple of questions, then the room joins in. You’re welcome to speak or simply listen.</p>
         <ApplyForSeat />
       </article>
     </main>
