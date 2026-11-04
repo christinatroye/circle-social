@@ -8,7 +8,7 @@ import "../perfect/perfect.css";
 import "./trust.css";
 
 const title = "Trust, a Circle with Jimmy Wales";
-const description = "Who do you trust, and why? Tuesday 24 November, online.";
+const description = "Who do you trust, and why? Monday 30 November, online.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -41,7 +41,7 @@ export default function TrustPage() {
           <p>What part can each of us play in building a world worth trusting? And how do we stay trustworthy ourselves, even when it costs us?</p>
         </div>
 
-        <p className="event-when event-when-end">Tuesday 24 November · 6pm UK</p>
+        <p className="event-when event-when-end">Monday 30 November · 6pm UK</p>
         <p className="event-opens">Jimmy opens, then the room joins in. You’re welcome to speak, or simply listen.</p>
         <p className="event-facts">Small group. Invite only. Online. Not recorded.</p>
         <ApplyForSeat event="trust" className="trust-apply" />
