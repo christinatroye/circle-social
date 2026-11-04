@@ -110,7 +110,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
 
   /* ---------- Seats: the speaker at the top, you near the bottom ---------- */
   const others = data.others.filter(p => !(me.speaker && p.speaker));
-  const N = Math.max(10, c.seats, others.length + 1);
+  const N = Math.max(18, others.length + 1);
   const YOU = me.speaker ? 0 : Math.round(N * 8 / 15);
   const LOGO_TO_SEAT = Array.from({ length: 10 }, (_, j) => Math.round(j * N / 10));
   const logoOf = new Map(LOGO_TO_SEAT.map((s, j) => [s, j]));
