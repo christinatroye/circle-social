@@ -326,7 +326,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
             (c.inviteUrl ? `<p class="small">You can see <a href="${esc(c.inviteUrl)}" target="_blank" rel="noopener">the invitation</a> we shared with guests.</p>` : "")
           : '<p class="voice">Please approve your short bio</p>' +
             '<p class="small">Every Circle is curated. Before it starts, everyone can see who else is coming, with a short bio for each person. This is what the others will see about you.</p>',
-        `<div class="person"><p class="who">${esc(me.name)}</p><p class="past">${been(beenBefore)}</p></div>`,
+        `<div class="person"><p class="who">${esc(me.name)}</p><p class="past">${me.speaker ? "Speaker" : been(beenBefore)}</p></div>`,
         `<div class="write plain"><label for="bio" class="visually-hidden">Your short bio</label><textarea id="bio" rows="2" maxlength="320">${esc(draft.read() ?? me.introduction)}</textarea></div>`,
         '<p class="eyebrow">Change anything you like, then approve it.</p>',
         `<div class="actions stack"><button class="go beacon" type="button" id="share">Approve my bio</button>${me.speaker ? "" : '<button class="quiet" type="button" id="anon">Show just my name</button>'}</div>`,
@@ -606,7 +606,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
         void arrived.offsetHeight; arrived.classList.add("stepping-aside");
         later(() => arrived.remove(), 700);
       }
-      const sub = person?.speaker ? "Speaker" : been(you ? me.beenBefore : Boolean(person?.beenBefore));
+      const sub = (you ? me.speaker : person?.speaker) ? "Speaker" : been(you ? me.beenBefore : Boolean(person?.beenBefore));
       setCentre(`<p class="c-title">${esc(you ? "You" : person!.name)}</p><p class="c-sub">${sub}</p>`);
       const box = root.querySelector("#person"); if (!box) return;
       const bio = you ? (me.shared ? me.introduction : "The others will see just your name.") : person!.shared ? person!.introduction : "";
