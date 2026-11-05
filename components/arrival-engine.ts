@@ -68,7 +68,7 @@ function localTime(iso: string, ukWeekday: string, range = false) {
 
 /** What to expect from each Circle's speaker, in Christina's words. Circles without one get a plain line. */
 const SPEAKER_NOTES: Record<string, string> = {
-  Perfect: "Heather opens, then the room joins in. You’re welcome to speak or simply listen.",
+  Perfect: "Circle opens by Christina asking Heather a couple of questions, then the room joins in. You’re welcome to speak or simply listen.",
   Alien: "You don't need to know any physics. Daniel's gift is making the biggest questions in science feel human and accessible. He'll take us through a few slides, with plenty of space for questions.",
 };
 
@@ -110,7 +110,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
 
   /* ---------- Seats: the speaker at the top, you near the bottom ---------- */
   const others = data.others.filter(p => !(me.speaker && p.speaker));
-  const N = Math.max(10, c.seats, others.length + 1);
+  const N = Math.max(18, others.length + 1);
   const YOU = me.speaker ? 0 : Math.round(N * 8 / 15);
   const LOGO_TO_SEAT = Array.from({ length: 10 }, (_, j) => Math.round(j * N / 10));
   const logoOf = new Map(LOGO_TO_SEAT.map((s, j) => [s, j]));
