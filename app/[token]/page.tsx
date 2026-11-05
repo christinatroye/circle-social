@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Circle", robots: { index: false, follow: false } };
 
 /** The public invitation for each Circle, shown to the speaker. */
-const INVITATIONS: Record<string, string> = { alien: "https://luma.com/d1bodo24" };
+const INVITATIONS: Record<string, string> = { alien: "https://luma.com/d1bodo24", perfect: "https://in.entercircle.co/perfect/invite" };
 
 const PHASES: Phase[] = ["before", "reveal", "day", "after"];
 
