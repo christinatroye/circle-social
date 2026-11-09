@@ -5,7 +5,7 @@ import type { ArrivalData } from "@/lib/arrival";
 import { startArrival } from "@/components/arrival-engine";
 import { CircleMark } from "@/components/CircleMark";
 import { ArrivalMusic } from "@/components/ArrivalMusic";
-import { addThisDevice, claimLink, recommendFriend, logAfterStep, sendFeedback, wantEarlyAccess, wantNextCircle, requestIntroduction, saveIntroduction, sawIntroduction, setCancelled, whoIsHere } from "./actions";
+import { addThisDevice, claimLink, recommendFriend, logAfterStep, sendFeedback, wantEarlyAccess, wantNextCircle, requestIntroduction, saveIntroduction, sawIntroduction, setCancelled, shareOnWall, whoIsHere } from "./actions";
 
 /** The drifting light in each Circle's own hue: the brightest tone, then two deeper ones. Alien's indigo unless a Circle has its own. */
 const ORB: Record<string, [string, string, string]> = {
@@ -36,6 +36,7 @@ export default function Arrival({ data }: { data: ArrivalData }) {
       wantEarlyAccess: () => wantEarlyAccess(token),
       logStep: step => logAfterStep(token, step),
       sendFeedback: line => sendFeedback(token, line),
+      shareOnWall: text => shareOnWall(token, text),
     });
   }, []);
 
