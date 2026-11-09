@@ -466,12 +466,13 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       show([
         '<p class="eyebrow">What to expect</p>',
         `<p class="voice">${esc(start.weekday)} at ${esc(start.time)} UK time${esc(localTime(c.startsAt, start.weekday))}.</p>`,
-        `<div class="person"><p class="small">The doors open at ${esc(doors.time)}${esc(doorsLocal && " UK time" + doorsLocal)}. Come a few minutes early, so we can begin together at ${esc(start.time.replace(/(am|pm)$/, ""))}.</p>` +
+        `<div class="person"><p class="small">The doors open at ${esc(doors.time)}${esc(doorsLocal && " UK time" + doorsLocal)}. Come a couple of minutes early, so we can begin together at ${esc(start.time.replace(/(am|pm)$/, ""))}.</p>` +
           '<p class="small">This is a space where you don&#39;t need to sell, buy, or prove anything. Just be in the room.</p>' +
-          `<p class="small">${esc(SPEAKER_NOTES[c.title] ?? `${c.speaker.split(" ")[0]} will take us through a few slides, with plenty of space for questions.`)} Everyone has already read your bio, so no need to introduce your work.</p>` +
+          `<p class="small">${esc(SPEAKER_NOTES[c.title] ?? `${c.speaker.split(" ")[0]} will take us through a few slides, with plenty of space for questions.`)}</p>` +
           '<p class="small">Nothing is recorded. Be yourself.</p>' +
           '<p class="small">Questions are always best when the whole room wants to hear the answer.</p>' +
-          '<p class="small">A few things that make a Circle more enjoyable: a quiet, comfortable space, not too bright. Camera on. Laptop over mobile if you can. Good wifi. And maybe a cup of tea.</p></div>',
+          '<p class="small">A few things that make a Circle more enjoyable: a quiet, comfortable space, not too bright. Laptop over mobile if you can. Good wifi. And maybe a cup of tea.</p>' +
+          '<p class="small">Please keep your camera on.</p></div>',
         '<p class="voice teaser closing"><span>We&#39;re glad you&#39;re here.</span></p>',
         '<div class="actions"><button class="quiet" type="button" id="back">Back</button></div>',
       ], el => { el.querySelector("#back")!.addEventListener("click", home); });
