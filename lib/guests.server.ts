@@ -19,6 +19,8 @@ export type Guest = {
   introduction: string; introduction_confirmed_at: string | null; shared: boolean; been_before: boolean;
   token: string; device_hash: string | null; other_devices: string[]; first_opened_at: string | null; last_seen_at: string | null;
   cancelled_at: string | null;
+  /** Set when Christina moves a guest to the waitlist. Missing until db/003-waitlist.sql has run. */
+  waitlisted_at?: string | null;
 };
 
 export const hash = (value: string) => createHash("sha256").update(value).digest("hex");
@@ -79,7 +81,7 @@ export async function othersInCircle(circleId: string, guestId: string) {
       CASE WHEN shared THEN introduction ELSE '' END AS introduction,
       (last_seen_at > now() - interval '15 minutes') AS here
     FROM guests
-    WHERE circle_id = ${circleId} AND id <> ${guestId} AND cancelled_at IS NULL
+    WHERE circle_id = ${circleId} AND id <> ${guestId} AND cancelled_at IS NULL AND (to_jsonb(guests) ->> 'waitlisted_at') IS NULL
     ORDER BY role DESC, created_at, name
   `;
   return rows.map(row => ({
@@ -89,8 +91,23 @@ export async function othersInCircle(circleId: string, guestId: string) {
 }
 
 export async function seatCount(circleId: string) {
-  const [row] = await database()`SELECT count(*)::int AS n FROM guests WHERE circle_id = ${circleId} AND cancelled_at IS NULL`;
+  const [row] = await database()`SELECT count(*)::int AS n FROM guests WHERE circle_id = ${circleId} AND cancelled_at IS NULL AND (to_jsonb(guests) ->> 'waitlisted_at') IS NULL`;
   return Number(row.n);
+}
+
+/** Places in a Circle's room, counting the host and the speaker. */
+export const CIRCLE_CAPACITY = 25;
+
+/** A guest on the waitlist takes a free place, first come first served. False when the Circle is already full. */
+export async function takeWaitlistSeat(guestId: string, circleId: string) {
+  const [row] = await database()`
+    UPDATE guests SET waitlisted_at = NULL
+    WHERE id = ${guestId} AND waitlisted_at IS NOT NULL
+      AND (SELECT count(*) FROM guests WHERE circle_id = ${circleId} AND cancelled_at IS NULL AND waitlisted_at IS NULL) < ${CIRCLE_CAPACITY}
+    RETURNING id
+  `;
+  if (row) await logEvent(guestId, "waitlist_seat");
+  return Boolean(row);
 }
 
 /** The wall's comments, newest first, from everyone still coming. Empty if the wall table isn't there yet. */
