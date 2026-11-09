@@ -112,6 +112,20 @@ export async function wantEarlyAccess(token: string): Promise<Result> {
   return { ok: true };
 }
 
+/** From the reveal until the Circle: what a guest looks at, for the host page. Visits and wall opens count once per half hour; each bio and What to expect once. */
+export async function logReveal(token: string, step: string): Promise<Result> {
+  const repeats = step === "reveal_visit" || step === "wall_opened";
+  if (!repeats && step !== "expect_opened" && !/^read_bio:[0-9a-f-]{36}$/.test(step)) return { ok: false, reason: "invalid" };
+  const found = await owned(token);
+  const now = Date.now();
+  if (!found || now < Date.parse(found.circle.reveal_at) || now > Date.parse(found.circle.starts_at) + 60 * 60 * 1000) return { ok: false, reason: "elsewhere" };
+  const [seen] = repeats
+    ? await database()`SELECT 1 FROM guest_events WHERE guest_id = ${found.guest.id} AND kind = ${step} AND at > now() - interval '30 minutes' LIMIT 1`
+    : await database()`SELECT 1 FROM guest_events WHERE guest_id = ${found.guest.id} AND kind = ${step} LIMIT 1`;
+  if (!seen) await logEvent(found.guest.id, step);
+  return { ok: true };
+}
+
 /** After the evening: a step the guest reached on the after page. Each step counts once. */
 export async function logAfterStep(token: string, step: string): Promise<Result> {
   if (!(AFTER_STEPS as readonly string[]).includes(step)) return { ok: false, reason: "invalid" };

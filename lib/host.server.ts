@@ -16,7 +16,7 @@ export type HostCircle = {
   recommendations: { from: string; recommended: string; at: string }[];
   wantsNext: string[];
   feedback: { from: string; line: string; at: string }[];
-  activity: { name: string; kind: string; at: string }[];
+  activity: { name: string; kind: string; at: string; about: string | null }[];
 };
 
 function statusOf(row: Record<string, unknown>): HostGuest["status"] {
@@ -54,7 +54,8 @@ export async function hostCircles(): Promise<HostCircle[]> {
         WHERE f.circle_id = ${circle.id} ORDER BY f.created_at DESC
       `.catch(() => []),
       sql`
-        SELECT g.name, e.kind, e.at FROM guest_events e JOIN guests g ON g.id = e.guest_id
+        SELECT g.name, e.kind, e.at, t.name AS about FROM guest_events e JOIN guests g ON g.id = e.guest_id
+        LEFT JOIN guests t ON e.kind LIKE 'read_bio:%' AND t.id::text = substr(e.kind, 10)
         WHERE g.circle_id = ${circle.id} ORDER BY e.at DESC
       `,
     ]);
@@ -76,7 +77,7 @@ export async function hostCircles(): Promise<HostCircle[]> {
       })),
       wantsNext: wantsNext.map(row => String(row.name)),
       feedback: feedback.map(row => ({ from: String(row.from_name), line: String(row.line), at: new Date(row.created_at).toISOString() })),
-      activity: activity.map(row => ({ name: String(row.name), kind: String(row.kind), at: new Date(row.at).toISOString() })),
+      activity: activity.map(row => ({ name: String(row.name), kind: String(row.kind), at: new Date(row.at).toISOString(), about: row.about ? String(row.about) : null })),
     };
   }));
 }
