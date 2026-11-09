@@ -109,3 +109,18 @@ export async function takeWaitlistSeat(guestId: string, circleId: string) {
   if (row) await logEvent(guestId, "waitlist_seat");
   return Boolean(row);
 }
+
+/** The wall's comments, newest first, from everyone still coming. Empty if the wall table isn't there yet. */
+export async function wallFor(circleId: string, guestId: string) {
+  try {
+    const rows = await database()`
+      SELECT w.guest_id, g.name, w.body, w.created_at FROM wall_posts w JOIN guests g ON g.id = w.guest_id
+      WHERE w.circle_id = ${circleId} AND g.cancelled_at IS NULL
+      ORDER BY w.created_at DESC
+      LIMIT 300
+    `;
+    return rows.map(row => ({ guestId: String(row.guest_id), name: String(row.name), text: String(row.body), mine: String(row.guest_id) === guestId, at: new Date(row.created_at).toISOString() }));
+  } catch {
+    return [];
+  }
+}

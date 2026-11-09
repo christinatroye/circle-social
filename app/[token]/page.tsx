@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { phaseFor, type ArrivalData, type Phase } from "@/lib/arrival";
 import { isHostAuthenticated } from "@/lib/host-auth.server";
-import { deviceKey, deviceState, guestForToken, othersInCircle, seatCount, takeWaitlistSeat, touch, CIRCLE_CAPACITY } from "@/lib/guests.server";
+import { deviceKey, deviceState, guestForToken, othersInCircle, seatCount, takeWaitlistSeat, touch, wallFor, CIRCLE_CAPACITY } from "@/lib/guests.server";
 import Arrival from "./Arrival";
 import "./arrival.css";
 
@@ -58,6 +58,7 @@ export default async function GuestPage({ params, searchParams }: PageProps<"/[t
     },
     // Before the reveal, the speaker is the only other seat that shows.
     others: !trusted ? [] : (await othersInCircle(circle.id, guest.id)).filter(person => phase !== "before" || person.speaker),
+    wall: trusted && (phase === "reveal" || phase === "day") ? await wallFor(circle.id, guest.id) : [],
   };
   return <Arrival data={data} />;
 }

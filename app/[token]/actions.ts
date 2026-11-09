@@ -178,3 +178,18 @@ export async function addThisDevice(token: string, email: string): Promise<Resul
   await logEvent(found.guest.id, "added_device");
   return { ok: true };
 }
+
+/** From the reveal until an hour after the Circle starts, a guest can post comments on the wall. */
+export async function shareOnWall(token: string, text: string): Promise<Result> {
+  const found = await owned(token);
+  const now = Date.now();
+  if (!found || now < Date.parse(found.circle.reveal_at) || now > Date.parse(found.circle.starts_at) + 60 * 60 * 1000) return { ok: false, reason: "elsewhere" };
+  const body = String(text ?? "").trim().replace(/\n{3,}/g, "\n\n").slice(0, 600);
+  if (!body) return { ok: false, reason: "invalid" };
+  if (!await withinLimit(`wall:${found.guest.id}`, 20, 60 * 60)) return { ok: false, reason: "invalid" };
+  await database()`
+    INSERT INTO wall_posts (circle_id, guest_id, body) VALUES (${found.circle.id}, ${found.guest.id}, ${body})
+  `;
+  await logEvent(found.guest.id, "wall_post");
+  return { ok: true };
+}
