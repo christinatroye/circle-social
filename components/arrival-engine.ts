@@ -268,7 +268,12 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
   function claim() {
     if (claimed) return;
     claimed = true;
-    actions.claim().then(result => { if (!disposed && !result.ok && result.reason === "elsewhere") S.elsewhere(); }).catch(() => {});
+    actions.claim().then(result => {
+      if (disposed || result.ok) return;
+      if (result.reason === "elsewhere") S.elsewhere();
+      // The Circle filled while this guest was on the waitlist: reload to show the closed link.
+      else if (result.reason === "gone") window.location.reload();
+    }).catch(() => {});
   }
 
   function enter() {
