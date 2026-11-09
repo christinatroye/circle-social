@@ -40,6 +40,10 @@ const EVENTS: Record<string, string> = {
   glimpse_passed: "went on without opening the glimpse",
   recommend_skipped: "skipped recommending a friend",
   reached_end: "reached the hosting step",
+  reveal_visit: "came back after the reveal",
+  wall_opened: "opened the wall",
+  wall_post: "posted on the wall",
+  expect_opened: "read What to expect",
 };
 
 function summary(circle: HostCircle) {
@@ -116,7 +120,7 @@ export default async function HostPage({ searchParams }: PageProps<"/host">) {
             {circle.activity.length === 0 ? <p className="host-empty">Nothing yet.</p> : (
               <ul className="host-activity">
                 {circle.activity.map((event, index) => (
-                  <li key={index}><span className="host-small">{when(event.at)}</span> {event.name} {EVENTS[event.kind] ?? event.kind}</li>
+                  <li key={index}><span className="host-small">{when(event.at)}</span> {event.name} {event.kind.startsWith("read_bio:") ? `read ${event.about ?? "a guest"}'s bio` : EVENTS[event.kind] ?? event.kind}</li>
                 ))}
               </ul>
             )}

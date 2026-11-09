@@ -54,4 +54,5 @@ export type ArrivalActions = {
   logStep: (step: AfterStep) => Promise<{ ok: boolean }>;
   sendFeedback: (line: string) => Promise<{ ok: boolean }>;
   shareOnWall: (text: string) => Promise<{ ok: boolean }>;
+  logReveal: (step: string) => Promise<{ ok: boolean }>;
 };

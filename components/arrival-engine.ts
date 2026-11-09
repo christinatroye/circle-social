@@ -172,6 +172,9 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
   /** After the Circle: note each step a guest reaches, for the host page. Never in the way. */
   function step(name: AfterStep) { actions.logStep(name).catch(() => {}); }
 
+  /** From the reveal until the Circle: what a guest looks at, for the host page. Never in the way. */
+  function seen(what: string) { actions.logReveal(what).catch(() => {}); }
+
   /** After the Circle: one line to write, sent or skipped, then a moment of thanks before the next step. */
   function oneLine(o: { lead: string[]; label: string; placeholder: string; sendLabel?: string; skip?: boolean; gate?: boolean; onSkip?: () => void; save: (text: string) => Promise<{ ok: boolean }>; thanks: string; next: () => void }) {
     show([
@@ -469,6 +472,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
 
     reveal() {
       arrive();
+      seen("reveal_visit");
       setMode("reveal");
       setCentre(`<p class="c-title">${esc(c.title)}</p>`);
       show([
@@ -500,6 +504,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       // The wall has the screen to itself: the ring steps aside until Back.
       ring.classList.add("away");
       body.classList.add("on-wall");
+      seen("wall_opened");
       window.scrollTo(0, 0);
       show([
         '<p class="big wall-title">The wall</p>',
@@ -514,6 +519,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
 
     /** How the hour itself will go, for guests. */
     expect() {
+      seen("expect_opened");
       const doorsLocal = localTime(doorsAt, doors.weekday);
       setMode("kept");
       setCentre(titleCentre(mine.date, mineTime));
@@ -534,6 +540,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
 
     day() {
       arrive();
+      seen("reveal_visit");
       intervals.splice(0).forEach(clearInterval);
       setMode("day");
       setCentre(`<p class="c-title">Your Circle awaits</p><p class="c-sub">${esc(start.time)} UK time</p>`);
@@ -656,6 +663,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
     el.addEventListener("click", () => {
       if ((ring.dataset.mode !== "reveal" && ring.dataset.mode !== "early" && ring.dataset.mode !== "day") || (!person && !you)) return;
       seats.forEach(s => s.el.classList.remove("sel")); el.classList.add("sel");
+      if (person && ring.dataset.mode !== "early") seen(`read_bio:${person.id}`);
       // After the first touch the welcome line steps aside, so the introduction sits closer to the ring.
       const arrived = root.querySelector<HTMLElement>("#arrived");
       if (arrived) {
