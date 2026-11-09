@@ -153,7 +153,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
     const wasDoor = ring.dataset.mode === "door";
     ring.dataset.mode = mode;
     place(mode === "door" ? "door" : "ring", stagger && wasDoor);
-    const live = mode === "reveal" || mode === "early";
+    const live = mode === "reveal" || mode === "early" || mode === "day";
     seats.forEach(({ el, person, you }) => {
       const tappable = live && (Boolean(person) || you);
       el.tabIndex = tappable ? 0 : -1;
@@ -203,6 +203,36 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
   }
 
   /* ---------- Words, one moment at a time ---------- */
+  /* ---------- The wall: from the reveal until the Circle, comments for everyone coming to read ---------- */
+  const wall = [...data.wall];
+  const initials = (name: string) => name.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join("").toUpperCase();
+  function ago(iso: string) {
+    const min = Math.max(0, Math.round((Date.now() - Date.parse(iso)) / 60000));
+    if (min < 1) return "just now";
+    if (min < 60) return `${min} min ago`;
+    const h = Math.round(min / 60);
+    if (h < 24) return `${h} hour${h === 1 ? "" : "s"} ago`;
+    const d = Math.round(h / 24);
+    return `${d} day${d === 1 ? "" : "s"} ago`;
+  }
+  function wallComments() {
+    return wall.map(p => `<div class="comment"><span class="initials" aria-hidden="true">${esc(initials(p.name))}</span><div class="comment-body">` +
+      `<p class="comment-meta"><span class="comment-who">${esc(p.mine ? "You" : p.name)}</span><span class="comment-when">${esc(ago(p.at))}</span></p>` +
+      `<p class="comment-text">${esc(p.text)}</p></div></div>`).join("");
+  }
+  function bindWall(el: HTMLElement) {
+    const list = el.querySelector<HTMLElement>("#wall-posts");
+    const t = el.querySelector("#wall-text") as HTMLTextAreaElement | null, send = el.querySelector("#wall-send") as HTMLButtonElement | null;
+    if (!list || !t || !send) return;
+    autosize(t);
+    t.addEventListener("input", () => { send.disabled = !t.value.trim(); });
+    send.addEventListener("click", () => void attempt(send, () => actions.shareOnWall(t.value), () => {
+      wall.unshift({ guestId: "", name: me.name, text: t.value.trim(), mine: true, at: new Date().toISOString() });
+      t.value = ""; t.dispatchEvent(new Event("input"));
+      list.innerHTML = wallComments();
+    }));
+  }
+
   function show(parts: string[], after?: (el: HTMLElement) => void) {
     const render = () => {
       copy.classList.remove("leaving"); copy.style.minHeight = "";
@@ -443,7 +473,9 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
           ? `<div class="room-link"><p class="eyebrow ceremony">Tonight&#39;s room:</p><p class="small countdown" id="countdown"></p><div class="actions"><button class="go beacon" type="button" id="enter-now">Enter Circle</button></div><p class="small">The doors open at ${esc(doors.time)} UK time${esc(localTime(doorsAt, doors.weekday))}.</p></div>`
           : `<div class="room-link"><p class="eyebrow ceremony">The link to the room will appear here on ${esc(start.weekday)}.</p></div>`,
         me.speaker ? "" : '<div class="actions"><button class="quiet" type="button" id="expect">What to expect</button><button class="quiet" type="button" id="cant">I can no longer come</button></div>',
+        '<div class="actions"><button class="go beacon" type="button" id="wall-open">The wall</button></div>',
       ].filter(Boolean), el => {
+        el.querySelector("#wall-open")?.addEventListener("click", S.wall);
         el.querySelector("#expect")?.addEventListener("click", S.expect);
         el.querySelector("#cant")?.addEventListener("click", S.confirmCancel);
         el.querySelector("#enter-now")?.addEventListener("click", S.enterRoom);
@@ -455,6 +487,23 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
           out.textContent = left ? `Circle starts in ${h ? `${unit(h, "hour")}: ` : ""}${unit(m, "minute")}` : "Circle starts now.";
         };
         if (el.querySelector("#countdown")) { tick(); intervals.push(window.setInterval(tick, 15000)); }
+      });
+    },
+
+    /** The wall: comments for everyone coming, newest first, with a way back to the seats. */
+    wall() {
+      // The wall has the screen to itself: the ring steps aside until Back.
+      ring.classList.add("away");
+      body.classList.add("on-wall");
+      window.scrollTo(0, 0);
+      show([
+        '<p class="big wall-title">The wall</p>',
+        `<div class="wall-posts" id="wall-posts">${wallComments()}</div>`,
+        '<div class="actions"><button class="quiet" type="button" id="back">Back</button></div>',
+        '<div class="wall-dock"><div class="write plain"><label for="wall-text" class="visually-hidden">Write a comment</label><textarea id="wall-text" rows="1" maxlength="600" placeholder="Write a comment"></textarea></div><button class="go" type="button" id="wall-send" disabled>Post</button></div>',
+      ], el => {
+        bindWall(el);
+        el.querySelector("#back")!.addEventListener("click", () => { ring.classList.remove("away"); body.classList.remove("on-wall"); home(); });
       });
     },
 
@@ -488,8 +537,11 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
         c.roomUrl
           ? `<div class="room-link"><p class="small countdown" id="countdown"></p><div class="actions"><button class="go beacon" type="button" id="enter-now">Enter Circle</button></div><p class="small">The doors open at ${esc(doors.time)} UK time${esc(localTime(doorsAt, doors.weekday))}.</p></div>`
           : `<p class="small">We open the doors at ${esc(doors.time)}.</p>`,
+        '<div class="person" id="person"><p class="small">Touch any seat to read their bio.</p></div>',
         me.speaker ? "" : '<div class="actions"><button class="quiet" type="button" id="expect">What to expect</button></div>',
+        '<div class="actions"><button class="go beacon" type="button" id="wall-open">The wall</button></div>',
       ].filter(Boolean), el => {
+        el.querySelector("#wall-open")?.addEventListener("click", S.wall);
         el.querySelector("#expect")?.addEventListener("click", S.expect);
         el.querySelector("#enter-now")?.addEventListener("click", S.enterRoom);
         const tick = () => {
@@ -596,7 +648,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
   // Touch a seat and that person takes the centre of the ring: before the reveal only you and the speaker, after it everyone.
   seats.forEach(({ el, person, you }) => {
     el.addEventListener("click", () => {
-      if ((ring.dataset.mode !== "reveal" && ring.dataset.mode !== "early") || (!person && !you)) return;
+      if ((ring.dataset.mode !== "reveal" && ring.dataset.mode !== "early" && ring.dataset.mode !== "day") || (!person && !you)) return;
       seats.forEach(s => s.el.classList.remove("sel")); el.classList.add("sel");
       // After the first touch the welcome line steps aside, so the introduction sits closer to the ring.
       const arrived = root.querySelector<HTMLElement>("#arrived");
