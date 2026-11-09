@@ -153,7 +153,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
     const wasDoor = ring.dataset.mode === "door";
     ring.dataset.mode = mode;
     place(mode === "door" ? "door" : "ring", stagger && wasDoor);
-    const live = mode === "reveal" || mode === "early";
+    const live = mode === "reveal" || mode === "early" || mode === "day";
     seats.forEach(({ el, person, you }) => {
       const tappable = live && (Boolean(person) || you);
       el.tabIndex = tappable ? 0 : -1;
@@ -488,6 +488,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
         c.roomUrl
           ? `<div class="room-link"><p class="small countdown" id="countdown"></p><div class="actions"><button class="go beacon" type="button" id="enter-now">Enter Circle</button></div><p class="small">The doors open at ${esc(doors.time)} UK time${esc(localTime(doorsAt, doors.weekday))}.</p></div>`
           : `<p class="small">We open the doors at ${esc(doors.time)}.</p>`,
+        '<div class="person" id="person"><p class="small">Touch any seat to read their bio.</p></div>',
         me.speaker ? "" : '<div class="actions"><button class="quiet" type="button" id="expect">What to expect</button></div>',
       ].filter(Boolean), el => {
         el.querySelector("#expect")?.addEventListener("click", S.expect);
@@ -596,7 +597,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
   // Touch a seat and that person takes the centre of the ring: before the reveal only you and the speaker, after it everyone.
   seats.forEach(({ el, person, you }) => {
     el.addEventListener("click", () => {
-      if ((ring.dataset.mode !== "reveal" && ring.dataset.mode !== "early") || (!person && !you)) return;
+      if ((ring.dataset.mode !== "reveal" && ring.dataset.mode !== "early" && ring.dataset.mode !== "day") || (!person && !you)) return;
       seats.forEach(s => s.el.classList.remove("sel")); el.classList.add("sel");
       // After the first touch the welcome line steps aside, so the introduction sits closer to the ring.
       const arrived = root.querySelector<HTMLElement>("#arrived");
