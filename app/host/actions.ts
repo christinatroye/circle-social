@@ -62,3 +62,10 @@ export async function removeGuest(guestId: string) {
   await database()`DELETE FROM guests WHERE id = ${guestId}::uuid`;
   revalidatePath("/host");
 }
+
+/** Moves a guest to the waitlist, or gives them their seat back. Their bio and link stay as they are. */
+export async function setWaitlisted(guestId: string, waitlisted: boolean) {
+  await requireHost();
+  await database()`UPDATE guests SET waitlisted_at = ${waitlisted ? new Date().toISOString() : null} WHERE id = ${guestId}::uuid`;
+  revalidatePath("/host");
+}

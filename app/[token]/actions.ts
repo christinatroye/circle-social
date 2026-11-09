@@ -3,7 +3,7 @@
 import { randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
 import { database, withinLimit } from "@/lib/db.server";
-import { DEVICE_COOKIE, deviceKey, guestForToken, hash, holdsLink, logEvent, othersInCircle, touch } from "@/lib/guests.server";
+import { DEVICE_COOKIE, deviceKey, guestForToken, hash, holdsLink, logEvent, othersInCircle, takeWaitlistSeat, touch } from "@/lib/guests.server";
 import { AFTER_STEPS } from "@/lib/arrival";
 
 type Result = { ok: true } | { ok: false; reason: "gone" | "elsewhere" | "invalid" };
@@ -42,6 +42,8 @@ export async function claimLink(token: string): Promise<Result> {
   `;
   if (!row) return { ok: false, reason: "elsewhere" };
   if (!found.guest.device_hash) await logEvent(found.guest.id, "opened");
+  // From the waitlist: holding the circle takes a free place, unless the Circle filled up in the meantime.
+  if (found.guest.waitlisted_at && !await takeWaitlistSeat(found.guest.id, found.circle.id)) return { ok: false, reason: "gone" };
   return { ok: true };
 }
 

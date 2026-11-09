@@ -3,7 +3,7 @@ import { SITE_URL } from "@/lib/email.server";
 import { requireHost } from "@/lib/host-auth.server";
 import { hostCircles, seatRequests, type HostCircle, type HostGuest } from "@/lib/host.server";
 import { signOut } from "../login/actions";
-import { setRequestStatus } from "./actions";
+import { setRequestStatus, setWaitlisted } from "./actions";
 import { CopyLink } from "./CopyLink";
 import { NewLink } from "./NewLink";
 import { AddGuest } from "./AddGuest";
@@ -25,6 +25,7 @@ const EVENTS: Record<string, string> = {
   quiet_guest: "chose to show just their name",
   sharing: "chose to share their bio",
   cancelled: "said they can't come",
+  waitlist_seat: "took a place from the waitlist",
   uncancelled: "said they can come after all",
   intro_requested: "requested an introduction",
   link_resent: "was emailed a fresh link",
@@ -44,8 +45,9 @@ const EVENTS: Record<string, string> = {
 function summary(circle: HostCircle) {
   const count = (status: HostGuest["status"]) => circle.guests.filter(guest => guest.status === status).length;
   const confirmed = count("Bio approved") + count("Just their name");
-  const parts = [`${circle.guests.length} invited`, `${confirmed} confirmed`, `${count("Opened")} opened but not confirmed`, `${count("Not opened")} not opened`];
+  const parts = [`${circle.guests.length - count("Waitlist")} invited`, `${confirmed} confirmed`, `${count("Opened")} opened but not confirmed`, `${count("Not opened")} not opened`];
   if (count("Can't come")) parts.push(`${count("Can't come")} can't come`);
+  if (count("Waitlist")) parts.push(`${count("Waitlist")} on the waitlist`);
   return parts.join(", ") + ".";
 }
 
@@ -63,6 +65,7 @@ export default async function HostPage({ searchParams }: PageProps<"/host">) {
   const current = circles.find(circle => circle.slug === picked) ?? defaultCircle(circles);
   const shown = current ? [current] : [];
   const applications = allApplications.filter(application => application.event === current?.slug);
+  const waitlisted = (current?.guests ?? []).filter(guest => guest.status === "Waitlist").sort((a, b) => a.name.localeCompare(b.name, "en", { sensitivity: "base" }));
   return (
     <main className="host-page">
       <header className="host-top">
@@ -79,7 +82,7 @@ export default async function HostPage({ searchParams }: PageProps<"/host">) {
       )}
       {circles.length === 0 && <p className="host-empty">No Circles yet. Import a guest list from Luma to begin.</p>}
       {shown.map(circle => {
-        const guests = [...circle.guests].sort((a, b) => a.name.localeCompare(b.name, "en", { sensitivity: "base" }));
+        const guests = [...circle.guests].filter(guest => guest.status !== "Waitlist").sort((a, b) => a.name.localeCompare(b.name, "en", { sensitivity: "base" }));
         return (
           <section key={circle.id} className="host-circle">
             <h1>{circle.title}</h1>
@@ -101,6 +104,7 @@ export default async function HostPage({ searchParams }: PageProps<"/host">) {
                   <div className="host-actions">
                     <CopyLink url={`${SITE_URL}/${guest.token}`} />
                     <NewLink guestId={guest.id} name={guest.name} />
+                    {guest.role !== "speaker" && <form action={setWaitlisted.bind(null, guest.id, true)}><button className="host-quiet">Move to waitlist</button></form>}
                     <RemoveGuest guestId={guest.id} name={guest.name} />
                   </div>
                 </li>
@@ -170,9 +174,22 @@ export default async function HostPage({ searchParams }: PageProps<"/host">) {
           </section>
         );
       })}
-      {current && applications.length > 0 && <section className="host-circle">
-        <h1>Applications</h1>
-        <p className="host-meta">People who applied for a seat at in.entercircle.co/{current.slug}.</p>
+      {current && (applications.length > 0 || waitlisted.length > 0) && <section className="host-circle">
+        <h1>Waitlist</h1>
+        <p className="host-meta">Guests you moved off the list keep a working link: the first to open it take any free places, up to 25. Once the Circle is full, their links close. Below them, people who applied for a seat at in.entercircle.co/{current.slug}.</p>
+        {waitlisted.length > 0 && <ul className="host-guests">
+          {waitlisted.map(guest => (
+            <li key={guest.id} data-status={guest.status}>
+              <div className="host-guest-top"><strong>{guest.name}</strong><span className="host-status">Waitlist</span></div>
+              <p className="host-small">{guest.email}{guest.lastSeen ? ` · last seen ${when(guest.lastSeen)}` : ""}</p>
+              <p className="host-intro">{guest.introduction}</p>
+              <div className="host-actions">
+                <form action={setWaitlisted.bind(null, guest.id, false)}><button className="host-quiet">Give them a seat</button></form>
+                <CopyLink url={`${SITE_URL}/${guest.token}`} />
+              </div>
+            </li>
+          ))}
+        </ul>}
         <ul className="host-requests">
             {applications.map((application, index) => (
               <li key={index}>

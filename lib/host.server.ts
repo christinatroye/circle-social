@@ -3,7 +3,7 @@ import { database } from "./db.server";
 
 export type HostGuest = {
   id: string; name: string; email: string; role: "guest" | "speaker"; introduction: string; token: string;
-  status: "Not opened" | "Opened" | "Bio approved" | "Just their name" | "Can't come";
+  status: "Not opened" | "Opened" | "Bio approved" | "Just their name" | "Can't come" | "Waitlist";
   beenBefore: boolean; lastSeen: string | null;
   /** The guest confirmed an introduction that differs from Christina's draft. */
   edited: boolean;
@@ -20,6 +20,7 @@ export type HostCircle = {
 };
 
 function statusOf(row: Record<string, unknown>): HostGuest["status"] {
+  if (row.waitlisted_at) return "Waitlist";
   if (row.cancelled_at) return "Can't come";
   if (row.introduction_confirmed_at) return row.shared ? "Bio approved" : "Just their name";
   return row.first_opened_at ? "Opened" : "Not opened";

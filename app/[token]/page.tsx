@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { phaseFor, type ArrivalData, type Phase } from "@/lib/arrival";
 import { isHostAuthenticated } from "@/lib/host-auth.server";
-import { deviceKey, deviceState, guestForToken, othersInCircle, seatCount, touch } from "@/lib/guests.server";
+import { deviceKey, deviceState, guestForToken, othersInCircle, seatCount, takeWaitlistSeat, touch, CIRCLE_CAPACITY } from "@/lib/guests.server";
 import Arrival from "./Arrival";
 import "./arrival.css";
 
@@ -23,6 +23,13 @@ export default async function GuestPage({ params, searchParams }: PageProps<"/[t
   if (!found) notFound();
   const { guest, circle } = found;
   const device = deviceState(guest, await deviceKey());
+  // A guest on the waitlist keeps a working link while the Circle has room. Someone who already holds the link takes the
+  // place as soon as they open it; a first visit takes it when they hold the circle to enter (claimLink). Once the Circle
+  // is full, the link shows as closed, like a removed guest's.
+  if (guest.waitlisted_at) {
+    const room = device === "mine" ? await takeWaitlistSeat(guest.id, circle.id) : await seatCount(circle.id) < CIRCLE_CAPACITY;
+    if (!room) notFound();
+  }
   if (device === "mine") await touch(guest.id);
 
   const phase = PHASES.find(p => p === asked) ?? phaseFor(circle.starts_at, circle.reveal_at);
