@@ -32,7 +32,7 @@ const EVENTS: Record<string, string> = {
   new_link: "was given a new link",
   added_device: "opened their link on another device",
   recommended: "recommended a friend",
-  wants_next: "would love to be considered for Beauty",
+  wants_next: "would like a place at the next Circle",
   feedback: "left a line of feedback",
   early_access: "requested early access to host",
   after_opened: "opened their after-Circle page",
@@ -160,7 +160,7 @@ export default async function HostPage({ searchParams }: PageProps<"/host">) {
             )}
 
             {circle.wantsNext.length > 0 && <>
-              <h2>Would love to be considered for Beauty</h2>
+              <h2>Would like a place at the next Circle</h2>
               <p>{circle.wantsNext.join(", ")}</p>
             </>}
 

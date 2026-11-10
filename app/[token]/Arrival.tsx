@@ -11,6 +11,8 @@ import { addThisDevice, claimLink, recommendFriend, logAfterStep, logReveal, sen
 const ORB: Record<string, [string, string, string]> = {
   perfect: ["232,190,140", "150,98,58", "92,58,34"],
 };
+/** The song for the page after the evening: each Circle's own closing song where it has one. */
+const AFTER_MUSIC: Record<string, string> = { perfect: "/perfect-closing.m4a" };
 const ORB_DEFAULT: [string, string, string] = ["150,150,225", "117,102,135", "68,57,79"];
 
 export default function Arrival({ data }: { data: ArrivalData }) {
@@ -71,7 +73,7 @@ export default function Arrival({ data }: { data: ArrivalData }) {
       <div className="orb" aria-hidden="true" ref={orb}><div /><div className="orb-main" /><div className="orb-core" /></div>
       <div className="top" aria-hidden="true"><CircleMark className="mark" /><span>Circle</span></div>
       {/* Music only on the page after the evening; the arrival is silent. */}
-      {data.phase === "after" && <ArrivalMusic src="/after-music.mp3" />}
+      {data.phase === "after" && <ArrivalMusic src={AFTER_MUSIC[data.circle.slug] ?? "/after-music.mp3"} />}
       <main className="stage" ref={root}>
         <div className="ring" data-mode="door">
           <button className="hold" type="button" aria-label="Hold to enter"><span className="halo" /></button>
