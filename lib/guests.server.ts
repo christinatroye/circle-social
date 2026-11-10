@@ -111,6 +111,21 @@ export async function takeWaitlistSeat(guestId: string, circleId: string) {
 }
 
 /** The wall's comments, newest first, from everyone still coming, with their hearts. Empty if the wall table isn't there yet; no hearts if that table isn't there yet. */
+/** The guests' one-line feedback on a Circle, oldest first, with first names. For the speaker's after page. */
+export async function feedbackFor(circleId: string) {
+  try {
+    const rows = await database()`
+      SELECT g.first_name, f.line FROM feedback f JOIN guests g ON g.id = f.guest_id
+      WHERE f.circle_id = ${circleId} AND g.role <> 'speaker' AND length(trim(f.line)) > 0
+      ORDER BY f.created_at ASC
+      LIMIT 200
+    `;
+    return rows.map(row => ({ first: String(row.first_name), line: String(row.line) }));
+  } catch {
+    return [];
+  }
+}
+
 export async function wallFor(circleId: string, guestId: string) {
   const post = (row: Record<string, unknown>) => ({ id: String(row.id), guestId: String(row.guest_id), name: String(row.name), text: String(row.body), mine: String(row.guest_id) === guestId, at: new Date(String(row.created_at)).toISOString(), hearts: Number(row.hearts ?? 0), hearted: Boolean(row.hearted) });
   try {

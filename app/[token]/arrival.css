@@ -308,3 +308,8 @@ body.on-wall .stage { justify-content: flex-start; padding-bottom: 150px; }
 body.in-sea .orb { opacity: 0; }
 body.in-sea .ring { opacity: .25; transition: opacity 2s var(--curve); }
 @media (prefers-reduced-motion: reduce) { .trust-sea i { animation: none; } }
+
+/* The speaker's after page: what the room said, one quiet line each. */
+.room-words { display: grid; gap: 22px; width: 100%; max-width: 46ch; margin: 8px auto; max-height: 52vh; overflow-y: auto; padding: 4px 6px; text-align: center; }
+.room-line { font-family: var(--voice); font-style: italic; font-weight: 300; font-size: 17px; line-height: 1.5; color: var(--fg); text-wrap: balance; }
+.room-who { display: block; margin-top: 6px; font-family: inherit; font-style: normal; font-size: 12.5px; letter-spacing: .06em; color: var(--pearl); }
