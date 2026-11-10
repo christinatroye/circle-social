@@ -17,6 +17,9 @@ const when = (iso: string) => new Intl.DateTimeFormat("en-GB", {
   timeZone: "Europe/London", weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit",
 }).format(new Date(iso));
 
+/** Which Circle each Circle's after page gives a glimpse of. */
+const GLIMPSE_OF: Record<string, string> = { alien: "Beauty", perfect: "Trust" };
+
 const EVENTS: Record<string, string> = {
   opened: "opened their link",
   saw_introduction: "saw their bio",
@@ -36,7 +39,7 @@ const EVENTS: Record<string, string> = {
   feedback: "left a line of feedback",
   early_access: "requested early access to host",
   after_opened: "opened their after-Circle page",
-  glimpse_opened: "opened the glimpse of Beauty",
+  glimpse_opened: "opened the glimpse of the next Circle",
   glimpse_passed: "went on without opening the glimpse",
   recommend_skipped: "skipped recommending a friend",
   reached_end: "reached the hosting step",
@@ -120,7 +123,7 @@ export default async function HostPage({ searchParams }: PageProps<"/host">) {
             {circle.activity.length === 0 ? <p className="host-empty">Nothing yet.</p> : (
               <ul className="host-activity">
                 {circle.activity.map((event, index) => (
-                  <li key={index}><span className="host-small">{when(event.at)}</span> {event.name} {event.kind.startsWith("read_bio:") ? `read ${event.about ?? "a guest"}'s bio` : EVENTS[event.kind] ?? event.kind}</li>
+                  <li key={index}><span className="host-small">{when(event.at)}</span> {event.name} {event.kind.startsWith("read_bio:") ? `read ${event.about ?? "a guest"}'s bio` : (event.kind === "glimpse_opened" ? `opened the glimpse of ${GLIMPSE_OF[circle.slug] ?? "the next Circle"}` : EVENTS[event.kind] ?? event.kind)}</li>
                 ))}
               </ul>
             )}
