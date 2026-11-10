@@ -34,6 +34,8 @@ export type ArrivalData = {
   others: Person[];
   /** From the reveal until the Circle starts: the wall's comments, newest first. */
   wall: WallPost[];
+  /** After the Circle, for the speaker only: the guests' one-line feedback, oldest first. */
+  feedback: { first: string; line: string; en?: string }[];
 };
 
 /** Steps on the after-Circle page, logged once per guest so the host can see how far each person went. */
