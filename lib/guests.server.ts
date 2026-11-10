@@ -112,6 +112,11 @@ export async function takeWaitlistSeat(guestId: string, circleId: string) {
 
 /** The wall's comments, newest first, from everyone still coming, with their hearts. Empty if the wall table isn't there yet; no hearts if that table isn't there yet. */
 /** The guests' one-line feedback on a Circle, oldest first, with first names. For the speaker's after page. */
+/** English for lines the speaker can't read, matched on how the guest's line begins. */
+const TRANSLATIONS: [string, string][] = [
+  ["Helt otroligt. Kan inte minnas", "Absolutely incredible. I can't remember ever being in a digital room that felt this present. <3"],
+];
+
 export async function feedbackFor(circleId: string) {
   try {
     const rows = await database()`
@@ -120,7 +125,8 @@ export async function feedbackFor(circleId: string) {
       ORDER BY f.created_at ASC
       LIMIT 200
     `;
-    return rows.map(row => ({ first: String(row.first_name), line: String(row.line) }));
+    return rows.map(row => { const line = String(row.line); const en = TRANSLATIONS.find(([start]) => line.startsWith(start))?.[1];
+           return { first: String(row.first_name), line, ...(en ? { en } : {}) }; });
   } catch {
     return [];
   }

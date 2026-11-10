@@ -619,7 +619,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
         lines.length
           ? '<p class="small">Here is what the room said afterwards, in their own words.</p>'
           : '<p class="small">The room is still writing back. Their words will appear here as they come in.</p>',
-        lines.length ? `<div class="room-words">${lines.map(f => `<p class="room-line">${esc(f.line)}<span class="room-who">${esc(f.first)}</span></p>`).join("")}</div>` : "",
+        lines.length ? `<div class="room-words">${lines.map(f => `<p class="room-line">${esc(f.line)}${f.en ? `<span class="room-en">${esc(f.en)}</span>` : ""}<span class="room-who">${esc(f.first)}</span></p>`).join("")}</div>` : "",
         '<p class="small">With gratitude,<br>Christina</p>',
       ].filter(Boolean));
     },

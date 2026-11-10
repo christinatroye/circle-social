@@ -312,4 +312,5 @@ body.in-sea .ring { opacity: .25; transition: opacity 2s var(--curve); }
 /* The speaker's after page: what the room said, one quiet line each. */
 .room-words { display: grid; gap: 22px; width: 100%; max-width: 46ch; margin: 8px auto; max-height: 52vh; overflow-y: auto; padding: 4px 6px; text-align: center; }
 .room-line { font-family: var(--voice); font-style: italic; font-weight: 300; font-size: 17px; line-height: 1.5; color: var(--fg); text-wrap: balance; }
+.room-en { display: block; margin-top: 6px; font-size: 15px; color: var(--muted, var(--fg)); opacity: .8; }
 .room-who { display: block; margin-top: 6px; font-family: inherit; font-style: normal; font-size: 12.5px; letter-spacing: .06em; color: var(--pearl); }
