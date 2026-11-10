@@ -78,11 +78,11 @@ body.inside .orb { opacity: 1; }
 .ring[data-mode="early"] .seat:hover i { --s: 1.7; }
 .ring[data-mode="early"] .seat.sel i { --o: 1; --s: 1.8; --g: 24px; background: var(--pearl); }
 .ring[data-mode="belief"] .seat i { --o: .8; --s: 1.15; --g: 12px; }
-.ring[data-mode="reveal"] .seat { pointer-events: auto; }
-.ring[data-mode="reveal"] .seat i { --o: .62; }
-.ring[data-mode="reveal"] .seat.you i { --o: .9; }
-.ring[data-mode="reveal"] .seat:hover i { --o: .95; --s: 1.3; }
-.ring[data-mode="reveal"] .seat.sel i { --o: 1; --s: 1.7; --g: 22px; background: var(--pearl); }
+.ring[data-mode="reveal"] .seat, .ring[data-mode="met"] .seat { pointer-events: auto; }
+.ring[data-mode="reveal"] .seat i, .ring[data-mode="met"] .seat i { --o: .62; }
+.ring[data-mode="reveal"] .seat.you i, .ring[data-mode="met"] .seat.you i { --o: .9; }
+.ring[data-mode="reveal"] .seat:hover i, .ring[data-mode="met"] .seat:hover i { --o: .95; --s: 1.3; }
+.ring[data-mode="reveal"] .seat.sel i, .ring[data-mode="met"] .seat.sel i { --o: 1; --s: 1.7; --g: 22px; background: var(--pearl); }
 .ring[data-mode="day"] .seat i { --o: .14; }
 .ring[data-mode="day"] .seat.here i { --o: .95; --s: 1.2; --g: 12px; }
 .ring[data-mode="day"] .seat.speaker i { --o: 1; --s: 1.6; --g: 22px; }
@@ -296,3 +296,15 @@ body.on-wall .stage { justify-content: flex-start; padding-bottom: 150px; }
 .heart-count { min-height: 14px; font-size: 12px; font-variant-numeric: tabular-nums; color: inherit; }
 @keyframes heartPop { 0% { transform: scale(.7); } 55% { transform: scale(1.22); } 100% { transform: scale(1); } }
 @media (prefers-reduced-motion: reduce) { .wall-dock .write, .wall-dock .write::after, .wall-dock .go.beacon, .heart.on svg { animation: none; } }
+
+/* After Perfect: Trust's deep water rises behind the next-Circle step and drifts slowly, like the Trust page. */
+.trust-sea { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; background: #031026; opacity: 0; transition: opacity 2.4s var(--curve); }
+.trust-sea.on { opacity: 1; }
+.trust-sea i { position: absolute; inset: -12%; background: url(/events/trust-water.webp) 50% 0% / cover no-repeat; animation: seaDrift 38s ease-in-out infinite alternate; }
+.trust-sea i + i { opacity: .55; mix-blend-mode: screen; animation: seaDrift2 26s ease-in-out infinite alternate; filter: blur(2px); }
+.trust-sea::after { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse 90% 70% at 50% 55%, rgba(3,16,38,.35), rgba(3,16,38,.8) 85%), linear-gradient(transparent 40%, rgba(3,16,38,.7)); }
+@keyframes seaDrift { from { transform: translate3d(-3%, 0, 0) scale(1.05); } to { transform: translate3d(3%, -3%, 0) scale(1.14); } }
+@keyframes seaDrift2 { 0% { transform: translate3d(4%, 2%, 0) scale(1.2); opacity: .25; } 50% { opacity: .55; } 100% { transform: translate3d(-4%, -2%, 0) scale(1.1); opacity: .3; } }
+body.in-sea .orb { opacity: 0; }
+body.in-sea .ring { opacity: .25; transition: opacity 2s var(--curve); }
+@media (prefers-reduced-motion: reduce) { .trust-sea i { animation: none; } }

@@ -97,6 +97,8 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
   const doorsAt = new Date(Date.parse(c.startsAt) - 5 * 60 * 1000).toISOString(), doors = londonParts(doorsAt);
   // The glimpse of the next Circle is Beauty, which is Perfect itself, so only Alien's guests are shown it.
   const GLIMPSE = c.slug === "alien";
+  // After Perfect, the next Circle is Trust with Jimmy Wales: guests can ask for a place.
+  const TRUST_NEXT = c.slug === "perfect";
   const draftKey = `circle-bio:${data.token}`;
   const draft = {
     read: () => { try { return localStorage.getItem(draftKey); } catch { return null; } },
@@ -153,7 +155,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
     const wasDoor = ring.dataset.mode === "door";
     ring.dataset.mode = mode;
     place(mode === "door" ? "door" : "ring", stagger && wasDoor);
-    const live = mode === "reveal" || mode === "early" || mode === "day";
+    const live = mode === "reveal" || mode === "early" || mode === "day" || mode === "met";
     seats.forEach(({ el, person, you }) => {
       const tappable = live && (Boolean(person) || you);
       el.tabIndex = tappable ? 0 : -1;
@@ -601,21 +603,42 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
 
     after() {
       arrive();
+      step("after_opened");
       // The room, small and quiet above the words, with the guest's own seat still lit.
       ring.classList.add("emblem");
       setMode("kept");
       centre.innerHTML = "";
-      step("after_opened");
       S.afterThanks();
     },
 
-    /* After the Circle, one moment at a time: how it was, a glimpse of the next Circle, a friend, then hosting. */
+    /* After the Circle, one moment at a time: how it was, who was there, a glimpse of the next Circle, a friend, then hosting. */
     afterThanks() {
+      const met = data.others.some(p => !p.speaker);
       oneLine({
         lead: [`<p class="voice">Thank you for being part of ${esc(c.title)}, ${esc(me.first)}.</p>`, '<p class="small">How was it for you?</p>'],
-        label: "How was it for you?", placeholder: "One line is plenty", sendLabel: GLIMPSE ? "See what&#39;s next in Circle" : "Send", skip: false, gate: true,
-        save: text => actions.sendFeedback(text), thanks: "Thank you. That means a lot.", next: () => GLIMPSE ? S.afterGlimpse() : S.afterFriend(),
+        label: "How was it for you?", placeholder: "One line is plenty",
+        sendLabel: met ? "Send" : GLIMPSE || TRUST_NEXT ? "See what&#39;s next in Circle" : "Send", skip: false, gate: true,
+        save: text => actions.sendFeedback(text), thanks: "Thank you. That means a lot.", next: () => met ? S.afterMet() : S.afterNext(),
       });
+    },
+
+    /** The whole room again: touch a seat to see who was there and ask for an introduction. */
+    afterMet() {
+      ring.classList.remove("emblem");
+      setMode("met");
+      setCentre(`<p class="c-title">${esc(c.title)}</p>`);
+      show([
+        '<p class="voice" id="arrived">Who was there</p>',
+        '<div class="person" id="person"><p class="small">Touch any seat to read their bio. If there&#39;s someone you&#39;d like to meet, ask us to introduce you.</p></div>',
+        `<div class="actions"><button class="go beacon" type="button" id="on">${GLIMPSE || TRUST_NEXT ? "See what&#39;s next in Circle" : "Continue"}</button></div>`,
+      ], el => el.querySelector("#on")!.addEventListener("click", () => S.afterNext()));
+    },
+
+    afterNext() {
+      ring.classList.add("emblem");
+      setMode("kept");
+      centre.innerHTML = "";
+      if (GLIMPSE) S.afterGlimpse(); else if (TRUST_NEXT) S.afterTrust(); else S.afterFriend();
     },
 
     afterGlimpse() {
@@ -633,7 +656,30 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       });
     },
 
+    afterTrust() {
+      step("glimpse_opened");
+      // Trust's deep water rises behind the words, slowly moving, like the Trust page.
+      let sea = document.querySelector<HTMLElement>(".trust-sea");
+      if (!sea) { sea = document.createElement("div"); sea.className = "trust-sea"; sea.setAttribute("aria-hidden", "true"); sea.innerHTML = "<i></i><i></i>"; document.body.appendChild(sea); }
+      document.body.classList.add("in-sea");
+      later(() => sea!.classList.add("on"), 60);
+      show([
+        '<p class="small">Our next Circle</p>',
+        '<p class="voice">Trust, with Jimmy Wales, founder of Wikipedia.</p>',
+        '<p class="small">Monday 30 November, 6pm UK time. Places are very limited.</p>',
+        '<div class="actions"><a class="go beacon" id="place" href="https://in.entercircle.co/trust" target="_blank" rel="noopener">Request a place</a></div>',
+        '<div class="actions"><button class="quiet dim" type="button" id="on">Continue</button></div>',
+      ], el => {
+        // The Trust page opens in a new tab; this page moves on, so the rest is here when they come back.
+        el.querySelector("#place")!.addEventListener("click", () => { actions.wantNextCircle().catch(() => {}); later(() => S.afterFriend(), 600); });
+        el.querySelector("#on")!.addEventListener("click", () => { step("glimpse_passed"); S.afterFriend(); });
+      });
+    },
+
     afterFriend() {
+      // Leaving Trust, the water sinks away again.
+      const sea = document.querySelector<HTMLElement>(".trust-sea");
+      if (sea) { sea.classList.remove("on"); document.body.classList.remove("in-sea"); later(() => sea.remove(), 2600); }
       oneLine({
         lead: ['<p class="small">We have some extraordinary Circles coming up. If someone comes to mind who belongs in a room like this, we&#39;d like to know who.</p>'],
         label: "Recommend a friend", placeholder: "Their name, email or LinkedIn",
@@ -684,7 +730,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
   // Touch a seat and that person takes the centre of the ring: before the reveal only you and the speaker, after it everyone.
   seats.forEach(({ el, person, you }) => {
     el.addEventListener("click", () => {
-      if ((ring.dataset.mode !== "reveal" && ring.dataset.mode !== "early" && ring.dataset.mode !== "day") || (!person && !you)) return;
+      if ((ring.dataset.mode !== "reveal" && ring.dataset.mode !== "early" && ring.dataset.mode !== "day" && ring.dataset.mode !== "met") || (!person && !you)) return;
       seats.forEach(s => s.el.classList.remove("sel")); el.classList.add("sel");
       if (person && ring.dataset.mode !== "early") seen(`read_bio:${person.id}`);
       // After the first touch the welcome line steps aside, so the introduction sits closer to the ring.
@@ -710,7 +756,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
         autosize(t); t.focus();
         t.addEventListener("input", () => { send.disabled = !t.value.trim(); });
         send.addEventListener("click", () => void attempt(send, () => actions.requestIntroduction(person!.id, t.value), () => {
-          box.innerHTML = '<p class="voice say">Leave it with us.</p><p class="small say" style="animation-delay:.15s">Christina will be in touch after the Circle.</p>';
+          box.innerHTML = `<p class="voice say">Leave it with us.</p><p class="small say" style="animation-delay:.15s">${ring.dataset.mode === "met" ? "Christina will be in touch." : "Christina will be in touch after the Circle."}</p>`;
         }));
       });
     });
@@ -727,6 +773,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
 
   return () => {
     disposed = true;
+    document.querySelector(".trust-sea")?.remove(); document.body.classList.remove("in-sea");
     closeBeauty?.();
     timers.forEach(clearTimeout); intervals.forEach(clearInterval);
     cancelAnimationFrame(raf);
