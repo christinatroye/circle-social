@@ -481,7 +481,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
         '<p class="voice" id="arrived">Others joining in this Circle</p>',
         '<div class="person" id="person"><p class="small">Touch any seat to read their bio. If there&#39;s someone you&#39;d like to meet, ask us to introduce you.</p></div>',
         roomToday
-          ? `<div class="room-link"><p class="eyebrow ceremony">Tonight&#39;s room:</p><p class="small countdown" id="countdown"></p><div class="actions"><button class="go beacon" type="button" id="enter-now">Enter Circle</button></div><p class="small">The doors open at ${esc(doors.time)} UK time${esc(localTime(doorsAt, doors.weekday))}.</p></div>`
+          ? `<div class="room-link"><p class="eyebrow ceremony">Tonight&#39;s room:</p><p class="small countdown" id="countdown"></p><div class="actions"><button class="go beacon portal" type="button" id="enter-now">Enter Circle</button></div><p class="small">The doors open at ${esc(doors.time)} UK time${esc(localTime(doorsAt, doors.weekday))}.</p></div>`
           : `<div class="room-link"><p class="eyebrow ceremony">The link to the room will appear here on ${esc(start.weekday)}.</p></div>`,
         me.speaker ? "" : '<div class="actions"><button class="quiet" type="button" id="expect">What to expect</button><button class="quiet" type="button" id="cant">I can no longer come</button></div>',
         `<div class="actions"><button class="${roomToday ? "go" : "go beacon"}" type="button" id="wall-open">The wall</button></div>`,
@@ -550,7 +550,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
         `<p class="eyebrow">${esc(start.date)}</p>`,
         '<p class="big">Soon.</p>',
         c.roomUrl
-          ? `<div class="room-link"><p class="small countdown" id="countdown"></p><div class="actions"><button class="go beacon" type="button" id="enter-now">Enter Circle</button></div><p class="small">The doors open at ${esc(doors.time)} UK time${esc(localTime(doorsAt, doors.weekday))}.</p></div>`
+          ? `<div class="room-link"><p class="small countdown" id="countdown"></p><div class="actions"><button class="go beacon portal" type="button" id="enter-now">Enter Circle</button></div><p class="small">The doors open at ${esc(doors.time)} UK time${esc(localTime(doorsAt, doors.weekday))}.</p></div>`
           : `<p class="small">We open the doors at ${esc(doors.time)}.</p>`,
         '<div class="person" id="person"><p class="small">Touch any seat to read their bio.</p></div>',
         me.speaker ? "" : '<div class="actions"><button class="quiet" type="button" id="expect">What to expect</button></div>',
