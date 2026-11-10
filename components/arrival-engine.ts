@@ -493,7 +493,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
           if (!out) return;
           const left = Math.max(0, Math.ceil((Date.parse(c.startsAt) - Date.now()) / 60000));
           const h = Math.floor(left / 60), m = left % 60, unit = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
-          out.textContent = left ? `Circle starts in ${h ? `${unit(h, "hour")}: ` : ""}${unit(m, "minute")}` : "Circle starts now.";
+          out.textContent = left ? `Circle starts in ${h ? `${unit(h, "hour")} ` : ""}${unit(m, "minute")}` : "Circle starts now.";
         };
         if (el.querySelector("#countdown")) { tick(); intervals.push(window.setInterval(tick, 15000)); }
       });
@@ -562,7 +562,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
           if (!out) return;
           const left = Math.max(0, Math.ceil((Date.parse(c.startsAt) - Date.now()) / 60000));
           const h = Math.floor(left / 60), m = left % 60, unit = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
-          out.textContent = left ? `Circle starts in ${h ? `${unit(h, "hour")}: ` : ""}${unit(m, "minute")}` : "Circle starts now.";
+          out.textContent = left ? `Circle starts in ${h ? `${unit(h, "hour")} ` : ""}${unit(m, "minute")}` : "Circle starts now.";
         };
         tick();
         intervals.push(window.setInterval(tick, 15000));
