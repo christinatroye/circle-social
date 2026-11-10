@@ -275,3 +275,24 @@ body.on-wall .stage { justify-content: flex-start; padding-bottom: 150px; }
 .wall-dock .write textarea { text-align: left; max-height: 30vh; overflow-y: auto; }
 .wall-dock .write::after { left: 0; right: 0; }
 .wall-dock .go { flex: none; }
+/* The wall's way in: the writing box glows warm and breathes, and Post glows strongly like the way into the room, so it is clear where to write. */
+.wall-dock .write { border-radius: 16px; border: 1px solid rgba(var(--tint),.32); background: radial-gradient(ellipse 100% 160% at 50% 100%, rgba(var(--tint),.3), rgba(var(--tint),.1) 65%, rgba(var(--tint),.04)); animation: wallBox 4s ease-in-out infinite; }
+.wall-dock .write textarea::placeholder { color: var(--fg); opacity: .85; }
+.wall-dock .write::after { left: 14px; right: 14px; bottom: -1px; height: 2px; opacity: 1; background: linear-gradient(90deg, rgba(var(--tint),.35), rgba(255,248,236,1), rgba(var(--tint),.35)); animation: wallLine 3.2s ease-in-out infinite; }
+.wall-dock .write:focus-within { animation: none; border-color: rgba(var(--tint),.6); box-shadow: 0 0 44px rgba(var(--tint),.38); }
+.wall-dock .write:focus-within::after { animation: none; box-shadow: 0 0 18px rgba(var(--tint),.85); }
+@keyframes wallBox { 0%, 100% { box-shadow: 0 0 22px rgba(var(--tint),.18); } 50% { box-shadow: 0 0 52px rgba(var(--tint),.4); } }
+@keyframes wallLine { 0%, 100% { box-shadow: 0 0 8px rgba(var(--tint),.4); opacity: .75; } 50% { box-shadow: 0 0 24px rgba(var(--tint),.9); opacity: 1; } }
+.wall-dock .go.beacon { padding: 15px 32px; font-size: 15px; letter-spacing: .03em; border-color: rgba(var(--tint),.7); text-shadow: 0 0 12px rgba(255,248,236,.55);
+  background: radial-gradient(closest-side, rgba(var(--tint),.55), rgba(var(--tint),.24) 70%, rgba(var(--tint),.1)); animation: portal 3.6s ease-in-out infinite; }
+.wall-dock .go.beacon:disabled { opacity: .9; }
+/* Hearts: a small gold heart beside each comment, with how many people hearted it. */
+.comment { grid-template-columns: 34px 1fr auto; }
+.heart { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 40px; margin-top: -4px; padding: 6px 4px; border: 0; background: none; color: var(--dim); cursor: pointer; font: inherit; transition: color .3s var(--curve); }
+.heart svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; transition: transform .3s var(--curve), fill .3s var(--curve), filter .3s var(--curve); }
+.heart:hover { color: var(--pearl); }
+.heart.on { color: var(--pearl); }
+.heart.on svg { fill: currentColor; filter: drop-shadow(0 0 6px rgba(var(--tint),.75)); animation: heartPop .45s var(--curve); }
+.heart-count { min-height: 14px; font-size: 12px; font-variant-numeric: tabular-nums; color: inherit; }
+@keyframes heartPop { 0% { transform: scale(.7); } 55% { transform: scale(1.22); } 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .wall-dock .write, .wall-dock .write::after, .wall-dock .go.beacon, .heart.on svg { animation: none; } }

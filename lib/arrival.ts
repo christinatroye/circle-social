@@ -15,8 +15,8 @@ export type Person = {
   id: string; name: string; first: string; speaker: boolean; beenBefore: boolean; shared: boolean; introduction: string; here: boolean;
 };
 
-/** A comment on the wall, with the name of the guest who posted it. */
-export type WallPost = { guestId: string; name: string; text: string; mine: boolean; at: string };
+/** A comment on the wall, with the name of the guest who posted it, how many hearted it, and whether this guest did. */
+export type WallPost = { id: string; guestId: string; name: string; text: string; mine: boolean; at: string; hearts: number; hearted: boolean };
 
 export type ArrivalData = {
   token: string;
@@ -53,6 +53,7 @@ export type ArrivalActions = {
   wantEarlyAccess: () => Promise<{ ok: boolean }>;
   logStep: (step: AfterStep) => Promise<{ ok: boolean }>;
   sendFeedback: (line: string) => Promise<{ ok: boolean }>;
-  shareOnWall: (text: string) => Promise<{ ok: boolean }>;
+  shareOnWall: (text: string) => Promise<{ ok: boolean; id?: string }>;
+  heartWallPost: (postId: string, on: boolean) => Promise<{ ok: boolean }>;
   logReveal: (step: string) => Promise<{ ok: boolean }>;
 };

@@ -110,17 +110,31 @@ export async function takeWaitlistSeat(guestId: string, circleId: string) {
   return Boolean(row);
 }
 
-/** The wall's comments, newest first, from everyone still coming. Empty if the wall table isn't there yet. */
+/** The wall's comments, newest first, from everyone still coming, with their hearts. Empty if the wall table isn't there yet; no hearts if that table isn't there yet. */
 export async function wallFor(circleId: string, guestId: string) {
+  const post = (row: Record<string, unknown>) => ({ id: String(row.id), guestId: String(row.guest_id), name: String(row.name), text: String(row.body), mine: String(row.guest_id) === guestId, at: new Date(String(row.created_at)).toISOString(), hearts: Number(row.hearts ?? 0), hearted: Boolean(row.hearted) });
   try {
     const rows = await database()`
-      SELECT w.guest_id, g.name, w.body, w.created_at FROM wall_posts w JOIN guests g ON g.id = w.guest_id
+      SELECT w.id, w.guest_id, g.name, w.body, w.created_at,
+        (SELECT count(*) FROM wall_hearts h JOIN guests hg ON hg.id = h.guest_id WHERE h.post_id = w.id AND hg.cancelled_at IS NULL) AS hearts,
+        EXISTS (SELECT 1 FROM wall_hearts h WHERE h.post_id = w.id AND h.guest_id = ${guestId}) AS hearted
+      FROM wall_posts w JOIN guests g ON g.id = w.guest_id
       WHERE w.circle_id = ${circleId} AND g.cancelled_at IS NULL
       ORDER BY w.created_at DESC
       LIMIT 300
     `;
-    return rows.map(row => ({ guestId: String(row.guest_id), name: String(row.name), text: String(row.body), mine: String(row.guest_id) === guestId, at: new Date(row.created_at).toISOString() }));
+    return rows.map(post);
   } catch {
-    return [];
+    try {
+      const rows = await database()`
+        SELECT w.id, w.guest_id, g.name, w.body, w.created_at FROM wall_posts w JOIN guests g ON g.id = w.guest_id
+        WHERE w.circle_id = ${circleId} AND g.cancelled_at IS NULL
+        ORDER BY w.created_at DESC
+        LIMIT 300
+      `;
+      return rows.map(post);
+    } catch {
+      return [];
+    }
   }
 }

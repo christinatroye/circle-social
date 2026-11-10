@@ -1,4 +1,4 @@
-import type { AfterStep, ArrivalActions, ArrivalData, Person } from "@/lib/arrival";
+import type { AfterStep, ArrivalActions, ArrivalData, Person, WallPost } from "@/lib/arrival";
 import { openBeauty } from "@/components/beauty";
 
 /*
@@ -218,10 +218,15 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
     const d = Math.round(h / 24);
     return `${d} day${d === 1 ? "" : "s"} ago`;
   }
+  const HEART = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 2.7c0 5.6-7.5 10.2-7.5 10.2z"/></svg>';
+  function heartButton(p: WallPost) {
+    const label = p.hearted ? "Take back your heart" : "Heart this comment";
+    return `<button class="heart${p.hearted ? " on" : ""}" type="button" data-heart="${esc(p.id)}" aria-pressed="${p.hearted}" aria-label="${label}">${HEART}<span class="heart-count">${p.hearts > 0 ? p.hearts : ""}</span></button>`;
+  }
   function wallComments() {
     return wall.map(p => `<div class="comment"><span class="initials" aria-hidden="true">${esc(initials(p.name))}</span><div class="comment-body">` +
       `<p class="comment-meta"><span class="comment-who">${esc(p.mine ? "You" : p.name)}</span><span class="comment-when">${esc(ago(p.at))}</span></p>` +
-      `<p class="comment-text">${esc(p.text)}</p></div></div>`).join("");
+      `<p class="comment-text">${esc(p.text)}</p></div>${p.id ? heartButton(p) : ""}</div>`).join("");
   }
   function bindWall(el: HTMLElement) {
     const list = el.querySelector<HTMLElement>("#wall-posts");
@@ -229,11 +234,27 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
     if (!list || !t || !send) return;
     autosize(t);
     t.addEventListener("input", () => { send.disabled = !t.value.trim(); });
-    send.addEventListener("click", () => void attempt(send, () => actions.shareOnWall(t.value), () => {
-      wall.unshift({ guestId: "", name: me.name, text: t.value.trim(), mine: true, at: new Date().toISOString() });
+    let posted = "";
+    send.addEventListener("click", () => void attempt(send, async () => { const r = await actions.shareOnWall(t.value); posted = r.id ?? ""; return r; }, () => {
+      wall.unshift({ id: posted, guestId: "", name: me.name, text: t.value.trim(), mine: true, at: new Date().toISOString(), hearts: 0, hearted: false });
       t.value = ""; t.dispatchEvent(new Event("input"));
       list.innerHTML = wallComments();
     }));
+    // A heart shows at once; if it doesn't save, it quietly goes back.
+    list.addEventListener("click", e => {
+      const b = (e.target as HTMLElement).closest<HTMLButtonElement>("button[data-heart]");
+      const p = b && wall.find(w => w.id === b.dataset.heart);
+      if (!b || !p) return;
+      const set = (on: boolean) => {
+        if (p.hearted === on) return;
+        p.hearted = on; p.hearts = Math.max(0, p.hearts + (on ? 1 : -1));
+        const now = list.querySelector<HTMLButtonElement>(`button[data-heart="${CSS.escape(p.id)}"]`);
+        if (now) now.outerHTML = heartButton(p);
+      };
+      const on = !p.hearted;
+      set(on);
+      void actions.heartWallPost(p.id, on).then(r => r.ok, () => false).then(ok => { if (!ok && !disposed) set(!on); });
+    });
   }
 
   function show(parts: string[], after?: (el: HTMLElement) => void) {
@@ -512,7 +533,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
         '<p class="big wall-title">The wall</p>',
         `<div class="wall-posts" id="wall-posts">${wallComments()}</div>`,
         '<div class="actions"><button class="quiet" type="button" id="back">Back</button></div>',
-        '<div class="wall-dock"><div class="write plain"><label for="wall-text" class="visually-hidden">Write a comment</label><textarea id="wall-text" rows="1" maxlength="600" placeholder="Write a comment"></textarea></div><button class="go" type="button" id="wall-send" disabled>Post</button></div>',
+        '<div class="wall-dock"><div class="write plain"><label for="wall-text" class="visually-hidden">Write a comment</label><textarea id="wall-text" rows="1" maxlength="600" placeholder="Write a comment"></textarea></div><button class="go beacon" type="button" id="wall-send" disabled>Post</button></div>',
       ], el => {
         bindWall(el);
         el.querySelector("#back")!.addEventListener("click", () => { ring.classList.remove("away"); body.classList.remove("on-wall"); home(); });

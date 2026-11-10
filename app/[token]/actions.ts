@@ -194,16 +194,35 @@ export async function addThisDevice(token: string, email: string): Promise<Resul
 }
 
 /** From the reveal until an hour after the Circle starts, a guest can post comments on the wall. */
-export async function shareOnWall(token: string, text: string): Promise<Result> {
+export async function shareOnWall(token: string, text: string): Promise<Result | { ok: true; id: string }> {
   const found = await owned(token);
   const now = Date.now();
   if (!found || now < Date.parse(found.circle.reveal_at) || now > Date.parse(found.circle.starts_at) + 60 * 60 * 1000) return { ok: false, reason: "elsewhere" };
   const body = String(text ?? "").trim().replace(/\n{3,}/g, "\n\n").slice(0, 600);
   if (!body) return { ok: false, reason: "invalid" };
   if (!await withinLimit(`wall:${found.guest.id}`, 20, 60 * 60)) return { ok: false, reason: "invalid" };
-  await database()`
-    INSERT INTO wall_posts (circle_id, guest_id, body) VALUES (${found.circle.id}, ${found.guest.id}, ${body})
+  const [row] = await database()`
+    INSERT INTO wall_posts (circle_id, guest_id, body) VALUES (${found.circle.id}, ${found.guest.id}, ${body}) RETURNING id
   `;
   await logEvent(found.guest.id, "wall_post");
+  return { ok: true, id: String(row.id) };
+}
+
+/** In the same window as posting, a guest can heart a comment on their Circle's wall, or take their heart back. */
+export async function heartWallPost(token: string, postId: string, on: boolean): Promise<Result> {
+  const found = await owned(token);
+  const now = Date.now();
+  if (!found || now < Date.parse(found.circle.reveal_at) || now > Date.parse(found.circle.starts_at) + 60 * 60 * 1000) return { ok: false, reason: "elsewhere" };
+  if (!/^\d{1,18}$/.test(String(postId))) return { ok: false, reason: "invalid" };
+  if (!await withinLimit(`heart:${found.guest.id}`, 200, 60 * 60)) return { ok: false, reason: "invalid" };
+  if (on) {
+    await database()`
+      INSERT INTO wall_hearts (post_id, guest_id)
+      SELECT id, ${found.guest.id} FROM wall_posts WHERE id = ${postId} AND circle_id = ${found.circle.id}
+      ON CONFLICT DO NOTHING
+    `;
+  } else {
+    await database()`DELETE FROM wall_hearts WHERE post_id = ${postId} AND guest_id = ${found.guest.id}`;
+  }
   return { ok: true };
 }
