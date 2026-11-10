@@ -617,7 +617,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       oneLine({
         lead: [`<p class="voice">Thank you for being part of ${esc(c.title)}, ${esc(me.first)}.</p>`, '<p class="small">How was it for you?</p>'],
         label: "How was it for you?", placeholder: "One line is plenty",
-        sendLabel: met ? "Send" : GLIMPSE || TRUST_NEXT ? "See what&#39;s next in Circle" : "Send", skip: false, gate: true,
+        sendLabel: met ? "Send" : GLIMPSE ? "See what&#39;s next in Circle" : "Send", skip: false, gate: true,
         save: text => actions.sendFeedback(text), thanks: "Thank you. That means a lot.", next: () => met ? S.afterMet() : S.afterNext(),
       });
     },
@@ -630,7 +630,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       show([
         '<p class="voice" id="arrived">Who was there</p>',
         '<div class="person" id="person"><p class="small">Touch any seat to read their bio. If there&#39;s someone you&#39;d like to meet, ask us to introduce you.</p></div>',
-        `<div class="actions"><button class="go beacon" type="button" id="on">${GLIMPSE || TRUST_NEXT ? "See what&#39;s next in Circle" : "Continue"}</button></div>`,
+        `<div class="actions"><button class="go beacon" type="button" id="on">${GLIMPSE ? "See what&#39;s next in Circle" : "Continue"}</button></div>`,
       ], el => el.querySelector("#on")!.addEventListener("click", () => S.afterNext()));
     },
 
@@ -638,7 +638,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       ring.classList.add("emblem");
       setMode("kept");
       centre.innerHTML = "";
-      if (GLIMPSE) S.afterGlimpse(); else if (TRUST_NEXT) S.afterTrust(); else S.afterFriend();
+      if (GLIMPSE) S.afterGlimpse(); else S.afterFriend();
     },
 
     afterGlimpse() {
@@ -671,15 +671,29 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
         '<div class="actions"><button class="quiet dim" type="button" id="on">Continue</button></div>',
       ], el => {
         // The Trust page opens in a new tab; this page moves on, so the rest is here when they come back.
-        el.querySelector("#place")!.addEventListener("click", () => { actions.wantNextCircle().catch(() => {}); later(() => S.afterFriend(), 600); });
-        el.querySelector("#on")!.addEventListener("click", () => { step("glimpse_passed"); S.afterFriend(); });
+        el.querySelector("#place")!.addEventListener("click", () => { actions.wantNextCircle().catch(() => {}); later(() => S.afterHost(), 600); });
+        el.querySelector("#on")!.addEventListener("click", () => { step("glimpse_passed"); S.afterHost(); });
       });
     },
 
     afterFriend() {
-      // Leaving Trust, the water sinks away again.
-      const sea = document.querySelector<HTMLElement>(".trust-sea");
-      if (sea) { sea.classList.remove("on"); document.body.classList.remove("in-sea"); later(() => sea.remove(), 2600); }
+      if (TRUST_NEXT) {
+        // A friend, then one glowing way on to the next Circle; a name typed in the box is sent on the way.
+        show([
+          '<p class="small">We have some extraordinary Circles coming up. If someone comes to mind who belongs in a room like this, we&#39;d like to know who.</p>',
+          '<div class="feedback"><div class="write"><label for="line" class="visually-hidden">Recommend a friend</label><input id="line" type="text" maxlength="300" autocomplete="off" placeholder="Their name, email or LinkedIn"></div></div>',
+          '<div class="actions"><button class="go beacon" type="button" id="next-circle">Next in Circle</button></div>',
+        ], el => {
+          const line = el.querySelector("#line") as HTMLInputElement, next = el.querySelector("#next-circle") as HTMLButtonElement;
+          const go = () => {
+            if (!line.value.trim()) { step("recommend_skipped"); return S.afterTrust(); }
+            void attempt(next, () => actions.recommendFriend(line.value), () => S.afterTrust());
+          };
+          next.addEventListener("click", go);
+          line.addEventListener("keydown", e => { if (e.key === "Enter") go(); });
+        });
+        return;
+      }
       oneLine({
         lead: ['<p class="small">We have some extraordinary Circles coming up. If someone comes to mind who belongs in a room like this, we&#39;d like to know who.</p>'],
         label: "Recommend a friend", placeholder: "Their name, email or LinkedIn",
@@ -689,6 +703,9 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
     },
 
     afterHost() {
+      // Leaving Trust, the water sinks away again.
+      const sea = document.querySelector<HTMLElement>(".trust-sea");
+      if (sea) { sea.classList.remove("on"); document.body.classList.remove("in-sea"); later(() => sea.remove(), 2600); }
       step("reached_end");
       show([
         '<p class="small">Circle is quietly opening up to hosts who want to hold their gatherings in beautiful online rooms.</p>',
