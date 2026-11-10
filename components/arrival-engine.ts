@@ -475,14 +475,16 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       seen("reveal_visit");
       setMode("reveal");
       setCentre(`<p class="c-title">${esc(c.title)}</p>`);
+      // On the day, Enter Circle is the one glowing button; the wall steps back.
+      const roomToday = !!c.roomUrl && londonParts(new Date().toISOString()).date === start.date;
       show([
         '<p class="voice" id="arrived">Others joining in this Circle</p>',
         '<div class="person" id="person"><p class="small">Touch any seat to read their bio. If there&#39;s someone you&#39;d like to meet, ask us to introduce you.</p></div>',
-        c.roomUrl && londonParts(new Date().toISOString()).date === start.date
-          ? `<div class="room-link"><p class="eyebrow ceremony">Tonight&#39;s room:</p><p class="small countdown" id="countdown"></p><div class="actions"><button class="go beacon" type="button" id="enter-now">Enter Circle</button></div><p class="small">The doors open at ${esc(doors.time)} UK time${esc(localTime(doorsAt, doors.weekday))}.</p></div>`
+        roomToday
+          ? `<div class="room-link"><p class="eyebrow ceremony">Tonight&#39;s room:</p><p class="small countdown" id="countdown"></p><div class="actions"><button class="go beacon portal" type="button" id="enter-now">Enter Circle</button></div><p class="small">The doors open at ${esc(doors.time)} UK time${esc(localTime(doorsAt, doors.weekday))}.</p></div>`
           : `<div class="room-link"><p class="eyebrow ceremony">The link to the room will appear here on ${esc(start.weekday)}.</p></div>`,
         me.speaker ? "" : '<div class="actions"><button class="quiet" type="button" id="expect">What to expect</button><button class="quiet" type="button" id="cant">I can no longer come</button></div>',
-        '<div class="actions"><button class="go beacon" type="button" id="wall-open">The wall</button></div>',
+        `<div class="actions"><button class="${roomToday ? "go" : "go beacon"}" type="button" id="wall-open">The wall</button></div>`,
       ].filter(Boolean), el => {
         el.querySelector("#wall-open")?.addEventListener("click", S.wall);
         el.querySelector("#expect")?.addEventListener("click", S.expect);
@@ -493,7 +495,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
           if (!out) return;
           const left = Math.max(0, Math.ceil((Date.parse(c.startsAt) - Date.now()) / 60000));
           const h = Math.floor(left / 60), m = left % 60, unit = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
-          out.textContent = left ? `Circle starts in ${h ? `${unit(h, "hour")}: ` : ""}${unit(m, "minute")}` : "Circle starts now.";
+          out.textContent = left ? `Circle starts in ${h ? `${unit(h, "hour")} ` : ""}${unit(m, "minute")}` : "Circle starts now.";
         };
         if (el.querySelector("#countdown")) { tick(); intervals.push(window.setInterval(tick, 15000)); }
       });
@@ -548,11 +550,11 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
         `<p class="eyebrow">${esc(start.date)}</p>`,
         '<p class="big">Soon.</p>',
         c.roomUrl
-          ? `<div class="room-link"><p class="small countdown" id="countdown"></p><div class="actions"><button class="go beacon" type="button" id="enter-now">Enter Circle</button></div><p class="small">The doors open at ${esc(doors.time)} UK time${esc(localTime(doorsAt, doors.weekday))}.</p></div>`
+          ? `<div class="room-link"><p class="small countdown" id="countdown"></p><div class="actions"><button class="go beacon portal" type="button" id="enter-now">Enter Circle</button></div><p class="small">The doors open at ${esc(doors.time)} UK time${esc(localTime(doorsAt, doors.weekday))}.</p></div>`
           : `<p class="small">We open the doors at ${esc(doors.time)}.</p>`,
         '<div class="person" id="person"><p class="small">Touch any seat to read their bio.</p></div>',
         me.speaker ? "" : '<div class="actions"><button class="quiet" type="button" id="expect">What to expect</button></div>',
-        '<div class="actions"><button class="go beacon" type="button" id="wall-open">The wall</button></div>',
+        `<div class="actions"><button class="${c.roomUrl ? "go" : "go beacon"}" type="button" id="wall-open">The wall</button></div>`,
       ].filter(Boolean), el => {
         el.querySelector("#wall-open")?.addEventListener("click", S.wall);
         el.querySelector("#expect")?.addEventListener("click", S.expect);
@@ -562,7 +564,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
           if (!out) return;
           const left = Math.max(0, Math.ceil((Date.parse(c.startsAt) - Date.now()) / 60000));
           const h = Math.floor(left / 60), m = left % 60, unit = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
-          out.textContent = left ? `Circle starts in ${h ? `${unit(h, "hour")}: ` : ""}${unit(m, "minute")}` : "Circle starts now.";
+          out.textContent = left ? `Circle starts in ${h ? `${unit(h, "hour")} ` : ""}${unit(m, "minute")}` : "Circle starts now.";
         };
         tick();
         intervals.push(window.setInterval(tick, 15000));
