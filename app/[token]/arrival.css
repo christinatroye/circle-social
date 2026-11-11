@@ -308,3 +308,7 @@ body.on-wall .stage { justify-content: flex-start; padding-bottom: 150px; }
 body.in-sea .orb { opacity: 0; }
 body.in-sea .ring { opacity: .25; transition: opacity 2s var(--curve); }
 @media (prefers-reduced-motion: reduce) { .trust-sea i { animation: none; } }
+
+/* The speaker's page after the Circle: what guests said, as quiet quotes. */
+.praise { display: grid; gap: 14px; width: min(100%, 460px); max-height: 46vh; overflow-y: auto; padding: 4px 2px 28px; mask-image: linear-gradient(to bottom, #000 82%, transparent); -webkit-mask-image: linear-gradient(to bottom, #000 82%, transparent); }
+.praise-line { font-family: var(--display); font-style: italic; font-size: 17px; line-height: 1.5; color: var(--fg); }
