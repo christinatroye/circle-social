@@ -11,6 +11,22 @@ export const metadata: Metadata = { title: "Circle", robots: { index: false, fol
 
 /** The public invitation for each Circle, shown to the speaker. */
 const INVITATIONS: Record<string, string> = { alien: "https://luma.com/d1bodo24", perfect: "https://in.entercircle.co/perfect/invite" };
+// What guests said, hand-picked by Christina, shown only to the speaker on their after page.
+const PRAISE: Record<string, string[]> = {
+  perfect: [
+    "Heather was incredibly inspiring and insightful.",
+    "Heather was great and the format is super cool. It was very interesting and totally outside of my usual bubble.",
+    "Thank you Heather for an incredible hour. So many thoughtful questions from the Circle as well. I wonder what comes next: how will the Sephora Kids of today\u2019s own children rebel against them?",
+    "Great session, thank you Heather and everyone that contributed with their reflections.",
+    "What an important conversation amongst women. We need more of those!",
+    "I enjoyed exploring the different nuances of the topic and the food for thought.",
+    "All the smart women who opened up and asked wise questions.",
+    "Loved the content.",
+    "Gratitude for this conversation.",
+    "Change the culture & systems, not the individual\u2019s behaviour.",
+    "I feel so soft in my body now.",
+  ],
+};
 
 const PHASES: Phase[] = ["before", "reveal", "day", "after"];
 
@@ -59,6 +75,7 @@ export default async function GuestPage({ params, searchParams }: PageProps<"/[t
     // Before the reveal, the speaker is the only other seat that shows.
     others: !trusted ? [] : (await othersInCircle(circle.id, guest.id)).filter(person => phase !== "before" || person.speaker),
     wall: trusted && (phase === "reveal" || phase === "day") ? await wallFor(circle.id, guest.id) : [],
+    praise: trusted && phase === "after" && guest.role === "speaker" ? PRAISE[circle.slug] ?? [] : [],
   };
   return <Arrival data={data} />;
 }

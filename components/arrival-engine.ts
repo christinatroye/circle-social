@@ -608,7 +608,29 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       ring.classList.add("emblem");
       setMode("kept");
       centre.innerHTML = "";
-      S.afterThanks();
+      if (me.speaker) S.afterSpeaker(); else S.afterThanks();
+    },
+
+    /** The speaker: first how it was for them, then, on the button, what the guests said (lines Christina left visible, without names). */
+    afterSpeaker() {
+      const lines = data.praise ?? [];
+      const met = data.others.some(p => !p.speaker);
+      oneLine({
+        lead: [`<p class="voice">Thank you for speaking at ${esc(c.title)}, ${esc(me.first)}.</p>`, '<p class="small">How was it for you?</p>'],
+        label: "How was it for you?", placeholder: "One line is plenty",
+        sendLabel: lines.length ? "See what guests said" : "Send", skip: false, gate: true,
+        save: text => actions.sendFeedback(text), thanks: "Thank you. That means a lot.",
+        next: () => lines.length ? S.afterPraise() : met ? S.afterMet() : S.afterNext(),
+      });
+    },
+
+    afterPraise() {
+      const lines = data.praise ?? [];
+      show([
+        '<p class="voice">What guests said about the evening</p>',
+        `<div class="praise">${lines.map(l => `<p class="praise-line">\u201c${esc(l)}\u201d</p>`).join("")}</div>`,
+        '<div class="actions"><button class="go beacon" type="button" id="on">Continue</button></div>',
+      ], el => el.querySelector("#on")!.addEventListener("click", () => data.others.some(p => !p.speaker) ? S.afterMet() : S.afterNext()));
     },
 
     /* After the Circle, one moment at a time: how it was, who was there, a glimpse of the next Circle, a friend, then hosting. */
@@ -638,7 +660,8 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       ring.classList.add("emblem");
       setMode("kept");
       centre.innerHTML = "";
-      if (GLIMPSE) S.afterGlimpse(); else S.afterFriend();
+      if (me.speaker) { if (TRUST_NEXT) S.afterTrust(); else S.afterHost(); }
+      else if (GLIMPSE) S.afterGlimpse(); else S.afterFriend();
     },
 
     afterGlimpse() {
@@ -707,6 +730,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       const sea = document.querySelector<HTMLElement>(".trust-sea");
       if (sea) { sea.classList.remove("on"); document.body.classList.remove("in-sea"); later(() => sea.remove(), 2600); }
       step("reached_end");
+      if (me.speaker) { show([`<p class="voice">We hope to see you in Circle again, ${esc(me.first)}.</p>`]); return; }
       show([
         '<p class="small">Circle is quietly opening up to hosts who want to hold their gatherings in beautiful online rooms.</p>',
         '<div class="actions"><a class="go beacon" id="early" href="https://entercircle.co" target="_blank" rel="noopener">Request early access</a></div>',
