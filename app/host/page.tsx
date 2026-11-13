@@ -3,12 +3,14 @@ import { SITE_URL } from "@/lib/email.server";
 import { requireHost } from "@/lib/host-auth.server";
 import { hostCircles, seatRequests, type HostCircle, type HostGuest } from "@/lib/host.server";
 import { signOut } from "../login/actions";
-import { setRequestStatus, setWaitlisted } from "./actions";
+import { confirmRequest, setBioReady, setRequestStatus, setRequestWaitlisted, setWaitlisted } from "./actions";
+import { waitlistEmail } from "@/lib/waitlist-email";
 import { CopyLink } from "./CopyLink";
 import { NewLink } from "./NewLink";
 import { AddGuest } from "./AddGuest";
 import { RemoveGuest } from "./RemoveGuest";
 import { EditIntroduction } from "./EditIntroduction";
+import { WaitlistEmail } from "./WaitlistEmail";
 import "./host.css";
 
 export const dynamic = "force-dynamic";
@@ -49,11 +51,17 @@ const EVENTS: Record<string, string> = {
 function summary(circle: HostCircle) {
   const count = (status: HostGuest["status"]) => circle.guests.filter(guest => guest.status === status).length;
   const confirmed = count("Bio approved") + count("Just their name");
-  const parts = [`${circle.guests.length - count("Waitlist")} invited`, `${confirmed} confirmed`, `${count("Opened")} opened but not confirmed`, `${count("Not opened")} not opened`];
+  const parts = [`${circle.guests.length - count("Waitlist")} invited`, `${confirmed} approved their bio`, `${count("Opened")} opened but not approved`, `${count("Not opened")} not opened`];
   if (count("Can't come")) parts.push(`${count("Can't come")} can't come`);
   if (count("Waitlist")) parts.push(`${count("Waitlist")} on the waitlist`);
   return parts.join(", ") + ".";
 }
+
+const day = (iso: string) => new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", day: "numeric", month: "short" }).format(new Date(iso));
+const longDate = (iso: string) => new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", weekday: "long", day: "numeric", month: "long" }).format(new Date(iso));
+
+const BIO_ORDER: HostGuest["bio"][] = ["Bio missing", "Bio drafted", "Bio ready"];
+const BIO_FILTERS: Record<string, HostGuest["bio"]> = { missing: "Bio missing", drafted: "Bio drafted", ready: "Bio ready" };
 
 /** The Circle a tab opens on when none is picked: the next one coming up, otherwise the most recent. */
 function defaultCircle(circles: HostCircle[]) {
@@ -65,10 +73,23 @@ function defaultCircle(circles: HostCircle[]) {
 export default async function HostPage({ searchParams }: PageProps<"/host">) {
   await requireHost();
   const [circles, allApplications] = await Promise.all([hostCircles(), seatRequests()]);
-  const picked = (await searchParams).circle;
+  const params = await searchParams;
+  const picked = params.circle;
+  const bioFilter = BIO_FILTERS[String(params.bio ?? "")];
   const current = circles.find(circle => circle.slug === picked) ?? defaultCircle(circles);
   const shown = current ? [current] : [];
-  const applications = allApplications.filter(application => application.event === current?.slug);
+  // One entry per email, newest first. Someone already on the guest list is no longer a request.
+  const onList = new Set((current?.guests ?? []).map(guest => guest.email.toLowerCase()));
+  const seen = new Set<string>();
+  const applications = allApplications.filter(application => {
+    const email = application.email.toLowerCase();
+    if (application.event !== current?.slug || seen.has(email)) return false;
+    seen.add(email);
+    return true;
+  });
+  const fromRequest = new Map(applications.map(application => [application.email.toLowerCase(), application]));
+  const openRequests = applications.filter(application => !onList.has(application.email.toLowerCase()) && !application.waitlisted);
+  const waitlistedRequests = applications.filter(application => !onList.has(application.email.toLowerCase()) && application.waitlisted);
   const waitlisted = (current?.guests ?? []).filter(guest => guest.status === "Waitlist").sort((a, b) => a.name.localeCompare(b.name, "en", { sensitivity: "base" }));
   return (
     <main className="host-page">
@@ -86,34 +107,78 @@ export default async function HostPage({ searchParams }: PageProps<"/host">) {
       )}
       {circles.length === 0 && <p className="host-empty">No Circles yet. Import a guest list from Luma to begin.</p>}
       {shown.map(circle => {
-        const guests = [...circle.guests].filter(guest => guest.status !== "Waitlist").sort((a, b) => a.name.localeCompare(b.name, "en", { sensitivity: "base" }));
+        const confirmed = circle.guests.filter(guest => guest.status !== "Waitlist");
+        const bioCount = (bio: HostGuest["bio"]) => confirmed.filter(guest => guest.bio === bio).length;
+        const guests = confirmed.filter(guest => !bioFilter || guest.bio === bioFilter)
+          .sort((a, b) => BIO_ORDER.indexOf(a.bio) - BIO_ORDER.indexOf(b.bio) || a.name.localeCompare(b.name, "en", { sensitivity: "base" }));
+        const tab = (bio?: string) => `/host?circle=${circle.slug}${bio ? `&bio=${bio}` : ""}`;
         return (
           <section key={circle.id} className="host-circle">
             <h1>{circle.title}</h1>
             <p className="host-meta">With {circle.speaker}. {when(circle.startsAt)} UK time. Others revealed {when(circle.revealAt)}.</p>
             <p className="host-summary">{summary(circle)}</p>
+            <p className="host-summary">
+              {openRequests.length} {openRequests.length === 1 ? "request" : "requests"}, {confirmed.length} confirmed{waitlistedRequests.length ? `, ${waitlistedRequests.length} requests on the waitlist` : ""}.
+              {" "}Bios: {bioCount("Bio missing")} missing, {bioCount("Bio drafted")} drafted, {bioCount("Bio ready")} ready.
+            </p>
 
-            <h2>Guests</h2>
-            <ul className="host-guests">
-              {guests.map(guest => (
-                <li key={guest.id} data-status={guest.status}>
-                  <div className="host-guest-top">
-                    <strong>{guest.name}</strong>
-                    {guest.role === "speaker" && <span className="host-tag">Speaker</span>}
-                    {guest.edited && <span className="host-tag">Edited</span>}
-                    <span className="host-status">{guest.status}</span>
-                  </div>
-                  <p className="host-small">{guest.email}{guest.beenBefore ? " · been to a Circle before" : ""}{guest.lastSeen ? ` · last seen ${when(guest.lastSeen)}` : ""}</p>
-                  <EditIntroduction key={guest.introduction} guestId={guest.id} introduction={guest.introduction} />
-                  <div className="host-actions">
-                    <CopyLink url={`${SITE_URL}/${guest.token}`} />
-                    <NewLink guestId={guest.id} name={guest.name} />
-                    {guest.role !== "speaker" && <form action={setWaitlisted.bind(null, guest.id, true)}><button className="host-quiet">Move to waitlist</button></form>}
-                    <RemoveGuest guestId={guest.id} name={guest.name} />
-                  </div>
-                </li>
+            {openRequests.length > 0 && <>
+              <h2>Requests</h2>
+              <p className="host-note">People who asked for a seat. Confirm moves them to Confirmed so you can prepare their bio. Waitlist moves them to the waitlist. Nothing is sent to them.</p>
+              <ul className="host-guests">
+                {openRequests.map(request => (
+                  <li key={request.id}>
+                    <div className="host-guest-top">
+                      <strong>{request.name}</strong>
+                      <span className="host-tag">{request.invited ? "Invited" : "Public"}</span>
+                      <span className="host-status">{day(request.at)}</span>
+                    </div>
+                    <p className="host-small">{request.email}</p>
+                    {request.line && <p className="host-their">Their line: <i>{request.line}</i></p>}
+                    <div className="host-actions">
+                      <form action={confirmRequest.bind(null, request.id)}><button className="host-go">Confirm</button></form>
+                      <form action={setRequestWaitlisted.bind(null, request.id, true)}><button className="host-quiet">Waitlist</button></form>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </>}
+
+            <h2>Confirmed</h2>
+            <nav className="host-filters" aria-label="Bios">
+              <a href={tab()} aria-current={!bioFilter ? "page" : undefined}>All {confirmed.length}</a>
+              {Object.entries(BIO_FILTERS).map(([key, bio]) => (
+                <a key={key} href={tab(key)} aria-current={bioFilter === bio ? "page" : undefined}>{bio} {bioCount(bio)}</a>
               ))}
+            </nav>
+            <ul className="host-guests">
+              {guests.map(guest => {
+                const request = fromRequest.get(guest.email.toLowerCase());
+                return (
+                  <li key={guest.id} data-status={guest.status} data-bio={guest.bio}>
+                    <div className="host-guest-top">
+                      <strong>{guest.name}</strong>
+                      {guest.role === "speaker" && <span className="host-tag">Speaker</span>}
+                      {request && <span className="host-tag">{request.invited ? "Invited" : "Public"}</span>}
+                      {guest.edited && <span className="host-tag">Edited</span>}
+                      <span className="host-status host-bio">{guest.bio}</span>
+                    </div>
+                    <p className="host-small">{guest.email} · {guest.status}{guest.bioReadyAt ? ` · bio ready ${day(guest.bioReadyAt)}` : ""}{guest.beenBefore ? " · been to a Circle before" : ""}{guest.lastSeen ? ` · last seen ${when(guest.lastSeen)}` : ""}</p>
+                    {request?.line && guest.bio !== "Bio ready" && <p className="host-their">Their line: <i>{request.line}</i></p>}
+                    <EditIntroduction key={guest.introduction} guestId={guest.id} introduction={guest.introduction} />
+                    <div className="host-actions">
+                      {guest.bio === "Bio drafted" && <form action={setBioReady.bind(null, guest.id, true)}><button className="host-go">Bio ready</button></form>}
+                      {guest.bio === "Bio ready" && <form action={setBioReady.bind(null, guest.id, false)}><button className="host-quiet">Not ready yet</button></form>}
+                      <CopyLink url={`${SITE_URL}/${guest.token}`} />
+                      <NewLink guestId={guest.id} name={guest.name} />
+                      {guest.role !== "speaker" && <form action={setWaitlisted.bind(null, guest.id, true)}><button className="host-quiet">Move to waitlist</button></form>}
+                      <RemoveGuest guestId={guest.id} name={guest.name} backToRequests={Boolean(request)} />
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
+            {guests.length === 0 && <p className="host-empty">{bioFilter ? "Nobody here." : "Nobody confirmed yet."}</p>}
             <AddGuest circleId={circle.id} />
 
             <h2>Activity</h2>
@@ -178,9 +243,9 @@ export default async function HostPage({ searchParams }: PageProps<"/host">) {
           </section>
         );
       })}
-      {current && (applications.length > 0 || waitlisted.length > 0) && <section className="host-circle">
+      {current && (waitlistedRequests.length > 0 || waitlisted.length > 0) && <section className="host-circle">
         <h1>Waitlist</h1>
-        <p className="host-meta">Guests you moved off the list keep a working link: the first to open it take any free places, up to 25. Once the Circle is full, their links close. Below them, people who applied for a seat at in.entercircle.co/{current.slug}.</p>
+        <p className="host-meta">Guests you moved off the list keep a working link: the first to open it take any free places, up to 25. Once the Circle is full, their links close. Below them, requests you moved to the waitlist. Draft waitlist email opens the email in Gmail for you to send.</p>
         {waitlisted.length > 0 && <ul className="host-guests">
           {waitlisted.map(guest => (
             <li key={guest.id} data-status={guest.status}>
@@ -194,14 +259,25 @@ export default async function HostPage({ searchParams }: PageProps<"/host">) {
             </li>
           ))}
         </ul>}
-        <ul className="host-requests">
-            {applications.map((application, index) => (
-              <li key={index}>
-                <p><strong>{application.name}</strong> <span className="host-tag">{application.invited ? "Invited" : "Public"}</span> <span className="host-small">{application.email}</span></p>
-                {application.line && <p className="host-intro">{application.line}</p>}
-                <span className="host-small">{when(application.at)}</span>
-              </li>
-            ))}
+        <ul className="host-guests">
+          {waitlistedRequests.map(request => (
+            <li key={request.id}>
+              <div className="host-guest-top">
+                <strong>{request.name}</strong>
+                <span className="host-tag">{request.invited ? "Invited" : "Public"}</span>
+                <span className="host-status">{request.waitlistEmailAt ? `Email drafted ${day(request.waitlistEmailAt)}` : "Email not drafted"}</span>
+              </div>
+              <p className="host-small">{request.email} · asked {day(request.at)}</p>
+              {request.line && <p className="host-their">Their line: <i>{request.line}</i></p>}
+              <div className="host-actions">
+                <WaitlistEmail requestId={request.id} drafted={Boolean(request.waitlistEmailAt)} gmailUrl={waitlistEmail({
+                  first: request.name.trim().split(/\s+/)[0], email: request.email, title: current.title, speaker: current.speaker, date: longDate(current.startsAt),
+                })} />
+                <form action={confirmRequest.bind(null, request.id)}><button className="host-quiet">Confirm</button></form>
+                <form action={setRequestWaitlisted.bind(null, request.id, false)}><button className="host-quiet">Move back to requests</button></form>
+              </div>
+            </li>
+          ))}
         </ul>
       </section>}
     </main>

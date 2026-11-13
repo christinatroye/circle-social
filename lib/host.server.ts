@@ -7,6 +7,9 @@ export type HostGuest = {
   beenBefore: boolean; lastSeen: string | null;
   /** The guest confirmed an introduction that differs from Christina's draft. */
   edited: boolean;
+  /** Where Christina is with this guest's bio: none written, written, or marked ready by her. */
+  bio: "Bio missing" | "Bio drafted" | "Bio ready";
+  bioReadyAt: string | null;
 };
 
 export type HostCircle = {
@@ -67,6 +70,8 @@ export async function hostCircles(): Promise<HostCircle[]> {
         token: String(row.token), status: statusOf(row), beenBefore: Boolean(row.been_before),
         lastSeen: row.last_seen_at ? new Date(row.last_seen_at).toISOString() : null,
         edited: Boolean(row.introduction_confirmed_at && row.introduction_draft != null && row.introduction !== row.introduction_draft),
+        bio: row.bio_ready_at ? "Bio ready" : String(row.introduction).trim() ? "Bio drafted" : "Bio missing",
+        bioReadyAt: row.bio_ready_at ? new Date(row.bio_ready_at).toISOString() : null,
       })),
       requests: requests.map(row => ({
         id: String(row.id), from: String(row.from_name), to: String(row.to_name), note: String(row.note),
@@ -82,14 +87,19 @@ export async function hostCircles(): Promise<HostCircle[]> {
   }));
 }
 
-export type SeatRequest = { event: string; name: string; email: string; line: string; invited: boolean; at: string };
+export type SeatRequest = {
+  id: string; event: string; name: string; email: string; line: string; invited: boolean; at: string;
+  /** Christina moved this request to the waitlist, and when she last opened a waitlist email for it. */
+  waitlisted: boolean; waitlistEmailAt: string | null;
+};
 
 /** Applications from the public Circle pages and their invite pages, newest first. Empty until the seat_requests table exists. */
 export async function seatRequests(): Promise<SeatRequest[]> {
-  // SELECT * so the list still shows (all as Public) before the source column is added.
+  // SELECT * so the list still shows before the source and waitlist columns are added.
   const rows = await database()`SELECT * FROM seat_requests ORDER BY created_at DESC`.catch(() => []);
   return rows.map(row => ({
-    event: String(row.event), name: String(row.name), email: String(row.email), line: String(row.line),
+    id: String(row.id), event: String(row.event), name: String(row.name), email: String(row.email), line: String(row.line),
     invited: row.source === "invite", at: new Date(row.created_at).toISOString(),
+    waitlisted: Boolean(row.waitlisted_at), waitlistEmailAt: row.waitlist_email_at ? new Date(row.waitlist_email_at).toISOString() : null,
   }));
 }

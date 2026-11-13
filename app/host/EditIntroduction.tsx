@@ -9,16 +9,16 @@ export function EditIntroduction({ guestId, introduction }: { guestId: string; i
   const [pending, start] = useTransition();
   if (!editing) return (
     <>
-      {introduction ? <p className="host-intro">{introduction}</p> : <p className="host-small">No introduction yet.</p>}
-      <button type="button" className="host-quiet" onClick={() => { setText(introduction); setEditing(true); }}>Edit introduction</button>
+      {introduction && <p className="host-intro">{introduction}</p>}
+      <button type="button" className={introduction ? "host-quiet" : "host-go"} onClick={() => { setText(introduction); setEditing(true); }}>{introduction ? "Edit bio" : "Write bio"}</button>
     </>
   );
   return (
     <div className="host-edit">
-      <textarea className="host-intro" value={text} maxLength={320} rows={3} onChange={e => setText(e.target.value)} aria-label="Introduction" autoFocus />
+      <textarea className="host-intro" value={text} maxLength={320} rows={3} onChange={e => setText(e.target.value)} aria-label="Bio" autoFocus />
       <div className="host-actions">
-        <button type="button" className="host-quiet" disabled={pending} onClick={() => start(async () => { await updateIntroduction(guestId, text); setEditing(false); })}>
-          {pending ? "Saving…" : "Save"}
+        <button type="button" className="host-go" disabled={pending} onClick={() => start(async () => { await updateIntroduction(guestId, text); setEditing(false); })}>
+          {pending ? "Saving…" : "Save bio"}
         </button>
         <button type="button" className="host-quiet" disabled={pending} onClick={() => setEditing(false)}>Cancel</button>
         <span className="host-small">{text.length}/320</span>
