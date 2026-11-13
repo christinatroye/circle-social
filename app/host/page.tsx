@@ -122,28 +122,6 @@ export default async function HostPage({ searchParams }: PageProps<"/host">) {
               {" "}Bios: {bioCount("Bio missing")} missing, {bioCount("Bio drafted")} drafted, {bioCount("Bio ready")} ready.
             </p>
 
-            {openRequests.length > 0 && <>
-              <h2>Requests</h2>
-              <p className="host-note">People who asked for a seat. Confirm moves them to Confirmed so you can prepare their bio. Waitlist moves them to the waitlist. Nothing is sent to them.</p>
-              <ul className="host-guests">
-                {openRequests.map(request => (
-                  <li key={request.id}>
-                    <div className="host-guest-top">
-                      <strong>{request.name}</strong>
-                      <span className="host-tag">{request.invited ? "Invited" : "Public"}</span>
-                      <span className="host-status">{day(request.at)}</span>
-                    </div>
-                    <p className="host-small">{request.email}</p>
-                    {request.line && <p className="host-their">Their line: <i>{request.line}</i></p>}
-                    <div className="host-actions">
-                      <form action={confirmRequest.bind(null, request.id)}><button className="host-go">Confirm</button></form>
-                      <form action={setRequestWaitlisted.bind(null, request.id, true)}><button className="host-quiet">Waitlist</button></form>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </>}
-
             <h2>Confirmed</h2>
             <nav className="host-filters" aria-label="Bios">
               <a href={tab()} aria-current={!bioFilter ? "page" : undefined}>All {confirmed.length}</a>
@@ -180,6 +158,28 @@ export default async function HostPage({ searchParams }: PageProps<"/host">) {
             </ul>
             {guests.length === 0 && <p className="host-empty">{bioFilter ? "Nobody here." : "Nobody confirmed yet."}</p>}
             <AddGuest circleId={circle.id} />
+            {openRequests.length > 0 && <>
+              <h2>Requests</h2>
+              <p className="host-note">People who asked for a seat. Confirm moves them to Confirmed so you can prepare their bio. Waitlist moves them to the waitlist. Nothing is sent to them.</p>
+              <ul className="host-guests">
+                {openRequests.map(request => (
+                  <li key={request.id}>
+                    <div className="host-guest-top">
+                      <strong>{request.name}</strong>
+                      <span className="host-tag">{request.invited ? "Invited" : "Public"}</span>
+                      <span className="host-status">{day(request.at)}</span>
+                    </div>
+                    <p className="host-small">{request.email}</p>
+                    {request.line && <p className="host-their">Their line: <i>{request.line}</i></p>}
+                    <div className="host-actions">
+                      <form action={confirmRequest.bind(null, request.id)}><button className="host-go">Confirm</button></form>
+                      <form action={setRequestWaitlisted.bind(null, request.id, true)}><button className="host-quiet">Waitlist</button></form>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </>}
+
 
             <h2>Activity</h2>
             {circle.activity.length === 0 ? <p className="host-empty">Nothing yet.</p> : (
