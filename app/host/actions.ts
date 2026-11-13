@@ -69,3 +69,42 @@ export async function setWaitlisted(guestId: string, waitlisted: boolean) {
   await database()`UPDATE guests SET waitlisted_at = ${waitlisted ? new Date().toISOString() : null} WHERE id = ${guestId}::uuid`;
   revalidatePath("/host");
 }
+
+/** Moves someone who asked for a seat onto the guest list, with an empty bio for Christina to write. Nothing is sent to them. */
+export async function confirmRequest(requestId: string) {
+  await requireHost();
+  const sql = database();
+  const [request] = await sql`
+    SELECT r.name, r.email, c.id AS circle_id FROM seat_requests r JOIN circles c ON c.slug = r.event
+    WHERE r.id = ${requestId}::uuid`;
+  if (!request) return;
+  const name = String(request.name).replace(/\s+/g, " ").trim();
+  const first = name.split(" ").find(word => !/^(dr|prof|mr|mrs|ms)\.?$/i.test(word)) ?? name;
+  await sql`
+    INSERT INTO guests (circle_id, role, name, first_name, email, introduction, introduction_draft, token)
+    VALUES (${request.circle_id}, 'guest', ${name}, ${first}, ${String(request.email).toLowerCase()}, '', '', ${newToken(first)})
+    ON CONFLICT (circle_id, email) DO NOTHING`;
+  await sql`UPDATE seat_requests SET waitlisted_at = NULL WHERE id = ${requestId}::uuid`;
+  revalidatePath("/host");
+}
+
+/** Moves a request to the waitlist, or back to Requests. */
+export async function setRequestWaitlisted(requestId: string, waitlisted: boolean) {
+  await requireHost();
+  await database()`UPDATE seat_requests SET waitlisted_at = ${waitlisted ? new Date().toISOString() : null} WHERE id = ${requestId}::uuid`;
+  revalidatePath("/host");
+}
+
+/** Notes that Christina opened the waitlist email for this request in Gmail. Nothing is sent from here. */
+export async function markWaitlistEmail(requestId: string) {
+  await requireHost();
+  await database()`UPDATE seat_requests SET waitlist_email_at = now() WHERE id = ${requestId}::uuid`;
+  revalidatePath("/host");
+}
+
+/** Christina marks a guest's bio as ready, or takes the mark off. */
+export async function setBioReady(guestId: string, ready: boolean) {
+  await requireHost();
+  await database()`UPDATE guests SET bio_ready_at = ${ready ? new Date().toISOString() : null} WHERE id = ${guestId}::uuid`;
+  revalidatePath("/host");
+}

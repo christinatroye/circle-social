@@ -42,3 +42,17 @@ body:has(.host-page) { margin: 0; background: #0f0a07; }
 .host-tabs a { color: #c6c1e0; text-decoration: none; font-size: 15px; padding: 4px 0; transition: color .4s cubic-bezier(.2,.8,.2,1), text-shadow .4s cubic-bezier(.2,.8,.2,1); }
 .host-tabs a:hover, .host-tabs a:focus-visible, .host-tabs a[aria-current="page"] { color: #f3d9a4; text-shadow: 0 0 14px rgba(243, 217, 164, .5); outline: none; }
 .host-tabs a[aria-current="page"] { box-shadow: 0 1px 0 #f3d9a4; }
+/* The click list: the next thing to do glows gold; bio status on the right. */
+.host-go { font: inherit; font-size: 15px; color: #f3d9a4; background: none; border: 0; padding: 4px 0; cursor: pointer; text-shadow: 0 0 14px rgba(243, 217, 164, .55); transition: text-shadow .4s cubic-bezier(.2,.8,.2,1); }
+.host-go:hover, .host-go:focus-visible { text-shadow: 0 0 18px rgba(243, 217, 164, .9); outline: none; }
+.host-go:disabled { cursor: default; opacity: .6; }
+.host-note { font-size: 13px; color: #c6c1e0; margin: 0 0 8px; }
+.host-their { font-size: 13px; color: #c6c1e0; margin: 6px 0 0; }
+.host-their i { font-family: var(--font-cormorant), Georgia, serif; font-size: 1.05rem; color: #d9d3c4; }
+.host-guests [data-bio] .host-bio { color: #c6c1e0; text-shadow: none; }
+.host-guests [data-bio="Bio missing"] .host-bio { color: #efe3cf; }
+.host-guests [data-bio="Bio ready"] .host-bio { color: #f3d9a4; text-shadow: 0 0 12px rgba(243, 217, 164, .35); }
+.host-filters { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 0 0 4px; }
+.host-filters a { color: #c6c1e0; text-decoration: none; font-size: 13px; padding: 2px 0; transition: color .4s cubic-bezier(.2,.8,.2,1); }
+.host-filters a:hover, .host-filters a:focus-visible, .host-filters a[aria-current="page"] { color: #f3d9a4; outline: none; }
+.host-filters a[aria-current="page"] { box-shadow: 0 1px 0 #f3d9a4; }
