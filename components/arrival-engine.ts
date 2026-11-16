@@ -262,7 +262,10 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
 
   function show(parts: string[], after?: (el: HTMLElement) => void) {
     const render = () => {
-      copy.classList.remove("leaving"); copy.style.minHeight = "";
+      copy.classList.remove("leaving");
+      // Let the old height go only once the page is back at the top, so the browser never snaps the scroll.
+      const release = () => { if (window.scrollY > 0 && !disposed) return void requestAnimationFrame(release); copy.style.minHeight = ""; };
+      release();
       copy.innerHTML = parts.map((p, i) => p.replace(/^<(\w+)/, `<$1 style="animation-delay:${(0.1 + i * 0.16).toFixed(2)}s"`)).join("");
       copy.querySelectorAll(":scope > *").forEach(el => el.classList.add("say"));
       if (after) after(copy);
