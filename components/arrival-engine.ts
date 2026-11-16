@@ -68,6 +68,7 @@ function localTime(iso: string, ukWeekday: string, range = false) {
 
 /** What to expect from each Circle's speaker, in Christina's words. Circles without one get a plain line. */
 const SPEAKER_NOTES: Record<string, string> = {
+  Trust: "Jimmy opens, then the room joins in. You’re welcome to speak, or simply listen.",
   Perfect: "Circle opens by Christina asking Heather a couple of questions, then the room joins in. You’re welcome to speak or simply listen.",
   Alien: "You don't need to know any physics. Daniel's gift is making the biggest questions in science feel human and accessible. He'll take us through a few slides, with plenty of space for questions.",
 };
@@ -427,8 +428,8 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
         '<p class="voice question">A new kind of online room.</p>',
         '<p class="small">Step out of the Zoom grid and into a space designed for this gathering.</p>',
         '<p class="small">A fascinating speaker, a circle of curious people, and questions that open up new perspectives.</p>',
-        '<p class="voice teaser closing"><span>Each Circle gathers once, by invitation.</span><span>Every room is different.</span></p>',
-        '<div class="actions"><button class="go beacon" type="button" id="n">Continue</button></div>',
+        '<p class="voice teaser closing"><span>Each Circle gathers once, by invitation.</span><span>An hour to be present with others, not to sell or scroll.</span></p>',
+        '<div class="actions"><button class="go beacon" type="button" id="n">I&#39;ll be there, camera on</button></div>',
       ], el => { el.querySelector("#n")!.addEventListener("click", me.speaker ? home : S.speakerIntro); });
     },
 

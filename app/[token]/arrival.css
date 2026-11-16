@@ -30,6 +30,27 @@
   --line: 179,154,120;
   --top: #e2d3b8;
 }
+/* Trust: Jimmy Wales's Circle, in the deep water of in.entercircle.co/trust. */
+:root:has(.theme[data-circle="trust"]) {
+  --house: #031026;
+  --night: #0b1d33;
+  --fg: #f3ecdc;
+  --soft: #dfe7f1;
+  --dim: #a6b6cc;
+  --pearl: #f0da96;
+  --bone: #f3ecdc;
+  --tint: 240,218,150;
+  --line: 166,182,204;
+  --top: #dfe7f1;
+}
+/* Trust's water stays behind every moment: quiet at the door, fuller once you are inside. */
+.sea-ground { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; background: #031026; opacity: .45; transition: opacity 2.4s var(--curve); }
+body.inside .sea-ground { opacity: 1; }
+.sea-ground i { position: absolute; inset: -12%; background: url(/events/trust-water.webp) 50% 0% / cover no-repeat; animation: seaDrift 38s ease-in-out infinite alternate; }
+.sea-ground i + i { opacity: .55; mix-blend-mode: screen; animation: seaDrift2 26s ease-in-out infinite alternate; filter: blur(2px); }
+.sea-ground::after { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse 90% 70% at 50% 55%, rgba(3,16,38,.35), rgba(3,16,38,.8) 85%), linear-gradient(transparent 40%, rgba(3,16,38,.7)); }
+@media (prefers-reduced-motion: reduce) { .sea-ground i { animation: none; } }
+
 * { box-sizing: border-box; }
 html, body { height: 100%; }
 body { margin: 0; background: var(--house); color: var(--fg); font-family: var(--body); font-weight: 300; -webkit-font-smoothing: antialiased; overflow-x: hidden; transition: background 2.4s var(--curve); }
