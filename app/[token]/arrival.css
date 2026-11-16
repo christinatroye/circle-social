@@ -53,6 +53,8 @@ body.inside .sea-ground { opacity: 1; }
 
 * { box-sizing: border-box; }
 html, body { height: 100%; }
+/* Keep room for the scrollbar on every screen, so a long screen followed by a short one doesn't shift everything sideways. */
+html { scrollbar-gutter: stable; }
 body { margin: 0; background: var(--house); color: var(--fg); font-family: var(--body); font-weight: 300; -webkit-font-smoothing: antialiased; overflow-x: hidden; transition: background 2.4s var(--curve); }
 body.inside { background: var(--night); }
 button, textarea { font: inherit; color: inherit; }
