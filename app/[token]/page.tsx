@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { phaseFor, type ArrivalData, type Phase } from "@/lib/arrival";
 import { isHostAuthenticated } from "@/lib/host-auth.server";
 import { deviceKey, deviceState, guestForToken, othersInCircle, seatCount, takeWaitlistSeat, touch, wallFor, CIRCLE_CAPACITY } from "@/lib/guests.server";
+import { roomUrlFor } from "@/lib/room-guest.server";
 import Arrival from "./Arrival";
 import "./arrival.css";
 
@@ -68,7 +69,7 @@ export default async function GuestPage({ params, searchParams }: PageProps<"/[t
     },
     circle: {
       slug: circle.slug, title: circle.title, speaker: circle.speaker, speakerLine: circle.speaker_line, question: circle.question,
-      startsAt: circle.starts_at, revealAt: circle.reveal_at, roomUrl: trusted && (phase === "day" || phase === "reveal") ? circle.room_url : null,
+      startsAt: circle.starts_at, revealAt: circle.reveal_at, roomUrl: trusted && (phase === "day" || phase === "reveal") ? roomUrlFor(circle.room_url, token) : null,
       inviteUrl: INVITATIONS[circle.slug] ?? null,
       seats: trusted ? await seatCount(circle.id) : 0,
     },
