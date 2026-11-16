@@ -10,6 +10,7 @@ import { addThisDevice, claimLink, recommendFriend, logAfterStep, logReveal, sen
 /** The drifting light in each Circle's own hue: the brightest tone, then two deeper ones. Alien's indigo unless a Circle has its own. */
 const ORB: Record<string, [string, string, string]> = {
   perfect: ["232,190,140", "150,98,58", "92,58,34"],
+  trust: ["214,226,236", "70,110,150", "20,45,80"],
 };
 /** The song for the page after the evening: each Circle's own closing song where it has one. */
 const AFTER_MUSIC: Record<string, string> = { perfect: "/perfect-closing.m4a" };
@@ -70,6 +71,8 @@ export default function Arrival({ data }: { data: ArrivalData }) {
     <>
       {/* Lets the page take this Circle's colours from the first paint, so nothing flickers. */}
       <div className="theme" data-circle={data.circle.slug} hidden />
+      {/* Trust: the moving water of its invitation page, behind everything. */}
+      {data.circle.slug === "trust" && <div className="sea-ground" aria-hidden="true"><i /><i /></div>}
       <div className="orb" aria-hidden="true" ref={orb}><div /><div className="orb-main" /><div className="orb-core" /></div>
       <div className="top" aria-hidden="true"><CircleMark className="mark" /><span>Circle</span></div>
       {/* Music only on the page after the evening; the arrival is silent. */}
