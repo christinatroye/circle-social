@@ -267,7 +267,13 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       copy.querySelectorAll(":scope > *").forEach(el => el.classList.add("say"));
       if (after) after(copy);
     };
-    if (copy.children.length) { copy.classList.add("leaving"); later(render, 420); } else render();
+    if (copy.children.length) {
+      // A long screen may be scrolled down. Glide back to the top while the words fade, and hold their height
+      // until then, so a shorter next screen doesn't snap the page and make the ring jump.
+      copy.style.minHeight = `${copy.offsetHeight}px`;
+      if (window.scrollY > 0) window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+      copy.classList.add("leaving"); later(render, 420);
+    } else render();
   }
   function autosize(t: HTMLTextAreaElement) {
     const fit = () => { t.style.height = "auto"; t.style.height = t.scrollHeight + "px"; };
@@ -425,7 +431,8 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
         '<p class="eyebrow">What a Circle is</p>',
         '<p class="voice question">A new kind of online room.</p>',
         '<p class="small">A fascinating speaker, a circle of curious people, and questions that open up new perspectives.</p>',
-        '<p class="voice teaser closing"><span>Each Circle happens once, by invitation.</span><span>An hour to be present with others, not to sell or scroll.</span></p>',
+        '<p class="voice teaser closing">Each Circle happens once, by invitation.</p>',
+        '<p class="small">An hour to be present with others, not to sell or scroll.</p>',
         '<div class="actions"><button class="go beacon" type="button" id="n">I&#39;ll be there, camera on</button></div>',
       ], el => { el.querySelector("#n")!.addEventListener("click", me.speaker ? home : S.speakerIntro); });
     },
