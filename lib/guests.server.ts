@@ -15,7 +15,7 @@ export type Circle = {
 };
 
 export type Guest = {
-  id: string; circle_id: string; role: "guest" | "speaker"; name: string; first_name: string; email: string;
+  id: string; circle_id: string; role: "guest" | "speaker" | "host"; name: string; first_name: string; email: string;
   introduction: string; introduction_confirmed_at: string | null; shared: boolean; been_before: boolean;
   token: string; device_hash: string | null; other_devices: string[]; first_opened_at: string | null; last_seen_at: string | null;
   cancelled_at: string | null;
@@ -85,7 +85,7 @@ export async function othersInCircle(circleId: string, guestId: string) {
     ORDER BY role DESC, created_at, name
   `;
   return rows.map(row => ({
-    id: String(row.id), name: String(row.name), first: String(row.first_name), speaker: row.role === "speaker",
+    id: String(row.id), name: String(row.name), first: String(row.first_name), speaker: row.role === "speaker", host: row.role === "host",
     beenBefore: Boolean(row.been_before), shared: Boolean(row.shared), introduction: String(row.introduction), here: Boolean(row.here),
   }));
 }

@@ -137,6 +137,7 @@ export default async function HostPage({ searchParams }: PageProps<"/host">) {
                     <div className="host-guest-top">
                       <strong>{guest.name}</strong>
                       {guest.role === "speaker" && <span className="host-tag">Speaker</span>}
+                      {guest.role === "host" && <span className="host-tag">Host</span>}
                       {request && <span className="host-tag">{request.invited ? "Invited" : "Public"}</span>}
                       {guest.edited && <span className="host-tag">Edited</span>}
                       <span className="host-status host-bio">{guest.bio}</span>
@@ -149,7 +150,7 @@ export default async function HostPage({ searchParams }: PageProps<"/host">) {
                       {guest.bio === "Bio ready" && <form action={setBioReady.bind(null, guest.id, false)}><button className="host-quiet">Not ready yet</button></form>}
                       <CopyLink url={`${SITE_URL}/${guest.token}`} />
                       <NewLink guestId={guest.id} name={guest.name} />
-                      {guest.role !== "speaker" && <form action={setWaitlisted.bind(null, guest.id, true)}><button className="host-quiet">Move to waitlist</button></form>}
+                      {guest.role === "guest" && <form action={setWaitlisted.bind(null, guest.id, true)}><button className="host-quiet">Move to waitlist</button></form>}
                       <RemoveGuest guestId={guest.id} name={guest.name} backToRequests={Boolean(request)} />
                     </div>
                   </li>

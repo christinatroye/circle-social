@@ -2,7 +2,7 @@ import "server-only";
 import { database } from "./db.server";
 
 export type HostGuest = {
-  id: string; name: string; email: string; role: "guest" | "speaker"; introduction: string; token: string;
+  id: string; name: string; email: string; role: "guest" | "speaker" | "host"; introduction: string; token: string;
   status: "Not opened" | "Opened" | "Bio approved" | "Just their name" | "Can't come" | "Waitlist";
   beenBefore: boolean; lastSeen: string | null;
   /** The guest confirmed an introduction that differs from Christina's draft. */
