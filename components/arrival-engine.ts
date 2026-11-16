@@ -444,7 +444,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       show([
         `<p class="big">${esc(c.speaker)}</p>`,
         c.speakerLine ? `<p class="small">${italics(c.speakerLine)}</p>` : "",
-        c.question ? `<p class="small">Our question for ${esc(start.weekday)}:</p>` : "",
+        c.question ? '<p class="small">Our question:</p>' : "",
         c.question ? `<p class="voice teaser">${esc(c.question)}</p>` : "",
         '<div class="actions"><button class="go beacon" type="button" id="n">Continue</button></div>',
       ].filter(Boolean), el => { el.querySelector("#n")!.addEventListener("click", home); });
