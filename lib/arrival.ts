@@ -12,7 +12,7 @@ export function phaseFor(startsAt: string, revealAt: string, now = new Date()): 
 }
 
 export type Person = {
-  id: string; name: string; first: string; speaker: boolean; beenBefore: boolean; shared: boolean; introduction: string; here: boolean;
+  id: string; name: string; first: string; speaker: boolean; host: boolean; beenBefore: boolean; shared: boolean; introduction: string; here: boolean;
 };
 
 /** A comment on the wall, with the name of the guest who posted it, how many hearted it, and whether this guest did. */

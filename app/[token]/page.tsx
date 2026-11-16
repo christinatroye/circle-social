@@ -72,8 +72,8 @@ export default async function GuestPage({ params, searchParams }: PageProps<"/[t
       inviteUrl: INVITATIONS[circle.slug] ?? null,
       seats: trusted ? await seatCount(circle.id) : 0,
     },
-    // Before the reveal, the speaker is the only other seat that shows.
-    others: !trusted ? [] : (await othersInCircle(circle.id, guest.id)).filter(person => phase !== "before" || person.speaker),
+    // Before the reveal, only the speaker and the host (Christina) show.
+    others: !trusted ? [] : (await othersInCircle(circle.id, guest.id)).filter(person => phase !== "before" || person.speaker || person.host),
     wall: trusted && (phase === "reveal" || phase === "day") ? await wallFor(circle.id, guest.id) : [],
     praise: trusted && phase === "after" && guest.role === "speaker" ? PRAISE[circle.slug] ?? [] : [],
   };
