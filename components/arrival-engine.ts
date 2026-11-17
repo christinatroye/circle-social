@@ -95,6 +95,8 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
   const start = londonParts(c.startsAt), reveal = londonParts(c.revealAt);
   // The circle shows the start in the guest's own time, so it only says 7pm to someone in the UK.
   const zone = deviceZone(), mine = londonParts(c.startsAt, zone), mineTime = `${mine.time} ${zoneLabel(zone, c.startsAt)}`.trim();
+  // When the other seats light up, said in full: "On Sunday 29 November at 6pm UK time".
+  const revealWhen = `On ${reveal.date} at ${reveal.time} UK time,`;
   const doorsAt = new Date(Date.parse(c.startsAt) - 5 * 60 * 1000).toISOString(), doors = londonParts(doorsAt);
   // The glimpse of the next Circle is Beauty, which is Perfect itself, so only Alien's guests are shown it.
   const GLIMPSE = c.slug === "alien";
@@ -260,6 +262,16 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
     });
   }
 
+  /** Fade the words out. Their arrival animation is stopped first, held where it is, or the browser drops them in one frame. */
+  function leave() {
+    const kids = Array.from(copy.children) as HTMLElement[];
+    const now = kids.map(k => { const s = getComputedStyle(k); return [s.opacity, s.transform] as const; });
+    kids.forEach((k, i) => { k.style.opacity = now[i][0]; k.style.transform = now[i][1] === "none" ? "" : now[i][1]; k.classList.remove("say"); });
+    void copy.offsetHeight;
+    kids.forEach(k => { k.style.opacity = ""; k.style.transform = ""; });
+    copy.classList.add("leaving");
+  }
+
   function show(parts: string[], after?: (el: HTMLElement) => void) {
     const render = () => {
       copy.classList.remove("leaving");
@@ -275,7 +287,7 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       // until then, so a shorter next screen doesn't snap the page and make the ring jump.
       copy.style.minHeight = `${copy.offsetHeight}px`;
       if (window.scrollY > 0) window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
-      copy.classList.add("leaving"); later(render, 420);
+      leave(); later(render, 420);
     } else render();
   }
   function autosize(t: HTMLTextAreaElement) {
@@ -460,11 +472,11 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       setCentre(titleCentre(mine.date, mineTime));
       const status = !me.confirmed ? "We still need you to approve your short bio." : me.shared ? "Your bio is ready." : "The others will see just your name.";
       if (me.speaker && me.confirmed) return show([
-        `<div class="person" id="person"><p class="big">That&#39;s everything, ${esc(me.first)}.</p><p class="small">Your bio is ready for the guests. On ${esc(reveal.weekday)} the other seats light up, and you can see who&#39;ll be in the room with you.</p></div>`,
+        `<div class="person" id="person"><p class="big">That&#39;s everything, ${esc(me.first)}.</p><p class="small">Your bio is ready for the guests. ${esc(revealWhen)} the other seats light up, and you can see who&#39;ll be in the room with you.</p></div>`,
         '<div class="actions"><button class="quiet" type="button" id="edit">Change my bio</button></div>',
       ], el => { el.querySelector("#edit")!.addEventListener("click", () => S.line(false)); });
       show([
-        `<div class="person" id="person"><p class="big">That&#39;s everything, ${esc(me.first)}.</p><p class="small">${status} On ${esc(reveal.weekday)} the other seats light up, and you can see who else is coming.</p></div>`,
+        `<div class="person" id="person"><p class="big">That&#39;s everything, ${esc(me.first)}.</p><p class="small">${status} ${esc(revealWhen)} the other seats light up, and you can see who else is coming.</p></div>`,
         '<p class="eyebrow">Touch the glowing seats.</p>',
         `<div class="actions">${me.confirmed ? '<button class="quiet" type="button" id="edit">Change my bio</button>' : '<button class="go beacon" type="button" id="edit">Approve my bio</button>'}${me.speaker ? "" : '<button class="quiet" type="button" id="cant">I can no longer come</button>'}</div>`,
       ], el => {
