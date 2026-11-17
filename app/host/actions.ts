@@ -108,3 +108,15 @@ export async function setBioReady(guestId: string, ready: boolean) {
   await database()`UPDATE guests SET bio_ready_at = ${ready ? new Date().toISOString() : null} WHERE id = ${guestId}::uuid`;
   revalidatePath("/host");
 }
+
+/** Christina approves a guest's bio for them, the same as the guest pressing Approve my bio: it confirms their seat.
+ *  Their link, device and everything else stay exactly as they are. */
+export async function approveBioForGuest(guestId: string) {
+  await requireHost();
+  const [row] = await database()`
+    UPDATE guests SET introduction_confirmed_at = now()
+    WHERE id = ${guestId}::uuid AND introduction_confirmed_at IS NULL AND introduction <> ''
+    RETURNING id`;
+  if (row) await logEvent(guestId, "approved_by_host");
+  revalidatePath("/host");
+}

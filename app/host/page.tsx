@@ -11,6 +11,7 @@ import { AddGuest } from "./AddGuest";
 import { RemoveGuest } from "./RemoveGuest";
 import { EditIntroduction } from "./EditIntroduction";
 import { WaitlistEmail } from "./WaitlistEmail";
+import { ApproveBio } from "./ApproveBio";
 import "./host.css";
 
 export const dynamic = "force-dynamic";
@@ -23,6 +24,7 @@ const EVENTS: Record<string, string> = {
   opened: "opened their link",
   saw_introduction: "saw their bio",
   introduction_confirmed: "approved their bio",
+  approved_by_host: "had their bio approved by you",
   introduction_changed: "changed their bio",
   quiet_guest: "chose to show just their name",
   sharing: "chose to share their bio",
@@ -148,6 +150,7 @@ export default async function HostPage({ searchParams }: PageProps<"/host">) {
                     <div className="host-actions">
                       {guest.bio === "Bio drafted" && <form action={setBioReady.bind(null, guest.id, true)}><button className="host-go">Bio ready</button></form>}
                       {guest.bio === "Bio ready" && <form action={setBioReady.bind(null, guest.id, false)}><button className="host-quiet">Not ready yet</button></form>}
+                      {(guest.status === "Not opened" || guest.status === "Opened") && guest.introduction.trim() && <ApproveBio guestId={guest.id} first={guest.name.trim().split(/\s+/)[0]} glow={guest.bio === "Bio ready"} />}
                       <CopyLink url={`${SITE_URL}/${guest.token}`} />
                       <NewLink guestId={guest.id} name={guest.name} />
                       {guest.role === "guest" && <form action={setWaitlisted.bind(null, guest.id, true)}><button className="host-quiet">Move to waitlist</button></form>}
