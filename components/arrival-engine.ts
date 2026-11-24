@@ -501,16 +501,19 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
 
     /** For the speaker: why guests asked for a seat, in their own words, hand-picked by Christina, without names. */
     reasons(first: boolean) {
-      if (first) { setMode("kept"); setCentre(`<p class="c-title">${esc(c.title)}</p>`); }
+      if (first) setMode("kept");
+      // The lines have the screen: the ring steps back to a small emblem, so nothing needs scrolling.
+      ring.classList.add("emblem"); centre.innerHTML = ""; onResize();
+      const go = (to: () => void) => () => { ring.classList.remove("emblem"); onResize(); to(); };
       show([
         '<p class="voice">Why guests are coming</p>',
         '<p class="small">When guests asked for a seat, we asked what draws them to this Circle. Some of their answers:</p>',
-        `<div class="praise">${(data.reasons ?? []).map(l => `<p class="praise-line">\u201c${esc(l)}\u201d</p>`).join("")}</div>`,
-        `<div class="actions"><button class="go beacon" type="button" id="on">${first ? "Approve my bio" : "Back"}</button></div>`,
+        `<div class="reasons">${(data.reasons ?? []).map(l => `<p class="praise-line">\u201c${esc(l)}\u201d</p>`).join("")}</div>`,
+        `<div class="actions"><button class="go beacon" type="button" id="on">${first ? "Continue to bio" : "Back"}</button></div>`,
         first ? back : "",
       ].filter(Boolean), el => {
-        el.querySelector("#on")!.addEventListener("click", first ? () => S.line(true) : home);
-        onBack(el, S.arrival);
+        el.querySelector("#on")!.addEventListener("click", go(first ? () => S.line(true) : home));
+        onBack(el, go(S.arrival));
       });
     },
 
