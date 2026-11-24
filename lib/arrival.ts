@@ -36,6 +36,8 @@ export type ArrivalData = {
   wall: WallPost[];
   /** For the speaker after the Circle: the guests' feedback lines Christina hasn't hidden, without names. */
   praise?: string[];
+  /** For the speaker before the Circle: why guests asked for a seat, hand-picked by Christina, without names. */
+  reasons?: string[];
 };
 
 /** Steps on the after-Circle page, logged once per guest so the host can see how far each person went. */
