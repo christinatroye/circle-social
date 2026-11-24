@@ -28,6 +28,19 @@ const PRAISE: Record<string, string[]> = {
   ],
 };
 
+// Why guests asked for a seat, hand-picked by Christina from their requests, shown only to the speaker before the Circle.
+const REASONS: Record<string, string[]> = {
+  trust: [
+    "I\u2019ve heard Jimmy speak and he is a marvel!",
+    "Wikipedia is everything good about the Internet.",
+    "Trust is more important than ever, and hearing from Jimmy on this would be a privilege.",
+    "Jimmy is a legend. And his perspective will be important.",
+    "Learning about how Wikipedia is handling trust in the AI age.",
+    "I\u2019m interested in trust since reading Niklas Luhmann.",
+    "In my lifetime we\u2019ve seen major shifts that have required us to redefine the ways we assess trustworthiness, namely the shift online and the global pandemic; I believe we will navigate the AI transition, but is there a cost every time we redefine trust?",
+  ],
+};
+
 const PHASES: Phase[] = ["before", "reveal", "day", "after"];
 
 export default async function GuestPage({ params, searchParams }: PageProps<"/[token]">) {
@@ -76,6 +89,7 @@ export default async function GuestPage({ params, searchParams }: PageProps<"/[t
     others: !trusted ? [] : (await othersInCircle(circle.id, guest.id)).filter(person => phase !== "before" || person.speaker || person.host),
     wall: trusted && (phase === "reveal" || phase === "day") ? await wallFor(circle.id, guest.id) : [],
     praise: trusted && phase === "after" && guest.role === "speaker" ? PRAISE[circle.slug] ?? [] : [],
+    reasons: trusted && phase !== "after" && guest.role === "speaker" ? REASONS[circle.slug] ?? [] : [],
   };
   return <Arrival data={data} />;
 }

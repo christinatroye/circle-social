@@ -102,6 +102,11 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
   const GLIMPSE = c.slug === "alien";
   // After Perfect, the next Circle is Trust with Jimmy Wales: guests can ask for a place.
   const TRUST_NEXT = c.slug === "perfect";
+  // The speaker reads why guests are coming right after the welcome, before their bio.
+  const reasonsFirst = me.speaker && Boolean(data.reasons?.length);
+  /** A small way back to the screen before, so someone opening the link after another person can walk through it again. */
+  const back = '<div class="actions"><button class="quiet" type="button" id="back-step">Back</button></div>';
+  const onBack = (el: HTMLElement, to: () => void) => el.querySelector("#back-step")?.addEventListener("click", to);
   const draftKey = `circle-bio:${data.token}`;
   const draft = {
     read: () => { try { return localStorage.getItem(draftKey); } catch { return null; } },
@@ -390,9 +395,9 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
           : `<p class="small">${esc(start.date)} at ${esc(hourRange(c.startsAt))} UK time${esc(localTime(c.startsAt, start.weekday, true))}.</p>`,
         me.speaker && c.question ? `<p class="voice teaser">${esc(c.question)}</p>` : "",
         me.speaker ? "" : '<p class="small strong">Please approve your short bio. It also confirms your seat.</p>',
-        `<div class="actions stack"><button class="go beacon" type="button" id="n">Approve my bio</button>${me.speaker ? "" : '<button class="quiet" type="button" id="cant">I can no longer come</button>'}</div>`,
+        `<div class="actions stack"><button class="go beacon" type="button" id="n">${reasonsFirst ? "Continue" : "Approve my bio"}</button>${me.speaker ? "" : '<button class="quiet" type="button" id="cant">I can no longer come</button>'}</div>`,
       ].filter(Boolean), el => {
-        el.querySelector("#n")!.addEventListener("click", () => S.line(true));
+        el.querySelector("#n")!.addEventListener("click", () => reasonsFirst ? S.reasons(true) : S.line(true));
         el.querySelector("#cant")?.addEventListener("click", S.confirmCancel);
       });
     },
@@ -411,7 +416,9 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
         `<div class="person"><p class="who">${esc(me.name)}</p><p class="past">${me.speaker ? "Speaker" : been(beenBefore)}</p></div>`,
         `<div class="write plain"><label for="bio" class="visually-hidden">Your short bio</label><textarea id="bio" rows="2" maxlength="320">${esc(draft.read() ?? me.introduction)}</textarea></div>`,
         `<div class="actions stack"><button class="go beacon" type="button" id="share">Approve my bio</button>${me.speaker ? "" : '<button class="quiet" type="button" id="anon">Show just my name</button>'}</div>`,
+        back,
       ].filter(Boolean), el => {
+        onBack(el, first ? (reasonsFirst ? () => S.reasons(true) : S.arrival) : home);
         const t = el.querySelector("#bio") as HTMLTextAreaElement; autosize(t);
         // Typed changes stay in this browser until they are saved, so leaving the page loses nothing.
         t.addEventListener("input", () => draft.write(t.value));
@@ -449,7 +456,8 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
         '<p class="voice teaser closing">Each Circle happens once, by invitation.</p>',
         '<p class="small">An hour to be present with others, not to sell or scroll.</p>',
         '<div class="actions"><button class="go beacon" type="button" id="n">I&#39;ll be there, camera on</button></div>',
-      ], el => { el.querySelector("#n")!.addEventListener("click", me.speaker ? home : S.speakerIntro); });
+        back,
+      ], el => { el.querySelector("#n")!.addEventListener("click", me.speaker ? home : S.speakerIntro); onBack(el, () => S.line(true)); });
     },
 
     /** Who is speaking, and the question we bring, after the guest's own bio. */
@@ -462,7 +470,8 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
         c.question ? '<p class="small">Our question:</p>' : "",
         c.question ? `<p class="voice teaser">${esc(c.question)}</p>` : "",
         '<div class="actions"><button class="go beacon" type="button" id="n">Continue</button></div>',
-      ].filter(Boolean), el => { el.querySelector("#n")!.addEventListener("click", home); });
+        back,
+      ].filter(Boolean), el => { el.querySelector("#n")!.addEventListener("click", home); onBack(el, S.belief); });
     },
 
     settled() {
@@ -473,8 +482,13 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       const status = !me.confirmed ? "We still need you to approve your short bio." : me.shared ? "Your bio is ready." : "The others will see just your name.";
       if (me.speaker && me.confirmed) return show([
         `<div class="person" id="person"><p class="big">That&#39;s everything, ${esc(me.first)}.</p><p class="small">Your bio is ready for the guests. ${esc(revealWhen)} the other seats light up, and you can see who&#39;ll be in the room with you.</p></div>`,
-        '<div class="actions"><button class="quiet" type="button" id="edit">Change my bio</button></div>',
-      ], el => { el.querySelector("#edit")!.addEventListener("click", () => S.line(false)); });
+        data.reasons?.length ? '<div class="actions"><button class="quiet" type="button" id="why">Why guests are coming</button></div>' : "",
+        '<div class="actions"><button class="quiet" type="button" id="edit">Change my bio</button><button class="quiet" type="button" id="restart">Back to the start</button></div>',
+      ].filter(Boolean), el => {
+        el.querySelector("#edit")!.addEventListener("click", () => S.line(false));
+        el.querySelector("#why")?.addEventListener("click", () => S.reasons(false));
+        el.querySelector("#restart")!.addEventListener("click", S.arrival);
+      });
       show([
         `<div class="person" id="person"><p class="big">That&#39;s everything, ${esc(me.first)}.</p><p class="small">${status} ${esc(revealWhen)} the other seats light up, and you can see who else is coming.</p></div>`,
         '<p class="eyebrow">Touch the glowing seats.</p>',
@@ -482,6 +496,21 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
       ], el => {
         el.querySelector("#edit")!.addEventListener("click", () => S.line(false));
         el.querySelector("#cant")?.addEventListener("click", S.confirmCancel);
+      });
+    },
+
+    /** For the speaker: why guests asked for a seat, in their own words, hand-picked by Christina, without names. */
+    reasons(first: boolean) {
+      if (first) { setMode("kept"); setCentre(`<p class="c-title">${esc(c.title)}</p>`); }
+      show([
+        '<p class="voice">Why guests are coming</p>',
+        '<p class="small">When guests asked for a seat, we asked what draws them to this Circle. Some of their answers:</p>',
+        `<div class="praise">${(data.reasons ?? []).map(l => `<p class="praise-line">\u201c${esc(l)}\u201d</p>`).join("")}</div>`,
+        `<div class="actions"><button class="go beacon" type="button" id="on">${first ? "Approve my bio" : "Back"}</button></div>`,
+        first ? back : "",
+      ].filter(Boolean), el => {
+        el.querySelector("#on")!.addEventListener("click", first ? () => S.line(true) : home);
+        onBack(el, S.arrival);
       });
     },
 
