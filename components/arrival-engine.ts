@@ -391,9 +391,8 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
         `<p class="big">${greeting()}, ${esc(me.first)}.</p>`,
         `<p class="voice">${me.speaker ? `Welcome to your Circle: ${esc(c.title)}` : `You have a seat at ${esc(c.title)}, a Circle with ${esc(c.speaker)}.`}</p>`,
         me.speaker
-          ? `<p class="small">${esc(start.date)} at ${esc(start.time)} UK time${esc(localTime(c.startsAt, start.weekday))}. We&#39;ve invited a group of curious minds, for one hour, to explore your question:</p>`
+          ? `<p class="small">${esc(start.date)} at ${esc(start.time)} UK time${esc(localTime(c.startsAt, start.weekday))}.</p>`
           : `<p class="small">${esc(start.date)} at ${esc(hourRange(c.startsAt))} UK time${esc(localTime(c.startsAt, start.weekday, true))}.</p>`,
-        me.speaker && c.question ? `<p class="voice teaser">${esc(c.question)}</p>` : "",
         me.speaker ? "" : '<p class="small strong">Please approve your short bio. It also confirms your seat.</p>',
         `<div class="actions stack"><button class="go beacon" type="button" id="n">${reasonsFirst ? "Continue" : "Approve my bio"}</button>${me.speaker ? "" : '<button class="quiet" type="button" id="cant">I can no longer come</button>'}</div>`,
       ].filter(Boolean), el => {
@@ -501,16 +500,19 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
 
     /** For the speaker: why guests asked for a seat, in their own words, hand-picked by Christina, without names. */
     reasons(first: boolean) {
-      if (first) { setMode("kept"); setCentre(`<p class="c-title">${esc(c.title)}</p>`); }
+      if (first) setMode("kept");
+      // The lines have the screen: the ring steps back to a small emblem, so nothing needs scrolling.
+      ring.classList.add("emblem"); centre.innerHTML = ""; onResize();
+      const go = (to: () => void) => () => { ring.classList.remove("emblem"); onResize(); to(); };
       show([
         '<p class="voice">Why guests are coming</p>',
         '<p class="small">When guests asked for a seat, we asked what draws them to this Circle. Some of their answers:</p>',
-        `<div class="praise">${(data.reasons ?? []).map(l => `<p class="praise-line">\u201c${esc(l)}\u201d</p>`).join("")}</div>`,
-        `<div class="actions"><button class="go beacon" type="button" id="on">${first ? "Approve my bio" : "Back"}</button></div>`,
+        `<div class="reasons">${(data.reasons ?? []).map(l => `<p class="praise-line">\u201c${esc(l)}\u201d</p>`).join("")}</div>`,
+        `<div class="actions"><button class="go beacon" type="button" id="on">${first ? "Continue to bio" : "Back"}</button></div>`,
         first ? back : "",
       ].filter(Boolean), el => {
-        el.querySelector("#on")!.addEventListener("click", first ? () => S.line(true) : home);
-        onBack(el, S.arrival);
+        el.querySelector("#on")!.addEventListener("click", go(first ? () => S.line(true) : home));
+        onBack(el, go(S.arrival));
       });
     },
 
