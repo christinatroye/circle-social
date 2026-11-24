@@ -391,9 +391,8 @@ export function startArrival(root: HTMLElement, data: ArrivalData, actions: Arri
         `<p class="big">${greeting()}, ${esc(me.first)}.</p>`,
         `<p class="voice">${me.speaker ? `Welcome to your Circle: ${esc(c.title)}` : `You have a seat at ${esc(c.title)}, a Circle with ${esc(c.speaker)}.`}</p>`,
         me.speaker
-          ? `<p class="small">${esc(start.date)} at ${esc(start.time)} UK time${esc(localTime(c.startsAt, start.weekday))}. We&#39;ve invited a group of curious minds, for one hour, to explore your question:</p>`
+          ? `<p class="small">${esc(start.date)} at ${esc(start.time)} UK time${esc(localTime(c.startsAt, start.weekday))}.</p>`
           : `<p class="small">${esc(start.date)} at ${esc(hourRange(c.startsAt))} UK time${esc(localTime(c.startsAt, start.weekday, true))}.</p>`,
-        me.speaker && c.question ? `<p class="voice teaser">${esc(c.question)}</p>` : "",
         me.speaker ? "" : '<p class="small strong">Please approve your short bio. It also confirms your seat.</p>',
         `<div class="actions stack"><button class="go beacon" type="button" id="n">${reasonsFirst ? "Continue" : "Approve my bio"}</button>${me.speaker ? "" : '<button class="quiet" type="button" id="cant">I can no longer come</button>'}</div>`,
       ].filter(Boolean), el => {
